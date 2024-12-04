@@ -1,12 +1,23 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { CandidateEvaluation } from '../types';
-import { CheckCircle, AlertTriangle, Link as LinkIcon, Percent, Book } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Percent, Book } from 'lucide-react';
+import { Summary } from './Summary';
+import { ResearchLink } from './ResearchLink';
 
 interface EvaluationResultProps {
   evaluation: CandidateEvaluation;
 }
 
 export function EvaluationResult({ evaluation }: EvaluationResultProps) {
+  const linkRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const handleCitationClick = (index: number) => {
+    linkRefs.current[index]?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    });
+  };
+
   return (
     <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-8">
       <div className="flex items-center justify-between mb-6">
@@ -37,25 +48,28 @@ export function EvaluationResult({ evaluation }: EvaluationResultProps) {
         
         <div className="bg-gray-50 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2 text-gray-600">
-            <LinkIcon className="w-4 h-4" />
-            <span className="font-medium">Sources Found</span>
-          </div>
-          <span className="text-3xl font-bold text-gray-900">{evaluation.total_relevant_links}</span>
-        </div>
-        
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-2 text-gray-600">
             <Book className="w-4 h-4" />
             <span className="font-medium">Research Complete</span>
           </div>
           <span className="text-3xl font-bold text-gray-900">{evaluation.research_completeness}%</span>
         </div>
+        
+        <div className="bg-gray-50 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2 text-gray-600">
+            <AlertTriangle className="w-4 h-4" />
+            <span className="font-medium">Areas to Research</span>
+          </div>
+          <span className="text-3xl font-bold text-gray-900">{evaluation.areas_needing_research.length}</span>
+        </div>
       </div>
 
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Summary</h3>
-          <p className="text-gray-700 leading-relaxed whitespace-pre-line">{evaluation.summary}</p>
+      <div className="space-y-8">
+        <div className="bg-gray-50 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Summary</h3>
+          <Summary 
+            text={evaluation.summary} 
+            onCitationClick={handleCitationClick}
+          />
         </div>
 
         {evaluation.areas_needing_research.length > 0 && (
@@ -76,21 +90,12 @@ export function EvaluationResult({ evaluation }: EvaluationResultProps) {
           <h3 className="text-lg font-semibold text-gray-900 mb-3">Research Findings</h3>
           <div className="space-y-4">
             {evaluation.collected_links.map((link, index) => (
-              <div key={index} className="border rounded-lg p-4 hover:border-blue-500 transition-colors duration-200">
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
-                >
-                  <LinkIcon className="w-4 h-4" />
-                  {link.url}
-                </a>
-                <p className="mt-2 text-gray-700">{link.summary}</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Relevance: {link.relevance}
-                </p>
-              </div>
+              <ResearchLink
+                key={index}
+                ref={el => linkRefs.current[index] = el}
+                link={link}
+                index={index}
+              />
             ))}
           </div>
         </div>
