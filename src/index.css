@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.markdown > * {
+    all: revert;
+}
+
+.markdown a {
+    color: #2563eb; /* This is Tailwind's blue-600 */
+    text-decoration: none;
+}
+
+.markdown a:hover {
+    text-decoration: underline;
+}

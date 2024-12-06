@@ -1,83 +1,91 @@
 import React, { useState } from 'react';
-import { FormInput, CandidateEvaluation } from './types';
-import { evaluateCandidate } from './services/api';
-import { Header } from './components/Header';
-import { Button } from './components/Button';
-import { TextArea } from './components/TextArea';
-import { EvaluationResult } from './components/EvaluationResult';
-
-const initialState: FormInput = {
-  jobDescription: '',
-  candidateInfo: '',
-};
+import { Toaster } from 'react-hot-toast';
+import { Job } from './types';
+import { useJobs } from './hooks/useJobs';
+import { useCandidates } from './hooks/useCandidates';
+import { JobSection } from './components/JobSection';
+import { CandidateSection } from './components/CandidateSection';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { ConnectionError } from './components/ConnectionError';
+import { JobForm } from './components/JobForm';
 
 function App() {
-  const [formState, setFormState] = useState<FormInput>(initialState);
-  const [evaluation, setEvaluation] = useState<CandidateEvaluation | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [isCreatingJob, setIsCreatingJob] = useState<boolean>(false);
+  const { jobs, isLoading, createJob, deleteJob, error, retry } = useJobs();
+  const { candidates, createCandidate, deleteCandidate } = useCandidates(selectedJob?.id);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formState.jobDescription || !formState.candidateInfo) {
-      setError('Please fill in both the job description and candidate information');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await evaluateCandidate(formState);
-      setEvaluation(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to evaluate candidate');
-    } finally {
-      setLoading(false);
+  const handleDeleteJob = async (jobId: string) => {
+    const success = await deleteJob(jobId);
+    if (success && selectedJob?.id === jobId) {
+      setSelectedJob(null);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+  const handleCreateJob = async (description: string, keyTraits: string[]) => {
+    const success = await createJob(description, keyTraits);
+    if (success) {
+      setIsCreatingJob(false);
+    }
+  };
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <TextArea
-              label="Job Description"
-              value={formState.jobDescription}
-              onChange={(value) =>
-                setFormState((prev) => ({ ...prev, jobDescription: value }))
-              }
-              placeholder="Paste the complete job description here..."
-            />
-            <TextArea
-              label="Candidate Information"
-              value={formState.candidateInfo}
-              onChange={(value) =>
-                setFormState((prev) => ({ ...prev, candidateInfo: value }))
-              }
-              placeholder="Paste the candidate's information, resume, or profile here..."
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <ConnectionError onRetry={retry} />
+      </div>
+    );
+  }
+
+  return (
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gray-100 flex fixed inset-0">
+        <Toaster position="top-right" />
+        
+        {/* Sidebar - Fixed */}
+        <div className="w-1/4 min-w-[300px] border-r border-gray-200 bg-white flex flex-col">
+          <div className="flex-1 overflow-y-auto">
+            <JobSection
+              jobs={jobs}
+              isLoading={isLoading}
+              onJobSelect={(job) => {
+                setSelectedJob(job);
+                setIsCreatingJob(false);
+              }}
+              onCreateClick={() => {
+                setIsCreatingJob(true);
+                setSelectedJob(null);
+              }}
+              onJobDelete={handleDeleteJob}
+              selectedJobId={selectedJob?.id}
             />
           </div>
+        </div>
 
-          <div className="flex flex-col items-center gap-4">
-            <Button type="submit" loading={loading}>
-              Evaluate Candidate
-            </Button>
-
-            {error && (
-              <div className="text-red-600 bg-red-50 px-4 py-2 rounded-lg text-sm">
-                {error}
+        {/* Main Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            {isCreatingJob ? (
+              <div className="max-w-2xl mx-auto">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Job</h2>
+                <JobForm onSubmit={handleCreateJob} />
+              </div>
+            ) : selectedJob ? (
+              <CandidateSection
+                job={selectedJob}
+                candidates={candidates}
+                onCandidateCreate={createCandidate}
+                onCandidateDelete={deleteCandidate}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                Select a job or create a new one to get started
               </div>
             )}
           </div>
-        </form>
-
-        {evaluation && <EvaluationResult evaluation={evaluation} />}
-      </main>
-    </div>
+        </div>
+      </div>
+    </ErrorBoundary>
   );
 }
 

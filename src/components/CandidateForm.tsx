@@ -1,127 +1,93 @@
-import React from 'react';
-import { CandidateInput } from '../types';
-import { User, Plus, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { UserPlus, Plus, Minus, Loader2 } from 'lucide-react';
 
 interface CandidateFormProps {
-  candidate: CandidateInput;
-  onChange: (candidate: CandidateInput) => void;
+  onSubmit: (name: string, context: string) => Promise<void>;
 }
 
-export function CandidateForm({ candidate, onChange }: CandidateFormProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    onChange({
-      ...candidate,
-      [name]: value,
-    });
+export const CandidateForm: React.FC<CandidateFormProps> = ({ onSubmit }) => {
+  const [name, setName] = useState('');
+  const [context, setContext] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (name.trim() && context.trim()) {
+      setIsLoading(true);
+      try {
+        await onSubmit(name, context);
+        setName('');
+        setContext('');
+        setIsExpanded(false);
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
-  const handleSkillChange = (index: number, value: string) => {
-    const newSkills = [...candidate.key_skills];
-    newSkills[index] = value;
-    onChange({
-      ...candidate,
-      key_skills: newSkills,
-    });
-  };
-
-  const addSkill = () => {
-    onChange({
-      ...candidate,
-      key_skills: [...candidate.key_skills, ''],
-    });
-  };
-
-  const removeSkill = (index: number) => {
-    const newSkills = candidate.key_skills.filter((_, i) => i !== index);
-    onChange({
-      ...candidate,
-      key_skills: newSkills,
-    });
-  };
+  if (!isExpanded) {
+    return (
+      <button
+        onClick={() => setIsExpanded(true)}
+        className="w-full flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors mb-4"
+      >
+        <Plus size={20} className="mr-2" />
+        New Candidate
+      </button>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <User className="w-5 h-5 text-blue-600" />
-        <h2 className="text-xl font-semibold">Candidate Information</h2>
+    <div className="bg-white rounded-lg shadow-sm p-6 relative mt-4 mb-4">
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={() => setIsExpanded(false)}
+          className="p-1.5 bg-white text-gray-500 hover:text-gray-700 rounded-full shadow-sm border border-gray-200 hover:bg-gray-50"
+          title="Close form"
+        >
+          <Minus size={16} />
+        </button>
       </div>
-
-      <div className="space-y-4">
+      
+      <form onSubmit={handleSubmit} className="space-y-4 mt-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Full Name
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            Candidate Name
           </label>
           <input
             type="text"
-            name="full_name"
-            value={candidate.full_name}
-            onChange={handleChange}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            id="name"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
-
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Current Role
-          </label>
-          <input
-            type="text"
-            name="current_role"
-            value={candidate.current_role}
-            onChange={handleChange}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium text-gray-700">
-              Key Skills
-            </label>
-            <button
-              type="button"
-              onClick={addSkill}
-              className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
-            >
-              <Plus className="w-4 h-4" />
-              Add Skill
-            </button>
-          </div>
-          <div className="space-y-2">
-            {candidate.key_skills.map((skill, index) => (
-              <div key={index} className="flex gap-2">
-                <input
-                  type="text"
-                  value={skill}
-                  onChange={(e) => handleSkillChange(index, e.target.value)}
-                  className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeSkill(index)}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Notable Experience
+          <label htmlFor="context" className="block text-sm font-medium text-gray-700">
+            Resume/Context
           </label>
           <textarea
-            name="notable_experience"
-            value={candidate.notable_experience}
-            onChange={handleChange}
+            id="context"
             rows={4}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            value={context}
+            onChange={(e) => setContext(e.target.value)}
           />
         </div>
-      </div>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? (
+            <Loader2 size={16} className="mr-2 animate-spin" />
+          ) : (
+            <UserPlus size={16} className="mr-2" />
+          )}
+          {isLoading ? 'Evaluating...' : 'Evaluate Candidate'}
+        </button>
+      </form>
     </div>
   );
-}
+};
