@@ -22,12 +22,11 @@ RUN npm run build
 # Install a simple server to serve the static content
 RUN npm install -g serve
 
-# Expose the port the app runs on
-# Set the port number as an environment variable
+# Expose the port number as an environment variable
 ENV PORT=3000
 
 # Expose the port defined by the environment variable
 EXPOSE $PORT
 
 # Define the command to run the app
-CMD serve -s build -l $PORT
+CMD serve -s dist -l $PORT
