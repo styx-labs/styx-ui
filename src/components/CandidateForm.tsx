@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserPlus, Plus, Minus, Loader2 } from 'lucide-react';
+import { UserPlus, Plus, Minus, Loader2, Info } from 'lucide-react';
 
 interface CandidateFormProps {
   onSubmit: (name: string, context: string) => Promise<void>;
@@ -65,7 +65,16 @@ export const CandidateForm: React.FC<CandidateFormProps> = ({ onSubmit }) => {
         </div>
         <div>
           <label htmlFor="context" className="block text-sm font-medium text-gray-700">
-            Resume/Context
+            Candidate Context
+            <div className="group relative inline-block">
+              <Info 
+                size={16} 
+                className="inline-block ml-2 text-gray-400 hover:text-gray-600"
+              />
+              <div className="absolute hidden group-hover:block w-64 px-4 py-2 bg-gray-800 text-white text-sm rounded-lg -right-64 top-6">
+                Enter some basic information about the candidate to aid in our search. Info copy/pasted from their LinkedIn works great.
+              </div>
+            </div>
           </label>
           <textarea
             id="context"
