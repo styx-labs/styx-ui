@@ -6,7 +6,8 @@ export interface Job {
 
 export interface Candidate {
   id?: string;
-  name: string;
-  context: string;    // Changed from resume to match backend
+  name?: string;
+  context?: string;    // Changed from resume to match backend
   result?: string;
+  url?: string;
 }

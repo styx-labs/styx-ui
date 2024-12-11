@@ -7,7 +7,7 @@ import { CandidateForm } from './CandidateForm';
 interface CandidateSectionProps {
   job: Job;
   candidates: Candidate[];
-  onCandidateCreate: (name: string, context: string) => void;
+  onCandidateCreate: (name?: string, context?: string, url?: string) => void;
   onCandidateDelete: (candidateId: string) => void;
 }
 

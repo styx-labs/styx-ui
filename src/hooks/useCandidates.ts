@@ -17,11 +17,15 @@ export function useCandidates(jobId: string | undefined) {
     }
   };
 
-  const createCandidate = async (name: string, context: string) => {  // Changed from resume to context
+  const createCandidate = async (name: string, context: string, url: string) => {
     if (!jobId) return;
 
     try {
-      await apiService.createCandidate(jobId, { name, context });  // Changed from resume to context
+      await apiService.createCandidate(jobId, { 
+        name: name || '',
+        context: context || '',
+        url: url || ''
+      });
       toast.success('Candidate added successfully');
       loadCandidates();
     } catch (error) {
