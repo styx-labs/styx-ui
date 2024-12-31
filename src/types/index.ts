@@ -7,7 +7,12 @@ export interface Job {
 export interface Candidate {
   id?: string;
   name?: string;
-  context?: string;    // Changed from resume to match backend
-  result?: string;
+  context?: string;
   url?: string;
+  sections?: {
+    section: string;
+    score: number;
+    content: string;
+  }[];
+  citations: string
 }
