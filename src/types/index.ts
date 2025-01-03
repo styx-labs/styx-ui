@@ -14,5 +14,10 @@ export interface Candidate {
     score: number;
     content: string;
   }[];
-  citations: string
+  citations?: {
+    url: string;
+    confidence: number;
+    distilled_content: string;
+    index: number;
+  }[];
 }

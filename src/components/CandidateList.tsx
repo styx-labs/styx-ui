@@ -38,7 +38,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
                   candidate.sections.map((section, index) => (
                     <section key={index} className="mb-6 last:mb-0">
                       <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-medium m-0">{section.section}</h4>
+                        <h4 className="font-medium m-0">{section.section.charAt(0).toUpperCase() + section.section.slice(1)}</h4>
                         <span className="text-sm text-gray-600">Score: {section.score}</span>
                       </div>
                       <ReactMarkdown className="markdown">
@@ -51,9 +51,13 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
                 )}
                 {candidate.citations ? (
                     <section className="mb-6 last:mb-0">
-                      <ReactMarkdown className="markdown">
-                        {candidate.citations}
-                      </ReactMarkdown>
+                      <div className="text-sm text-gray-600">
+                        {candidate.citations.map((citation, index) => (
+                          <div key={index} className="mb-1">
+                            [{index + 1}] &lt;<a href={citation.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{citation.url}</a>&gt;, Confidence: <strong>{citation.confidence}</strong>
+                          </div>
+                        ))}
+                      </div>
                     </section>
                   ) : (
                     <p className="text-gray-600">No citations found</p>
