@@ -2,6 +2,8 @@ export interface Job {
   id?: string;
   job_description: string;
   key_traits: string[];
+  job_title: string;
+  company_name: string;
 }
 
 export interface Candidate {

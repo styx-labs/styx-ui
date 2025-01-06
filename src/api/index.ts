@@ -46,7 +46,7 @@ export const apiService = {
     api.delete<{ success: boolean }>(`/jobs/${jobId}`),
   
   getKeyTraits: (description: string) => 
-    api.post<{ key_traits: string[] }>('/get-key-traits', { description }),
+    api.post<{ key_traits: string[], job_title: string, company_name: string }>('/get-key-traits', { description }),
 
   // Candidates
   getCandidates: (jobId: string) => 

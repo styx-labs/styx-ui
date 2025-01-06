@@ -5,11 +5,13 @@ import { apiService } from '../api';
 import { toast } from 'react-hot-toast';
 
 interface JobFormProps {
-  onSubmit: (description: string, keyTraits: string[]) => void;
+  onSubmit: (description: string, keyTraits: string[], jobTitle: string, companyName: string) => void;
 }
 
 export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
   const [description, setDescription] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTraits, setSuggestedTraits] = useState<string[]>([]);
   const [isEditingTraits, setIsEditingTraits] = useState(false);
@@ -21,6 +23,8 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
       try {
         const response = await apiService.getKeyTraits(description);
         setSuggestedTraits(response.data.key_traits);
+        setJobTitle(response.data.job_title);
+        setCompanyName(response.data.company_name);
         setIsEditingTraits(true);
       } catch (error) {
         toast.error('Failed to get key traits');
@@ -34,8 +38,10 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
   const handleTraitsConfirm = async (traits: string[]) => {
     setIsSubmitting(true);
     try {
-      await onSubmit(description, traits);
+      await onSubmit(description, traits, jobTitle, companyName);
       setDescription('');
+      setJobTitle('');
+      setCompanyName('');
       setIsEditingTraits(false);
       setSuggestedTraits([]);
     } finally {

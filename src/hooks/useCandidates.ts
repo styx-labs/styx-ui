@@ -17,7 +17,7 @@ export function useCandidates(jobId: string | undefined) {
     }
   };
 
-  const createCandidate = async (name: string, context: string, url: string) => {
+  const createCandidate = async (name?: string, context?: string, url?: string) => {
     if (!jobId) return;
 
     try {

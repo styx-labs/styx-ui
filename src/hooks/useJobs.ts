@@ -33,11 +33,13 @@ export function useJobs() {
     }
   };
 
-  const createJob = async (description: string, keyTraits: string[]) => {
+  const createJob = async (description: string, keyTraits: string[], jobTitle: string, companyName: string) => {
     try {
       const jobResponse = await apiService.createJob({ 
         job_description: description,
-        key_traits: keyTraits
+        key_traits: keyTraits,
+        job_title: jobTitle,
+        company_name: companyName
       });
       
       if (jobResponse.data.job_id) {

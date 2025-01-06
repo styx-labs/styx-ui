@@ -27,11 +27,14 @@ export const JobList: React.FC<JobListProps> = ({
               : 'bg-white hover:bg-gray-50'
             }`}
         >
-          <p className="truncate text-gray-900">
-            {job.job_description.length > 100 
-              ? `${job.job_description.substring(0, 100)}...` 
-              : job.job_description}
-          </p>
+          <div className="flex flex-col overflow-hidden">
+            <p className="font-medium text-gray-900 truncate">
+              {job.company_name}
+            </p>
+            <p className="text-sm text-gray-500 truncate">
+              {job.job_title}
+            </p>
+          </div>
           <button
             onClick={(e) => {
               e.stopPropagation();
