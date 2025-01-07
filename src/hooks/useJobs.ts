@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
-import { Job } from '../types';
-import { apiService } from '../api';
+import { useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
+import { Job } from "../types";
+import { apiService } from "../api";
+import { useAuth } from "../context/AuthContext";
 
 export function useJobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const { user, loading: authLoading } = useAuth();
 
   const loadJobs = async () => {
     setIsLoading(true);
@@ -15,9 +17,13 @@ export function useJobs() {
       const response = await apiService.getJobs();
       setJobs(response.data.jobs || []);
     } catch (error) {
-      console.error('Error loading jobs:', error);
-      setError(error instanceof Error ? error : new Error('Failed to load jobs'));
-      toast.error(error instanceof Error ? error.message : 'Failed to load jobs');
+      console.error("Error loading jobs:", error);
+      setError(
+        error instanceof Error ? error : new Error("Failed to load jobs")
+      );
+      toast.error(
+        error instanceof Error ? error.message : "Failed to load jobs"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -28,29 +34,36 @@ export function useJobs() {
       const response = await apiService.getKeyTraits(description);
       return response.data.key_traits;
     } catch (error) {
-      console.error('Error getting key traits:', error);
-      throw error instanceof Error ? error : new Error('Failed to get key traits');
+      console.error("Error getting key traits:", error);
+      throw error instanceof Error
+        ? error
+        : new Error("Failed to get key traits");
     }
   };
 
-  const createJob = async (description: string, keyTraits: string[], jobTitle: string, companyName: string) => {
+  const createJob = async (
+    description: string,
+    keyTraits: string[],
+    jobTitle: string,
+    companyName: string
+  ) => {
     try {
-      const jobResponse = await apiService.createJob({ 
+      const jobResponse = await apiService.createJob({
         job_description: description,
         key_traits: keyTraits,
         job_title: jobTitle,
-        company_name: companyName
+        company_name: companyName,
       });
-      
+
       if (jobResponse.data.job_id) {
-        toast.success('Job created successfully');
+        toast.success("Job created successfully");
         await loadJobs();
         return true;
       }
       return false;
     } catch (error) {
-      console.error('Error creating job:', error);
-      throw error instanceof Error ? error : new Error('Failed to create job');
+      console.error("Error creating job:", error);
+      throw error instanceof Error ? error : new Error("Failed to create job");
     }
   };
 
@@ -58,30 +71,35 @@ export function useJobs() {
     try {
       const response = await apiService.deleteJob(jobId);
       if (response.data.success) {
-        toast.success('Job deleted successfully');
+        toast.success("Job deleted successfully");
         await loadJobs();
         return true;
       }
       return false;
     } catch (error) {
-      console.error('Error deleting job:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to delete job');
+      console.error("Error deleting job:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete job"
+      );
       return false;
     }
   };
 
   useEffect(() => {
-    loadJobs();
-  }, []);
+    // Only load jobs when auth is ready and we have a user
+    if (!authLoading && user) {
+      loadJobs();
+    }
+  }, [authLoading, user]);
 
   return {
     jobs,
-    isLoading,
+    isLoading: isLoading || authLoading, // Include auth loading in isLoading state
     error,
     getKeyTraits,
     createJob,
     deleteJob,
     retry: loadJobs,
-    refreshJobs: loadJobs
+    refreshJobs: loadJobs,
   };
 }
