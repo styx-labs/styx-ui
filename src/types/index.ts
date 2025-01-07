@@ -10,6 +10,7 @@ export interface Candidate {
   id?: string;
   name?: string;
   context?: string;
+  status?: string;
   url?: string;
   sections?: {
     section: string;

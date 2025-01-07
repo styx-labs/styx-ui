@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCircle, Trash2 } from 'lucide-react';
+import { UserCircle, Trash2, Linkedin } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Candidate } from '../types';
 
@@ -24,8 +24,18 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-4">
-                <UserCircle className="text-blue-600 flex-shrink-0" size={24} />
-                <h3 className="font-medium">{candidate.name}</h3>
+                <h2 className="text-xl font-semibold text-gray-900">{candidate.name}</h2>
+                {candidate.url && (
+                  <a
+                    href={candidate.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1.5 text-[#0A66C2] hover:bg-blue-50 rounded-md transition-colors"
+                    title="View LinkedIn Profile"
+                  >
+                    <Linkedin size={18} />
+                  </a>
+                )}
                 <button
                   onClick={() => onDeleteCandidate(candidate.id!)}
                   className="p-2 text-red-600 hover:bg-red-50 rounded-full ml-auto flex-shrink-0"

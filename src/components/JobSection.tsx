@@ -1,7 +1,8 @@
 import React from 'react';
-import { Briefcase, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Job } from '../types';
 import { JobList } from './JobList';
+import styxLogo from '../assets/styx_name_logo.png';
 
 interface JobSectionProps {
   jobs: Job[];
@@ -24,9 +25,12 @@ export const JobSection: React.FC<JobSectionProps> = ({
     <div className="h-full flex flex-col">
       <div className="sticky top-0 bg-white px-4 pt-4 pb-2 z-10 shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Briefcase className="text-blue-600" />
-            <h2 className="text-xl font-bold text-gray-900">Jobs</h2>
+          <div className="flex items-center">
+            <img 
+              src={styxLogo} 
+              alt="Styx" 
+              className="h-10 w-auto -ml-1 -mt-1"
+            />
           </div>
           <button
             onClick={onCreateClick}

@@ -40,7 +40,7 @@ export const CandidateForm: React.FC<CandidateFormProps> = ({ onSubmit }) => {
         className="w-full flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors mb-4"
       >
         <Plus size={20} className="mr-2" />
-        New Candidate
+        Manually Add Candidate
       </button>
     );
   }
