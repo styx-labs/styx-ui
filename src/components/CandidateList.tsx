@@ -13,14 +13,22 @@ const makeUrlsClickable = (text: string): string => {
   return text.replace(urlRegex, (url) => `[${url}](${url})`);
 };
 
-export const CandidateList: React.FC<CandidateListProps> = ({
-  candidates,
-  onDeleteCandidate,
-}) => {
+export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDeleteCandidate }) => {
+  // Sort completed candidates by overall_score in descending order
+  const sortedCandidates = [...candidates].sort((a, b) => {
+    // Keep processing candidates at their original position
+    if (a.status !== 'complete' || b.status !== 'complete') return 0;
+    // Sort completed candidates by overall_score (handle undefined scores)
+    return (b.overall_score ?? 0) - (a.overall_score ?? 0);
+  });
+
   return (
     <div className="space-y-6">
-      {candidates.map((candidate) => (
-        <div key={candidate.id} className="bg-white rounded-lg shadow-md p-6">
+      {sortedCandidates.map((candidate) => (
+        <div
+          key={candidate.id}
+          className="bg-white rounded-lg shadow-md p-6"
+        >
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-4">
@@ -45,7 +53,28 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                   <Trash2 size={20} />
                 </button>
               </div>
-              <div className="prose prose-sm max-w-none prose-headings:mt-4 prose-headings:mb-2 prose-p:my-2 prose-ul:my-2 prose-li:my-1 prose-a:text-purple-600 prose-a:no-underline hover:prose-a:underline">
+              {candidate.summary && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-medium text-gray-900">Summary</h3>
+                    {candidate.overall_score !== undefined && (
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium text-gray-600 mr-2">Overall Score:</span>
+                        <span className={`px-2 py-1 rounded-full text-sm font-medium ${
+                          candidate.overall_score >= 8 ? 'bg-green-100 text-green-800' :
+                          candidate.overall_score >= 6 ? 'bg-blue-100 text-blue-800' :
+                          candidate.overall_score >= 4 ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {candidate.overall_score.toFixed(1)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-gray-700 whitespace-pre-line">{candidate.summary}</p>
+                </div>
+              )}
+              <div className="prose prose-sm max-w-none prose-headings:mt-4 prose-headings:mb-2 prose-p:my-2 prose-ul:my-2 prose-li:my-1 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline">
                 {candidate.sections ? (
                   candidate.sections.map((section, index) => (
                     <section key={index} className="mb-6 last:mb-0">

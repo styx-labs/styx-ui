@@ -12,6 +12,8 @@ export interface Candidate {
   context?: string;
   status?: string;
   url?: string;
+  summary?: string;
+  overall_score?: number;
   sections?: {
     section: string;
     score: number;
