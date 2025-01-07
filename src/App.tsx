@@ -14,6 +14,7 @@ import { Login } from "./components/Login";
 import { setAuthUser } from "./api";
 import { UnauthorizedError } from "./api";
 import { useEffect } from "react";
+import { Welcome } from "./components/Welcome";
 
 function JobDetail() {
   const { jobId } = useParams();
@@ -137,6 +138,8 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCreatingJob, setIsCreatingJob] = React.useState<boolean>(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] =
+    React.useState<boolean>(false);
   const { jobs, isLoading, createJob, deleteJob, error, retry } = useJobs();
   const { user, loading, logout } = useAuth();
   const [imageError, setImageError] = React.useState(false);
@@ -230,23 +233,37 @@ function App() {
         <Toaster position="top-right" />
 
         {/* Sidebar */}
-        <div className="w-1/4 min-w-[300px] bg-white border-r border-gray-200 flex flex-col">
+        <div
+          className={`${
+            isSidebarCollapsed ? "w-12" : "w-1/4 min-w-[300px]"
+          } bg-white border-r border-gray-200 flex flex-col relative transition-all duration-200 ease-in-out`}
+        >
           <JobSection
             jobs={jobs}
             isLoading={isLoading}
             onJobSelect={(job) => {
               navigate(`/jobs/${job.id}`);
               setIsCreatingJob(false);
+              // Expand sidebar when selecting a job if it's collapsed
+              if (isSidebarCollapsed) {
+                setIsSidebarCollapsed(false);
+              }
             }}
             onCreateClick={() => {
               setIsCreatingJob(true);
               navigate("/");
+              // Expand sidebar when creating a job if it's collapsed
+              if (isSidebarCollapsed) {
+                setIsSidebarCollapsed(false);
+              }
             }}
             onJobDelete={handleDeleteJob}
             selectedJobId={jobId}
             renderAvatar={renderAvatar}
             user={user}
             onLogout={logout}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           />
         </div>
 
@@ -264,6 +281,13 @@ function App() {
                       </h2>
                       <JobForm onSubmit={handleCreateJob} />
                     </div>
+                  ) : jobs.length === 0 && !isLoading ? (
+                    <Welcome
+                      onCreateClick={() => {
+                        setIsCreatingJob(true);
+                        navigate("/");
+                      }}
+                    />
                   ) : (
                     <div className="flex items-center justify-center h-full text-gray-500">
                       Select a job or create a new one to get started
