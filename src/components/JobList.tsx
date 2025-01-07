@@ -1,6 +1,6 @@
-import React from 'react';
-import { Trash2 } from 'lucide-react';
-import { Job } from '../types';
+import React from "react";
+import { Trash2 } from "lucide-react";
+import { Job } from "../types";
 
 interface JobListProps {
   jobs: Job[];
@@ -9,11 +9,11 @@ interface JobListProps {
   onDeleteJob: (jobId: string) => void;
 }
 
-export const JobList: React.FC<JobListProps> = ({ 
-  jobs, 
+export const JobList: React.FC<JobListProps> = ({
+  jobs,
   selectedJobId,
-  onJobSelect, 
-  onDeleteJob 
+  onJobSelect,
+  onDeleteJob,
 }) => {
   return (
     <div className="divide-y divide-solid divide-gray-200 bg-white -mt-2">
@@ -22,18 +22,17 @@ export const JobList: React.FC<JobListProps> = ({
           key={job.id}
           onClick={() => onJobSelect(job)}
           className={`group flex items-center justify-between p-4 cursor-pointer
-            ${selectedJobId === job.id 
-              ? 'bg-gray-100' 
-              : 'bg-white hover:bg-gray-50'
+            ${
+              selectedJobId === job.id
+                ? "bg-gray-100"
+                : "bg-white hover:bg-gray-50"
             }`}
         >
           <div className="flex flex-col overflow-hidden">
             <p className="font-medium text-gray-900 truncate">
               {job.company_name}
             </p>
-            <p className="text-sm text-gray-500 truncate">
-              {job.job_title}
-            </p>
+            <p className="text-sm text-gray-500 truncate">{job.job_title}</p>
           </div>
           <button
             onClick={(e) => {
@@ -47,9 +46,7 @@ export const JobList: React.FC<JobListProps> = ({
         </div>
       ))}
       {jobs.length === 0 && (
-        <div className="p-4 text-gray-500 text-center">
-          No jobs found
-        </div>
+        <div className="p-4 text-gray-500 text-center">No jobs found</div>
       )}
     </div>
   );

@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, useNavigate, useParams } from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useJobs } from "./hooks/useJobs";
 import { useCandidates } from "./hooks/useCandidates";
@@ -8,11 +8,13 @@ import { CandidateSection } from "./components/CandidateSection";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ConnectionError } from "./components/ConnectionError";
 import { JobForm } from "./components/JobForm";
+import { useParams } from "react-router-dom";
 
 function JobDetail() {
   const { jobId } = useParams();
   const { jobs, isLoading, error, retry } = useJobs();
   const { candidates, createCandidate, deleteCandidate } = useCandidates(jobId);
+  console.log("jobId", jobId);
 
   const selectedJob = jobs.find((job) => job.id === jobId);
 
@@ -36,8 +38,12 @@ function JobDetail() {
 
 function App() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isCreatingJob, setIsCreatingJob] = React.useState<boolean>(false);
   const { jobs, isLoading, createJob, deleteJob, error, retry } = useJobs();
+
+  // Extract jobId from the current path
+  const jobId = location.pathname.match(/\/jobs\/([^/]+)/)?.[1];
 
   const handleDeleteJob = async (jobId: string) => {
     const success = await deleteJob(jobId);
@@ -91,7 +97,7 @@ function App() {
                 navigate("/");
               }}
               onJobDelete={handleDeleteJob}
-              selectedJobId={undefined}
+              selectedJobId={jobId}
             />
           </div>
         </div>

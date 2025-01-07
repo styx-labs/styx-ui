@@ -3,14 +3,14 @@ import { Plus } from "lucide-react";
 import { Job } from "../types";
 import { JobList } from "./JobList";
 import styxLogo from "../assets/styx_name_logo.png";
-import { useParams } from "react-router-dom";
 
 interface JobSectionProps {
   jobs: Job[];
   isLoading: boolean;
   onJobSelect: (job: Job) => void;
   onCreateClick: () => void;
-  onJobDelete: (jobId: string) => void;
+  onJobDelete: (jobId: string) => Promise<void>;
+  selectedJobId?: string;
 }
 
 export const JobSection: React.FC<JobSectionProps> = ({
@@ -19,9 +19,8 @@ export const JobSection: React.FC<JobSectionProps> = ({
   onJobSelect,
   onCreateClick,
   onJobDelete,
+  selectedJobId,
 }) => {
-  const { jobId } = useParams();
-
   return (
     <div className="h-full flex flex-col">
       <div className="sticky top-0 bg-white px-4 pt-4 pb-2 z-10 shadow-sm">
@@ -49,9 +48,9 @@ export const JobSection: React.FC<JobSectionProps> = ({
         ) : (
           <JobList
             jobs={jobs}
-            selectedJobId={jobId}
             onJobSelect={onJobSelect}
             onDeleteJob={onJobDelete}
+            selectedJobId={selectedJobId}
           />
         )}
       </div>
