@@ -13,6 +13,7 @@ import { useAuth } from "./context/AuthContext";
 import { Login } from "./components/Login";
 import { setAuthUser } from "./api";
 import { UnauthorizedError } from "./api";
+import { useEffect } from "react";
 
 function JobDetail() {
   const { jobId } = useParams();
@@ -26,6 +27,43 @@ function JobDetail() {
   } = useCandidates(jobId);
 
   const selectedJob = jobs.find((job) => job.id === jobId);
+
+  // Update meta tags when job changes
+  useEffect(() => {
+    if (selectedJob) {
+      // Update document title
+      document.title = `${selectedJob.job_title} at ${selectedJob.company_name} - Styx`;
+
+      // Update meta description
+      const metaDescription = document.querySelector(
+        'meta[name="description"]'
+      );
+      if (metaDescription) {
+        metaDescription.setAttribute(
+          "content",
+          `${selectedJob.job_title} position at ${
+            selectedJob.company_name
+          }. ${selectedJob.job_description.slice(0, 150)}...`
+        );
+      }
+    } else {
+      document.title = "Styx - AI Recruiting Assistant";
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.title = "Styx - AI Recruiting Assistant";
+      const metaDescription = document.querySelector(
+        'meta[name="description"]'
+      );
+      if (metaDescription) {
+        metaDescription.setAttribute(
+          "content",
+          "Styx - AI-powered recruiting assistant for hiring managers and recruiters."
+        );
+      }
+    };
+  }, [selectedJob]);
 
   if (error) {
     // Handle unauthorized access
