@@ -1,8 +1,10 @@
-import React, { useState } from "react";
-import { Users, ChevronDown, ChevronUp } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { Users, ChevronDown, ChevronUp, Upload } from "lucide-react";
 import { Candidate, Job } from "../types";
 import { CandidateList } from "./CandidateList";
 import { CandidateForm } from "./CandidateForm";
+import { apiService } from "../api";
+import { toast } from "react-hot-toast";
 
 interface CandidateSectionProps {
   job: Job;
@@ -13,6 +15,7 @@ interface CandidateSectionProps {
     url?: string
   ) => Promise<void>;
   onCandidateDelete: (candidateId: string) => void;
+  onCandidatesBatch: (file: File) => Promise<void>;
 }
 
 export const CandidateSection: React.FC<CandidateSectionProps> = ({
@@ -20,8 +23,11 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
   candidates,
   onCandidateCreate,
   onCandidateDelete,
+  onCandidatesBatch
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [statusFilter, setStatusFilter] = useState<"processing" | "complete">(
     "complete"
   );
@@ -110,27 +116,66 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
             <Users className="text-purple-600" size={24} />
             <h2 className="text-2xl font-bold text-gray-900">Candidates</h2>
           </div>
-          <div className="inline-flex items-center bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setStatusFilter("complete")}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
-                statusFilter === "complete"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Completed
-            </button>
-            <button
-              onClick={() => setStatusFilter("processing")}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
-                statusFilter === "processing"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Processing
-            </button>
+          <div className="flex items-center space-x-3">
+            <div className="inline-flex items-center bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setStatusFilter("complete")}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                  statusFilter === "complete"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Completed
+              </button>
+              <button
+                onClick={() => setStatusFilter("processing")}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                  statusFilter === "processing"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Processing
+              </button>
+            </div>
+            <div className="relative">
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".csv"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setIsUploading(true);
+                    try {
+                      await onCandidatesBatch(file);
+                    } catch (error) {
+                      console.error("Error uploading candidates:", error);
+                      toast.error("Failed to upload candidates");
+                    } finally {
+                      setIsUploading(false);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = "";
+                      }
+                    }
+                  }
+                }}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                  isUploading
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-purple-100 text-purple-700 hover:bg-purple-200"
+                }`}
+              >
+                <Upload size={16} className="mr-2" />
+                {isUploading ? "Uploading..." : "Upload CSV"}
+              </button>
+            </div>
           </div>
         </div>
 

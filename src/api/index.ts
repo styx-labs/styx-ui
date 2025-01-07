@@ -90,11 +90,26 @@ export const apiService = {
   getCandidates: (jobId: string) =>
     api.get<{ candidates: Candidate[] }>(`/jobs/${jobId}/candidates`),
 
-  createCandidate: (jobId: string, candidate: Omit<Candidate, "id">) =>
+  getCandidate: (jobId: string, candidateId: string) =>
+    api.get<{ candidate: Candidate }>(`/jobs/${jobId}/candidates/${candidateId}`),
+  
+  createCandidate: (jobId: string, candidate: Omit<Candidate, 'id'>) =>
     api.post<{ candidate_id: string }>(`/jobs/${jobId}/candidates`, candidate),
 
   deleteCandidate: (jobId: string, candidateId: string) =>
-    api.delete<{ success: boolean }>(
-      `/jobs/${jobId}/candidates/${candidateId}`
-    ),
+    api.delete<{ success: boolean }>(`/jobs/${jobId}/candidates/${candidateId}`),
+    
+  createCandidatesBatch: (jobId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post<{ success: boolean }>(
+      `/jobs/${jobId}/candidates_batch`, 
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+  }
 };

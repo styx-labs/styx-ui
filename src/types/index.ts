@@ -26,3 +26,7 @@ export interface Candidate {
     index: number;
   }[];
 }
+
+export interface CandidateBatch {
+  file: File;
+}

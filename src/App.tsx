@@ -23,7 +23,7 @@ function JobDetail() {
   const {
     candidates,
     createCandidate,
-    deleteCandidate,
+    deleteCandidate, createCandidatesBatch,
     error: candidatesError,
   } = useCandidates(jobId);
 
@@ -130,6 +130,7 @@ function JobDetail() {
       candidates={candidates}
       onCandidateCreate={createCandidate}
       onCandidateDelete={deleteCandidate}
+      onCandidatesBatch={createCandidatesBatch}
     />
   ) : null;
 }
