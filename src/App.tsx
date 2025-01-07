@@ -1,7 +1,6 @@
 import React from "react";
 import { Routes, Route, useNavigate, useParams } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { Job } from "./types";
 import { useJobs } from "./hooks/useJobs";
 import { useCandidates } from "./hooks/useCandidates";
 import { JobSection } from "./components/JobSection";
