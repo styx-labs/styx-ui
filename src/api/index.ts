@@ -18,17 +18,37 @@ const api = axios.create({
   validateStatus: (status) => status >= 200 && status < 300,
 });
 
-// Function to set auth token in headers
+// Function to set cross-site cookie for extension
+const setExtensionCookie = (token: string | null) => {
+  if (token) {
+    // Set cookie that can be accessed by extension on LinkedIn
+    // SameSite=None allows cross-site access, Secure is required for SameSite=None
+    document.cookie = `styxExtensionToken=${token}; path=/; domain=styxlabs.co; max-age=3600; SameSite=None; Secure`;
+  } else {
+    // Clear the cookie
+    document.cookie =
+      "styxExtensionToken=; path=/; domain=styxlabs.co; max-age=0; SameSite=None; Secure";
+  }
+};
+
+// Function to set auth token
 export const setAuthUser = async (user: User | null) => {
   if (user) {
     const token = await getIdToken(user, true);
-    // Store token in localStorage
-    localStorage.setItem("styxAuthToken", token);
+
+    // Set token in API headers
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+    // Set cross-site cookie for extension
+    setExtensionCookie(token);
+
+    // Store refresh info
+    window.currentUser = user;
   } else {
-    // Clear token from localStorage when user is null
-    localStorage.removeItem("styxAuthToken");
+    // Clear everything on logout
     delete api.defaults.headers.common["Authorization"];
+    setExtensionCookie(null);
+    delete window.currentUser;
   }
 };
 
@@ -52,7 +72,9 @@ api.interceptors.response.use(
         const user = window.currentUser;
         if (user) {
           const newToken = await getIdToken(user, true);
+          // Update both API headers and extension cookie
           api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+          setExtensionCookie(newToken);
           return api(originalRequest);
         }
       } catch (refreshError) {
@@ -91,25 +113,29 @@ export const apiService = {
     api.get<{ candidates: Candidate[] }>(`/jobs/${jobId}/candidates`),
 
   getCandidate: (jobId: string, candidateId: string) =>
-    api.get<{ candidate: Candidate }>(`/jobs/${jobId}/candidates/${candidateId}`),
-  
-  createCandidate: (jobId: string, candidate: Omit<Candidate, 'id'>) =>
+    api.get<{ candidate: Candidate }>(
+      `/jobs/${jobId}/candidates/${candidateId}`
+    ),
+
+  createCandidate: (jobId: string, candidate: Omit<Candidate, "id">) =>
     api.post<{ candidate_id: string }>(`/jobs/${jobId}/candidates`, candidate),
 
   deleteCandidate: (jobId: string, candidateId: string) =>
-    api.delete<{ success: boolean }>(`/jobs/${jobId}/candidates/${candidateId}`),
-    
+    api.delete<{ success: boolean }>(
+      `/jobs/${jobId}/candidates/${candidateId}`
+    ),
+
   createCandidatesBatch: (jobId: string, file: File) => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
     return api.post<{ success: boolean }>(
-      `/jobs/${jobId}/candidates_batch`, 
+      `/jobs/${jobId}/candidates_batch`,
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       }
     );
-  }
+  },
 };
