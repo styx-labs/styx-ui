@@ -15,6 +15,13 @@ import { setAuthUser } from "./api";
 import { UnauthorizedError } from "./api";
 import { useEffect } from "react";
 import { Welcome } from "./components/Welcome";
+import { User } from "firebase/auth";
+
+// Extend Window interface
+interface ExtendedWindow extends Window {
+  currentUser?: User | null;
+}
+declare const window: ExtendedWindow;
 
 function JobDetail() {
   const { jobId } = useParams();
@@ -23,7 +30,8 @@ function JobDetail() {
   const {
     candidates,
     createCandidate,
-    deleteCandidate, createCandidatesBatch,
+    deleteCandidate,
+    createCandidatesBatch,
     error: candidatesError,
   } = useCandidates(jobId);
 
@@ -145,19 +153,36 @@ function App() {
   const { user, loading, logout } = useAuth();
   const [imageError, setImageError] = React.useState(false);
 
-  // Set auth token in API service when user changes
+  // Set auth token in API service and notify extension when user changes
   React.useEffect(() => {
-    // Store user reference for token refresh
-    if (user) {
-      (window as any).currentUser = user;
-    } else {
-      delete (window as any).currentUser;
-    }
+    const handleAuthChange = async () => {
+      if (user) {
+        const token = await user.getIdToken();
+        // Store user reference for token refresh
+        window.currentUser = user;
+        // Set token in API service
+        setAuthUser(user).catch((error) => {
+          console.error("Error setting auth token:", error);
+        });
+        // Notify extension
+        document.dispatchEvent(
+          new CustomEvent("styxAuthUpdate", {
+            detail: { token },
+          })
+        );
+      } else {
+        delete window.currentUser;
+        setAuthUser(null);
+        // Notify extension of logout
+        document.dispatchEvent(
+          new CustomEvent("styxAuthUpdate", {
+            detail: { token: null },
+          })
+        );
+      }
+    };
 
-    // Set initial auth token
-    setAuthUser(user).catch((error) => {
-      console.error("Error setting auth token:", error);
-    });
+    handleAuthChange();
   }, [user]);
 
   // Extract jobId from the current path
