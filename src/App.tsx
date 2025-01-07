@@ -1,29 +1,64 @@
-import React, { useState } from 'react';
-import { Toaster } from 'react-hot-toast';
-import { Job } from './types';
-import { useJobs } from './hooks/useJobs';
-import { useCandidates } from './hooks/useCandidates';
-import { JobSection } from './components/JobSection';
-import { CandidateSection } from './components/CandidateSection';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import { ConnectionError } from './components/ConnectionError';
-import { JobForm } from './components/JobForm';
+import React from "react";
+import { Routes, Route, useNavigate, useParams } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { Job } from "./types";
+import { useJobs } from "./hooks/useJobs";
+import { useCandidates } from "./hooks/useCandidates";
+import { JobSection } from "./components/JobSection";
+import { CandidateSection } from "./components/CandidateSection";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { ConnectionError } from "./components/ConnectionError";
+import { JobForm } from "./components/JobForm";
+
+function JobDetail() {
+  const { jobId } = useParams();
+  const { jobs, isLoading, error, retry } = useJobs();
+  const { candidates, createCandidate, deleteCandidate } = useCandidates(jobId);
+
+  const selectedJob = jobs.find((job) => job.id === jobId);
+
+  if (error) {
+    return <ConnectionError onRetry={retry} />;
+  }
+
+  if (!selectedJob && !isLoading) {
+    return <div>Job not found</div>;
+  }
+
+  return selectedJob ? (
+    <CandidateSection
+      job={selectedJob}
+      candidates={candidates}
+      onCandidateCreate={createCandidate}
+      onCandidateDelete={deleteCandidate}
+    />
+  ) : null;
+}
 
 function App() {
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [isCreatingJob, setIsCreatingJob] = useState<boolean>(false);
+  const navigate = useNavigate();
+  const [isCreatingJob, setIsCreatingJob] = React.useState<boolean>(false);
   const { jobs, isLoading, createJob, deleteJob, error, retry } = useJobs();
-  const { candidates, createCandidate, deleteCandidate } = useCandidates(selectedJob?.id);
 
   const handleDeleteJob = async (jobId: string) => {
     const success = await deleteJob(jobId);
-    if (success && selectedJob?.id === jobId) {
-      setSelectedJob(null);
+    if (success) {
+      navigate("/");
     }
   };
 
-  const handleCreateJob = async (description: string, keyTraits: string[], jobTitle: string, companyName: string) => {
-    const success = await createJob(description, keyTraits, jobTitle, companyName);
+  const handleCreateJob = async (
+    description: string,
+    keyTraits: string[],
+    jobTitle: string,
+    companyName: string
+  ) => {
+    const success = await createJob(
+      description,
+      keyTraits,
+      jobTitle,
+      companyName
+    );
     if (success) {
       setIsCreatingJob(false);
     }
@@ -41,7 +76,7 @@ function App() {
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-100 flex fixed inset-0">
         <Toaster position="top-right" />
-        
+
         {/* Sidebar - Fixed */}
         <div className="w-1/4 min-w-[300px] border-r border-gray-200 bg-white flex flex-col">
           <div className="flex-1 overflow-y-auto">
@@ -49,15 +84,15 @@ function App() {
               jobs={jobs}
               isLoading={isLoading}
               onJobSelect={(job) => {
-                setSelectedJob(job);
+                navigate(`/jobs/${job.id}`);
                 setIsCreatingJob(false);
               }}
               onCreateClick={() => {
                 setIsCreatingJob(true);
-                setSelectedJob(null);
+                navigate("/");
               }}
               onJobDelete={handleDeleteJob}
-              selectedJobId={selectedJob?.id}
+              selectedJobId={undefined}
             />
           </div>
         </div>
@@ -65,23 +100,26 @@ function App() {
         {/* Main Content - Scrollable */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-6">
-            {isCreatingJob ? (
-              <div className="max-w-2xl mx-auto">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Job</h2>
-                <JobForm onSubmit={handleCreateJob} />
-              </div>
-            ) : selectedJob ? (
-              <CandidateSection
-                job={selectedJob}
-                candidates={candidates}
-                onCandidateCreate={createCandidate}
-                onCandidateDelete={deleteCandidate}
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  isCreatingJob ? (
+                    <div className="max-w-2xl mx-auto">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                        Create New Job
+                      </h2>
+                      <JobForm onSubmit={handleCreateJob} />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-500">
+                      Select a job or create a new one to get started
+                    </div>
+                  )
+                }
               />
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                Select a job or create a new one to get started
-              </div>
-            )}
+              <Route path="/jobs/:jobId" element={<JobDetail />} />
+            </Routes>
           </div>
         </div>
       </div>

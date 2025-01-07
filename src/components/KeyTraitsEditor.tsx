@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Plus, Check } from 'lucide-react';
+import React, { useState } from "react";
+import { X, Plus, Check } from "lucide-react";
 
 interface KeyTraitsEditorProps {
   suggestedTraits: string[];
@@ -13,12 +13,12 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
   onCancel,
 }) => {
   const [traits, setTraits] = useState<string[]>(suggestedTraits);
-  const [newTrait, setNewTrait] = useState('');
+  const [newTrait, setNewTrait] = useState("");
 
   const addTrait = () => {
     if (newTrait.trim() && !traits.includes(newTrait.trim())) {
       setTraits([...traits, newTrait.trim()]);
-      setNewTrait('');
+      setNewTrait("");
     }
   };
 
@@ -31,7 +31,8 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
       <div className="space-y-2">
         <h3 className="text-xl font-semibold text-gray-900">Edit Key Traits</h3>
         <p className="text-sm text-gray-500">
-          These traits will be used to evaluate candidates. You can add, edit, or remove traits as needed.
+          These traits will be used to evaluate candidates. You can add, edit,
+          or remove traits as needed.
         </p>
       </div>
 
@@ -41,7 +42,7 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
           {traits.map((trait, index) => (
             <div
               key={index}
-              className="group flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full"
+              className="group flex items-center gap-2 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full"
             >
               <input
                 type="text"
@@ -55,7 +56,7 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
               />
               <button
                 onClick={() => removeTrait(index)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-blue-100 rounded-full flex-shrink-0"
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-purple-100 rounded-full flex-shrink-0"
                 title="Remove trait"
               >
                 <X size={14} />
@@ -73,9 +74,9 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
             value={newTrait}
             onChange={(e) => setNewTrait(e.target.value)}
             placeholder="Add new trait..."
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10"
+            className="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 pr-10"
             onKeyPress={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === "Enter") {
                 e.preventDefault();
                 addTrait();
               }
@@ -84,7 +85,7 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
           {newTrait && (
             <button
               onClick={addTrait}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-purple-600 hover:bg-purple-50 rounded-full transition-colors"
               title="Add trait"
             >
               <Plus size={20} />
@@ -102,18 +103,18 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
       <div className="flex items-center gap-4 pt-4">
         <button
           onClick={() => onConfirm(traits)}
-          className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
         >
           <Check size={16} className="mr-2" />
           Confirm Key Traits
         </button>
         <button
           onClick={onCancel}
-          className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
         >
           Cancel
         </button>
       </div>
     </div>
   );
-}; 
+};
