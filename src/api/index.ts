@@ -1,5 +1,12 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { Job, Candidate } from "../types";
+import { User, getIdToken } from "firebase/auth";
+
+interface ExtendedWindow extends Window {
+  currentUser: User | null;
+}
+
+declare const window: ExtendedWindow;
 
 // Create an axios instance with default config
 const api = axios.create({
@@ -11,36 +18,49 @@ const api = axios.create({
   validateStatus: (status) => status >= 200 && status < 300,
 });
 
-// Function to set user ID in headers
-export const setAuthUser = (userId: string | null) => {
-  if (userId) {
-    api.defaults.headers.common["X-User-ID"] = userId;
+// Function to set auth token in headers
+export const setAuthUser = async (user: User | null) => {
+  if (user) {
+    const token = await getIdToken(user, true);
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } else {
-    delete api.defaults.headers.common["X-User-ID"];
+    delete api.defaults.headers.common["Authorization"];
   }
 };
 
-// Improved error handling
+// Custom error class for unauthorized access
+export class UnauthorizedError extends Error {
+  constructor(message: string = "You don't have access to this resource") {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
+
+// Refresh token interceptor
 api.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
-    if (error.code === "ECONNABORTED") {
-      console.error("Request timeout");
-      return Promise.reject(new Error("Request timeout. Please try again."));
+  async (error: AxiosError) => {
+    const originalRequest = error.config as AxiosRequestConfig;
+
+    // Handle 401 (unauthorized) - token expired or invalid
+    if (error.response?.status === 401 && originalRequest) {
+      try {
+        const user = window.currentUser;
+        if (user) {
+          const newToken = await getIdToken(user, true);
+          api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        console.error("Error refreshing token:", refreshError);
+        throw new UnauthorizedError("Session expired. Please log in again.");
+      }
     }
 
-    if (!error.response) {
-      console.error("Network error:", error.message);
-      return Promise.reject(
-        new Error("Network error. Please check your connection.")
-      );
+    // Handle 403 (forbidden) - user doesn't have access
+    if (error.response?.status === 403) {
+      throw new UnauthorizedError("You don't have access to this resource");
     }
-
-    console.error("API Error:", {
-      status: error.response.status,
-      data: error.response.data,
-      message: error.message,
-    });
 
     return Promise.reject(error);
   }

@@ -12,20 +12,77 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { Login } from "./components/Login";
 import { setAuthUser } from "./api";
+import { UnauthorizedError } from "./api";
 
 function JobDetail() {
   const { jobId } = useParams();
+  const navigate = useNavigate();
   const { jobs, isLoading, error, retry } = useJobs();
-  const { candidates, createCandidate, deleteCandidate } = useCandidates(jobId);
+  const {
+    candidates,
+    createCandidate,
+    deleteCandidate,
+    error: candidatesError,
+  } = useCandidates(jobId);
 
   const selectedJob = jobs.find((job) => job.id === jobId);
 
   if (error) {
+    // Handle unauthorized access
+    if (error instanceof UnauthorizedError) {
+      return (
+        <div className="p-6 text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Access Denied
+          </h2>
+          <p className="text-gray-600 mb-4">{error.message}</p>
+          <button
+            onClick={() => navigate("/")}
+            className="text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Go back to jobs
+          </button>
+        </div>
+      );
+    }
     return <ConnectionError onRetry={retry} />;
   }
 
   if (!selectedJob && !isLoading) {
-    return <div>Job not found</div>;
+    return (
+      <div className="p-6 text-center">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          Job Not Found
+        </h2>
+        <p className="text-gray-600 mb-4">
+          This job doesn't exist or has been deleted.
+        </p>
+        <button
+          onClick={() => navigate("/")}
+          className="text-blue-600 hover:text-blue-800 font-medium"
+        >
+          Go back to jobs
+        </button>
+      </div>
+    );
+  }
+
+  // Handle unauthorized access to candidates
+  if (candidatesError instanceof UnauthorizedError) {
+    return (
+      <div className="p-6 text-center">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          Access Denied
+        </h2>
+        <p className="text-gray-600 mb-4">{candidatesError.message}</p>
+        <button
+          onClick={() => navigate("/")}
+          className="text-blue-600 hover:text-blue-800 font-medium"
+        >
+          Go back to jobs
+        </button>
+      </div>
+    );
   }
 
   return selectedJob ? (
@@ -46,9 +103,19 @@ function App() {
   const { user, loading, logout } = useAuth();
   const [imageError, setImageError] = React.useState(false);
 
-  // Set user ID in API service when user changes
+  // Set auth token in API service when user changes
   React.useEffect(() => {
-    setAuthUser(user?.uid || null);
+    // Store user reference for token refresh
+    if (user) {
+      (window as any).currentUser = user;
+    } else {
+      delete (window as any).currentUser;
+    }
+
+    // Set initial auth token
+    setAuthUser(user).catch((error) => {
+      console.error("Error setting auth token:", error);
+    });
   }, [user]);
 
   // Extract jobId from the current path
