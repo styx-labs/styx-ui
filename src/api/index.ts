@@ -22,8 +22,12 @@ const api = axios.create({
 export const setAuthUser = async (user: User | null) => {
   if (user) {
     const token = await getIdToken(user, true);
+    // Store token in localStorage
+    localStorage.setItem("styxAuthToken", token);
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } else {
+    // Clear token from localStorage when user is null
+    localStorage.removeItem("styxAuthToken");
     delete api.defaults.headers.common["Authorization"];
   }
 };
