@@ -8,8 +8,8 @@ export const ConnectionError: React.FC<{ onRetry: () => void }> = ({
     <WifiOff className="mx-auto h-12 w-12 text-gray-400" />
     <h3 className="mt-4 text-lg font-medium text-gray-900">Connection Error</h3>
     <p className="mt-2 text-sm text-gray-500">
-      Unable to connect to the server. Please check if the backend is running on
-      http://127.0.0.1:8000
+      Unable to connect to the server. Please check if the backend is running
+      properly.
     </p>
     <button
       onClick={onRetry}

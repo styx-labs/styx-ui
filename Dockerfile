@@ -13,7 +13,7 @@ RUN npm install
 # Copy the rest of the application code to the working directory
 COPY . .
 
-ENV VITE_APP_API_BASE_URL="https://unilink-agent-api-16250094868.us-central1.run.app"
+ENV VITE_APP_API_BASE_URL="https://api.styxlabs.co"
 ENV VITE_APP_NODE_ENV="production"
 
 # Build the application
