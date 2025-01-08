@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { X, Plus, Check } from "lucide-react";
 
 interface KeyTraitsEditorProps {
-  suggestedTraits: string[];
+  suggestedTraits: { trait: string; description: string }[];
   jobTitle: string;
   companyName: string;
-  onConfirm: (traits: string[], jobTitle: string, companyName: string) => void;
+  onConfirm: (traits: { trait: string; description: string }[], jobTitle: string, companyName: string) => void;
   onCancel: () => void;
 }
 
@@ -16,15 +16,17 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const [traits, setTraits] = useState<string[]>(suggestedTraits);
+  const [traits, setTraits] = useState<{ trait: string; description: string }[]>(suggestedTraits);
   const [newTrait, setNewTrait] = useState("");
+  const [newDescription, setNewDescription] = useState("");
   const [jobTitle, setJobTitle] = useState(initialJobTitle);
   const [companyName, setCompanyName] = useState(initialCompanyName);
 
   const addTrait = () => {
-    if (newTrait.trim() && !traits.includes(newTrait.trim())) {
-      setTraits([...traits, newTrait.trim()]);
+    if (newTrait.trim() && !traits.some(t => t.trait === newTrait.trim())) {
+      setTraits([...traits, { trait: newTrait.trim(), description: newDescription.trim() }]);
       setNewTrait("");
+      setNewDescription("");
     }
   };
 
@@ -72,71 +74,80 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
       <div className="space-y-2">
         <h4 className="text-lg font-medium text-gray-900">Key Traits</h4>
         <p className="text-sm text-gray-500">
-          These traits will be used to evaluate candidates. You can add, edit, or remove traits as needed.
+          These traits will be used to evaluate candidates. Each trait should include a description elaborating on what is required from the candidate.
         </p>
       </div>
 
       {/* Traits List */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap gap-2">
-          {traits.map((trait, index) => (
-            <div
-              key={index}
-              className="group flex items-center gap-2 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full"
-            >
+      <div className="space-y-4">
+        {traits.map((trait, index) => (
+          <div
+            key={index}
+            className="group flex flex-col gap-2 bg-gray-50 p-4 rounded-lg"
+          >
+            <div className="flex items-center justify-between">
               <input
                 type="text"
-                value={trait}
+                value={trait.trait}
                 onChange={(e) => {
                   const newTraits = [...traits];
-                  newTraits[index] = e.target.value;
+                  newTraits[index] = { ...trait, trait: e.target.value };
                   setTraits(newTraits);
                 }}
-                className="bg-transparent border-none p-0 focus:ring-0 text-sm min-w-[400px] w-auto"
+                className="bg-white rounded px-2 py-1 border border-gray-200 focus:border-gray-300 focus:ring-0 text-sm font-medium text-gray-700 flex-1"
+                placeholder="Trait name..."
               />
               <button
                 onClick={() => removeTrait(index)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-purple-100 rounded-full flex-shrink-0"
+                className="p-1 hover:bg-gray-200 rounded-full flex-shrink-0 ml-2"
                 title="Remove trait"
               >
-                <X size={14} />
+                <X size={16} />
               </button>
             </div>
-          ))}
-        </div>
+            <textarea
+              value={trait.description}
+              onChange={(e) => {
+                const newTraits = [...traits];
+                newTraits[index] = { ...trait, description: e.target.value };
+                setTraits(newTraits);
+              }}
+              className="bg-white rounded px-2 py-1 border border-gray-200 focus:border-gray-300 focus:ring-0 text-sm text-gray-600 w-full resize-none"
+              placeholder="Description of why this trait is important..."
+              rows={2}
+            />
+          </div>
+        ))}
       </div>
 
       {/* Add New Trait */}
-      <div className="flex items-center gap-2">
-        <div className="flex-1 relative">
-          <input
-            type="text"
-            value={newTrait}
-            onChange={(e) => setNewTrait(e.target.value)}
-            placeholder="Add new trait..."
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 pr-10"
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addTrait();
-              }
-            }}
-          />
-          {newTrait && (
-            <button
-              onClick={addTrait}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-purple-600 hover:bg-purple-50 rounded-full transition-colors"
-              title="Add trait"
-            >
-              <Plus size={20} />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Help Text */}
-      <div className="text-sm text-gray-500">
-        Press Enter or click the plus icon to add a trait
+      <div className="flex flex-col gap-2 border border-gray-200 p-4 rounded-lg">
+        <input
+          type="text"
+          value={newTrait}
+          onChange={(e) => setNewTrait(e.target.value)}
+          placeholder="New trait name..."
+          className="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+        />
+        <textarea
+          value={newDescription}
+          onChange={(e) => setNewDescription(e.target.value)}
+          placeholder="Description..."
+          className="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          rows={2}
+        />
+        <button
+          onClick={addTrait}
+          disabled={!newTrait.trim()}
+          className={`inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium ${
+            newTrait.trim()
+              ? "bg-purple-600 text-white hover:bg-purple-700"
+              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+          }`}
+        >
+          <Plus size={16} className="mr-2" />
+          Add Trait
+        </button>
       </div>
 
       {/* Action Buttons */}

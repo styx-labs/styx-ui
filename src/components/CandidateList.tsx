@@ -135,7 +135,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
               {/* Breakdown Content */}
               {selectedSections[candidate.id!] === 'breakdown' && candidate.sections && (
                 <div>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
                     {candidate.sections.map((section) => (
                       <button
                         key={section.section}
@@ -143,24 +143,30 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
                           ...prev,
                           [candidate.id!]: prev[candidate.id!] === section.section ? '' : section.section
                         }))}
-                        className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                        className={`flex items-center justify-between px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                           selectedTraits[candidate.id!] === section.section
-                            ? 'bg-purple-100 text-purple-800'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-purple-100 text-purple-800 border-2 border-purple-200'
+                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                         }`}
                       >
-                        {section.section.charAt(0).toUpperCase() + section.section.slice(1)}
-                        <span className="ml-2 px-1.5 py-0.5 bg-white rounded-full text-xs">
+                        <span>{section.section.charAt(0).toUpperCase() + section.section.slice(1)}</span>
+                        <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+                          selectedTraits[candidate.id!] === section.section
+                            ? 'bg-purple-200 text-purple-800'
+                            : 'bg-white text-gray-600'
+                        }`}>
                           {section.score}
                         </span>
                       </button>
                     ))}
                   </div>
                   {selectedTraits[candidate.id!] && (
-                    <div className="prose prose-sm max-w-none">
-                      <ReactMarkdown>
-                        {candidate.sections.find(s => s.section === selectedTraits[candidate.id!])?.content || ''}
-                      </ReactMarkdown>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="prose prose-sm max-w-none prose-a:text-purple-600 prose-a:hover:underline">
+                        <ReactMarkdown className="markdown">
+                          {candidate.sections.find(s => s.section === selectedTraits[candidate.id!])?.content || ''}
+                        </ReactMarkdown>
+                      </div>
                     </div>
                   )}
                 </div>

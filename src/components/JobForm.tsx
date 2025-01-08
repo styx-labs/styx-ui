@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast";
 interface JobFormProps {
   onSubmit: (
     description: string,
-    keyTraits: string[],
+    keyTraits: { trait: string; description: string }[],
     jobTitle: string,
     companyName: string
   ) => void;
@@ -18,7 +18,7 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
   const [jobTitle, setJobTitle] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [suggestedTraits, setSuggestedTraits] = useState<string[]>([]);
+  const [suggestedTraits, setSuggestedTraits] = useState<{ trait: string; description: string }[]>([]);
   const [isEditingTraits, setIsEditingTraits] = useState(false);
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
@@ -27,7 +27,15 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
       setIsSubmitting(true);
       try {
         const response = await apiService.getKeyTraits(description);
-        setSuggestedTraits(response.data.key_traits);
+        const formattedTraits = Array.isArray(response.data.key_traits) 
+          ? response.data.key_traits.map((trait: string | { trait: string; description: string }) => {
+              if (typeof trait === 'string') {
+                return { trait, description: '' };
+              }
+              return trait;
+            })
+          : response.data.key_traits;
+        setSuggestedTraits(formattedTraits);
         setJobTitle(response.data.job_title);
         setCompanyName(response.data.company_name);
         setIsEditingTraits(true);
@@ -40,7 +48,11 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
     }
   };
 
-  const handleTraitsConfirm = async (traits: string[], updatedJobTitle: string, updatedCompanyName: string) => {
+  const handleTraitsConfirm = async (
+    traits: { trait: string; description: string }[],
+    updatedJobTitle: string,
+    updatedCompanyName: string
+  ) => {
     setIsSubmitting(true);
     try {
       await onSubmit(description, traits, updatedJobTitle, updatedCompanyName);
