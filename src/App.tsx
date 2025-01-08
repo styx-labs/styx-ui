@@ -255,46 +255,48 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-100 flex fixed inset-0">
+      <div className="h-screen flex bg-gray-100">
         <Toaster position="top-right" />
 
-        {/* Sidebar */}
+        {/* Sidebar - Fixed height, scrollable */}
         <div
           className={`${
             isSidebarCollapsed ? "w-12" : "w-1/4 min-w-[300px]"
-          } bg-white border-r border-gray-200 flex flex-col relative transition-all duration-200 ease-in-out`}
+          } bg-white border-r border-gray-200 flex flex-col h-screen transition-all duration-200 ease-in-out overflow-hidden`}
         >
-          <JobSection
-            jobs={jobs}
-            isLoading={isLoading}
-            onJobSelect={(job) => {
-              navigate(`/jobs/${job.id}`);
-              setIsCreatingJob(false);
-              // Expand sidebar when selecting a job if it's collapsed
-              if (isSidebarCollapsed) {
-                setIsSidebarCollapsed(false);
+          <div className="flex-1 overflow-y-auto">
+            <JobSection
+              jobs={jobs}
+              isLoading={isLoading}
+              onJobSelect={(job) => {
+                navigate(`/jobs/${job.id}`);
+                setIsCreatingJob(false);
+                if (isSidebarCollapsed) {
+                  setIsSidebarCollapsed(false);
+                }
+              }}
+              onCreateClick={() => {
+                setIsCreatingJob(true);
+                navigate("/");
+                if (isSidebarCollapsed) {
+                  setIsSidebarCollapsed(false);
+                }
+              }}
+              onJobDelete={handleDeleteJob}
+              selectedJobId={jobId}
+              renderAvatar={renderAvatar}
+              user={user}
+              onLogout={logout}
+              isCollapsed={isSidebarCollapsed}
+              onToggleCollapse={() =>
+                setIsSidebarCollapsed(!isSidebarCollapsed)
               }
-            }}
-            onCreateClick={() => {
-              setIsCreatingJob(true);
-              navigate("/");
-              // Expand sidebar when creating a job if it's collapsed
-              if (isSidebarCollapsed) {
-                setIsSidebarCollapsed(false);
-              }
-            }}
-            onJobDelete={handleDeleteJob}
-            selectedJobId={jobId}
-            renderAvatar={renderAvatar}
-            user={user}
-            onLogout={logout}
-            isCollapsed={isSidebarCollapsed}
-            onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
+            />
+          </div>
         </div>
 
-        {/* Main Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto">
+        {/* Main Content - Fixed height, scrollable */}
+        <div className="flex-1 h-screen overflow-y-auto">
           <div className="p-6">
             <Routes>
               <Route
