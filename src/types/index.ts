@@ -1,7 +1,10 @@
 export interface Job {
   id?: string;
   job_description: string;
-  key_traits: string[];
+  key_traits: {
+    trait: string;
+    description: string;
+  }[];
   job_title: string;
   company_name: string;
 }
@@ -25,8 +28,4 @@ export interface Candidate {
     distilled_content: string;
     index: number;
   }[];
-}
-
-export interface CandidateBatch {
-  file: File;
 }

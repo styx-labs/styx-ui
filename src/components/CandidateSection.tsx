@@ -94,14 +94,21 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
                 Key Traits
               </h3>
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex flex-wrap gap-2">
+                <div className="grid gap-3">
                   {job.key_traits.map((trait, index) => (
-                    <span
+                    <div
                       key={index}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800"
+                      className="flex flex-col bg-white rounded-lg p-3 shadow-sm"
                     >
-                      {trait}
-                    </span>
+                      <span className="text-sm font-medium text-purple-800">
+                        {trait.trait}
+                      </span>
+                      {trait.description && (
+                        <span className="text-sm text-gray-600 mt-1">
+                          {trait.description}
+                        </span>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
