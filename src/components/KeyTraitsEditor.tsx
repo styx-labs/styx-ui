@@ -74,7 +74,7 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
       <div className="space-y-2">
         <h4 className="text-lg font-medium text-gray-900">Key Traits</h4>
         <p className="text-sm text-gray-500">
-          These traits will be used to evaluate candidates. Each trait should include a description explaining why it's important.
+          These traits will be used to evaluate candidates. Each trait should include a description elaborating on what is required from the candidate.
         </p>
       </div>
 
@@ -83,7 +83,7 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
         {traits.map((trait, index) => (
           <div
             key={index}
-            className="group flex flex-col gap-2 bg-purple-50 p-4 rounded-lg"
+            className="group flex flex-col gap-2 bg-gray-50 p-4 rounded-lg"
           >
             <div className="flex items-center justify-between">
               <input
@@ -94,12 +94,12 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
                   newTraits[index] = { ...trait, trait: e.target.value };
                   setTraits(newTraits);
                 }}
-                className="bg-transparent border-none p-0 focus:ring-0 text-sm font-medium text-purple-700 flex-1"
+                className="bg-white rounded px-2 py-1 border border-gray-200 focus:border-gray-300 focus:ring-0 text-sm font-medium text-gray-700 flex-1"
                 placeholder="Trait name..."
               />
               <button
                 onClick={() => removeTrait(index)}
-                className="p-1 hover:bg-purple-100 rounded-full flex-shrink-0"
+                className="p-1 hover:bg-gray-200 rounded-full flex-shrink-0 ml-2"
                 title="Remove trait"
               >
                 <X size={16} />
@@ -112,7 +112,7 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
                 newTraits[index] = { ...trait, description: e.target.value };
                 setTraits(newTraits);
               }}
-              className="bg-transparent border-none p-0 focus:ring-0 text-sm text-purple-600 w-full resize-none"
+              className="bg-white rounded px-2 py-1 border border-gray-200 focus:border-gray-300 focus:ring-0 text-sm text-gray-600 w-full resize-none"
               placeholder="Description of why this trait is important..."
               rows={2}
             />
@@ -132,7 +132,7 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
         <textarea
           value={newDescription}
           onChange={(e) => setNewDescription(e.target.value)}
-          placeholder="Description of why this trait is important..."
+          placeholder="Description..."
           className="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
           rows={2}
         />

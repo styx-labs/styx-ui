@@ -28,6 +28,7 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [showCandidateForm, setShowCandidateForm] = useState(false);
+  const [expandedTraitIndex, setExpandedTraitIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [statusFilter, setStatusFilter] = useState<"processing" | "complete">(
     "complete"
@@ -89,28 +90,31 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
             </div>
           </div>
           {job.key_traits && job.key_traits.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
                 Key Traits
               </h3>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="grid gap-3">
+              <div className="bg-gray-50 rounded-lg p-3">
+                <div className="flex flex-wrap gap-2">
                   {job.key_traits.map((trait, index) => (
                     <div
                       key={index}
-                      className="flex flex-col bg-white rounded-lg p-3 shadow-sm"
+                      className={`inline-flex items-center px-3 py-1 bg-white rounded-full shadow-sm cursor-pointer hover:bg-gray-50 transition-colors ${
+                        expandedTraitIndex === index ? 'ring-1 ring-purple-500 bg-purple-50' : ''
+                      }`}
+                      onClick={() => setExpandedTraitIndex(expandedTraitIndex === index ? null : index)}
                     >
-                      <span className="text-sm font-medium text-purple-800">
+                      <span className="text-xs font-medium text-purple-800">
                         {trait.trait}
                       </span>
-                      {trait.description && (
-                        <span className="text-sm text-gray-600 mt-1">
-                          {trait.description}
-                        </span>
-                      )}
                     </div>
                   ))}
                 </div>
+                {expandedTraitIndex !== null && job.key_traits[expandedTraitIndex]?.description && (
+                  <div className="bg-white rounded-lg p-3 mt-2 text-xs text-gray-600">
+                    {job.key_traits[expandedTraitIndex].description}
+                  </div>
+                )}
               </div>
             </div>
           )}

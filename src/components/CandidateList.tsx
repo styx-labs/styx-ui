@@ -162,8 +162,8 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
                   </div>
                   {selectedTraits[candidate.id!] && (
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="prose prose-sm max-w-none">
-                        <ReactMarkdown>
+                      <div className="prose prose-sm max-w-none prose-a:text-purple-600 prose-a:hover:underline">
+                        <ReactMarkdown className="markdown">
                           {candidate.sections.find(s => s.section === selectedTraits[candidate.id!])?.content || ''}
                         </ReactMarkdown>
                       </div>
