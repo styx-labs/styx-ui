@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Users, ChevronDown, ChevronUp, Upload } from "lucide-react";
+import { Users, ChevronDown, ChevronUp, Upload, UserPlus } from "lucide-react";
 import { Candidate, Job } from "../types";
 import { CandidateList } from "./CandidateList";
 import { CandidateForm } from "./CandidateForm";
@@ -27,6 +27,7 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [showCandidateForm, setShowCandidateForm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [statusFilter, setStatusFilter] = useState<"processing" | "complete">(
     "complete"
@@ -117,28 +118,6 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
             <h2 className="text-2xl font-bold text-gray-900">Candidates</h2>
           </div>
           <div className="flex items-center space-x-3">
-            <div className="inline-flex items-center bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={() => setStatusFilter("complete")}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
-                  statusFilter === "complete"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                Completed
-              </button>
-              <button
-                onClick={() => setStatusFilter("processing")}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
-                  statusFilter === "processing"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                Processing
-              </button>
-            </div>
             <div className="relative">
               <input
                 type="file"
@@ -176,10 +155,39 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
                 {isUploading ? "Uploading..." : "Upload CSV"}
               </button>
             </div>
+            <button
+              onClick={() => setShowCandidateForm(!showCandidateForm)}
+              className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md bg-purple-100 text-purple-700 hover:bg-purple-200"
+            >
+              <UserPlus size={16} className="mr-2" />
+              Add Candidate
+            </button>
+            <div className="inline-flex items-center bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setStatusFilter("complete")}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                  statusFilter === "complete"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Completed
+              </button>
+              <button
+                onClick={() => setStatusFilter("processing")}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                  statusFilter === "processing"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Processing
+              </button>
+            </div>
           </div>
         </div>
 
-        <CandidateForm onSubmit={onCandidateCreate} />
+        {showCandidateForm && <CandidateForm onSubmit={onCandidateCreate} />}
         <CandidateList
           candidates={filteredCandidates}
           onDeleteCandidate={onCandidateDelete}
