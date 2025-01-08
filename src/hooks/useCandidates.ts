@@ -4,7 +4,7 @@ import { Candidate } from "../types";
 import { apiService } from "../api";
 import { useAuth } from "../context/AuthContext";
 
-const POLLING_INTERVAL = 5000; // 5 seconds
+const POLLING_INTERVAL = 2000;
 
 export function useCandidates(jobId: string | undefined) {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
