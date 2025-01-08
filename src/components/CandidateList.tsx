@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { UserCircle, Trash2, Linkedin, ChevronDown, ChevronUp } from "lucide-react";
+import { UserCircle, Trash2, Linkedin, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Candidate } from "../types";
 
@@ -14,13 +14,21 @@ const makeUrlsClickable = (text: string): string => {
 };
 
 export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDeleteCandidate }) => {
-  const [visibleSections, setVisibleSections] = useState<Record<string, string>>({});
+  const [selectedSections, setSelectedSections] = useState<Record<string, string>>({});
+  const [selectedTraits, setSelectedTraits] = useState<Record<string, string>>({});
 
   const toggleSection = (candidateId: string, sectionName: string) => {
-    setVisibleSections(prev => ({
+    setSelectedSections(prev => ({
       ...prev,
       [candidateId]: prev[candidateId] === sectionName ? '' : sectionName
     }));
+    // Clear selected trait when changing sections
+    if (sectionName !== 'breakdown') {
+      setSelectedTraits(prev => ({
+        ...prev,
+        [candidateId]: ''
+      }));
+    }
   };
 
   const sortedCandidates = [...candidates].sort((a, b) => {
@@ -39,8 +47,11 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   {candidate.name}
+                  {candidate.status === "processing" && (
+                    <Loader2 size={16} className="animate-spin text-purple-600" />
+                  )}
                 </h2>
                 {candidate.url && (
                   <a
@@ -72,94 +83,107 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
               </button>
             </div>
 
-            {/* Sections */}
-            <div className="space-y-2">
-              {/* Summary Section */}
+            {/* Section Navigation */}
+            <div className="flex gap-3 mb-4">
               {candidate.summary && (
-                <div className="border rounded-md overflow-hidden">
-                  <button
-                    onClick={() => toggleSection(candidate.id!, 'summary')}
-                    className="w-full px-3 py-2 text-left bg-gray-50 hover:bg-gray-100 flex items-center justify-between"
-                  >
-                    <span className="font-medium text-gray-700">Summary</span>
-                    {visibleSections[candidate.id!] === 'summary' ? (
-                      <ChevronUp size={16} className="text-gray-400" />
-                    ) : (
-                      <ChevronDown size={16} className="text-gray-400" />
-                    )}
-                  </button>
-                  {visibleSections[candidate.id!] === 'summary' && (
-                    <ReactMarkdown className="px-3 py-2 text-sm text-gray-600">
-                      {candidate.summary}
-                    </ReactMarkdown>
-                  )}
+                <button
+                  onClick={() => toggleSection(candidate.id!, 'summary')}
+                  className={`flex-1 px-3 py-1.5 text-center rounded-md transition-colors text-sm ${
+                    selectedSections[candidate.id!] === 'summary'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  Summary
+                </button>
+              )}
+              {candidate.sections && candidate.sections.length > 0 && (
+                <button
+                  onClick={() => toggleSection(candidate.id!, 'breakdown')}
+                  className={`flex-1 px-3 py-1.5 text-center rounded-md transition-colors text-sm ${
+                    selectedSections[candidate.id!] === 'breakdown'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  Breakdown
+                </button>
+              )}
+              {candidate.citations && (
+                <button
+                  onClick={() => toggleSection(candidate.id!, 'citations')}
+                  className={`flex-1 px-3 py-1.5 text-center rounded-md transition-colors text-sm ${
+                    selectedSections[candidate.id!] === 'citations'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  Citations
+                </button>
+              )}
+            </div>
+
+            {/* Content Display */}
+            <div className="mt-4">
+              {/* Summary Content */}
+              {selectedSections[candidate.id!] === 'summary' && candidate.summary && (
+                <div className="prose prose-sm max-w-none">
+                  <ReactMarkdown>{candidate.summary}</ReactMarkdown>
                 </div>
               )}
 
-              {/* Other Sections */}
-              {candidate.sections?.map((section, index) => (
-                <div key={index} className="border rounded-md overflow-hidden">
-                  <button
-                    onClick={() => toggleSection(candidate.id!, section.section)}
-                    className="w-full px-3 py-2 text-left bg-gray-50 hover:bg-gray-100 flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-700">
+              {/* Breakdown Content */}
+              {selectedSections[candidate.id!] === 'breakdown' && candidate.sections && (
+                <div>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {candidate.sections.map((section) => (
+                      <button
+                        key={section.section}
+                        onClick={() => setSelectedTraits(prev => ({
+                          ...prev,
+                          [candidate.id!]: prev[candidate.id!] === section.section ? '' : section.section
+                        }))}
+                        className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                          selectedTraits[candidate.id!] === section.section
+                            ? 'bg-purple-100 text-purple-800'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
                         {section.section.charAt(0).toUpperCase() + section.section.slice(1)}
-                      </span>
-                      <span className="text-xs px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded">
-                        {section.score}
-                      </span>
-                    </div>
-                    {visibleSections[candidate.id!] === section.section ? (
-                      <ChevronUp size={16} className="text-gray-400" />
-                    ) : (
-                      <ChevronDown size={16} className="text-gray-400" />
-                    )}
-                  </button>
-                  {visibleSections[candidate.id!] === section.section && (
-                    <div className="px-3 py-2 text-sm">
-                      <ReactMarkdown className="markdown">
-                        {(section.content)}
+                        <span className="ml-2 px-1.5 py-0.5 bg-white rounded-full text-xs">
+                          {section.score}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  {selectedTraits[candidate.id!] && (
+                    <div className="prose prose-sm max-w-none">
+                      <ReactMarkdown>
+                        {candidate.sections.find(s => s.section === selectedTraits[candidate.id!])?.content || ''}
                       </ReactMarkdown>
                     </div>
                   )}
                 </div>
-              ))}
+              )}
 
-              {/* Citations Section */}
-              {candidate.citations && (
-                <div className="border rounded-md overflow-hidden">
-                  <button
-                    onClick={() => toggleSection(candidate.id!, 'citations')}
-                    className="w-full px-3 py-2 text-left bg-gray-50 hover:bg-gray-100 flex items-center justify-between"
-                  >
-                    <span className="font-medium text-gray-700">Citations</span>
-                    {visibleSections[candidate.id!] === 'citations' ? (
-                      <ChevronUp size={16} className="text-gray-400" />
-                    ) : (
-                      <ChevronDown size={16} className="text-gray-400" />
-                    )}
-                  </button>
-                  {visibleSections[candidate.id!] === 'citations' && (
-                    <div className="px-3 py-2 text-xs space-y-1.5">
-                      {candidate.citations.map((citation, index) => (
-                        <div key={index} className="flex items-center gap-2 text-gray-600">
-                          <span>[{index + 1}]</span>
-                          <a
-                            href={citation.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-purple-600 hover:underline"
-                          >
-                            {citation.url}
-                          </a>
-                          <span className="text-gray-400">•</span>
-                          <span>Confidence: {citation.confidence}</span>
-                        </div>
-                      ))}
+              {/* Citations Content */}
+              {selectedSections[candidate.id!] === 'citations' && candidate.citations && (
+                <div className="space-y-2">
+                  {candidate.citations.map((citation, index) => (
+                    <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                      <span>[{index + 1}]</span>
+                      <a
+                        href={citation.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-purple-600 hover:underline"
+                      >
+                        {citation.url}
+                      </a>
+                      <span className="text-gray-400">•</span>
+                      <span>Confidence: {citation.confidence}</span>
                     </div>
-                  )}
+                  ))}
                 </div>
               )}
             </div>

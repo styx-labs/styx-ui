@@ -40,10 +40,10 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
     }
   };
 
-  const handleTraitsConfirm = async (traits: string[]) => {
+  const handleTraitsConfirm = async (traits: string[], updatedJobTitle: string, updatedCompanyName: string) => {
     setIsSubmitting(true);
     try {
-      await onSubmit(description, traits, jobTitle, companyName);
+      await onSubmit(description, traits, updatedJobTitle, updatedCompanyName);
       setDescription("");
       setJobTitle("");
       setCompanyName("");
@@ -58,6 +58,8 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
     return (
       <KeyTraitsEditor
         suggestedTraits={suggestedTraits}
+        jobTitle={jobTitle}
+        companyName={companyName}
         onConfirm={handleTraitsConfirm}
         onCancel={() => setIsEditingTraits(false)}
       />
