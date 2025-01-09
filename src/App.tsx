@@ -34,6 +34,7 @@ function JobDetail() {
     deleteCandidate,
     createCandidatesBatch,
     getCandidateReachout,
+    getEmail,
     error: candidatesError,
   } = useCandidates(jobId);
 
@@ -142,6 +143,7 @@ function JobDetail() {
       onCandidateDelete={deleteCandidate}
       onCandidatesBatch={createCandidatesBatch}
       onCandidateReachout={getCandidateReachout}
+      onGetEmail={getEmail}
     />
   ) : null;
 }

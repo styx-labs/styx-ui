@@ -119,6 +119,17 @@ export function useCandidates(jobId: string | undefined) {
     }
   };
 
+  const getEmail = async (linkedinUrl: string) => {
+    if (!jobId || !user) return;
+
+    try {
+      const response = await apiService.getEmail(linkedinUrl);
+      return response.data.email;
+    } catch (error) {
+      toast.error('Could not find email');
+    }
+  };
+
   useEffect(() => {
     // Only load candidates when auth is ready and we have a user
     if (!authLoading && user && jobId) {
@@ -140,6 +151,7 @@ export function useCandidates(jobId: string | undefined) {
     getCandidate,
     createCandidatesBatch,
     getCandidateReachout,
+    getEmail,
     error,
     isLoading: authLoading,
   };

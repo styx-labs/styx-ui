@@ -9,10 +9,11 @@ interface CandidateListProps {
   candidates: Candidate[];
   onDeleteCandidate: (candidateId: string) => void;
   onReachout: (candidateId: string, format: string) => void;
+  onGetEmail: (linkedinUrl: string) => Promise<string | undefined>;
 }
 
 
-export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDeleteCandidate, onReachout }) => {
+export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDeleteCandidate, onReachout, onGetEmail }) => {
   const [selectedSections, setSelectedSections] = useState<Record<string, string>>({});
   const [selectedTraits, setSelectedTraits] = useState<Record<string, string>>({});
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -39,6 +40,16 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
       toast.success('Reachout copied to clipboard');
     }
     setOpenDropdownId(null);
+  };
+
+  const handleGetEmail = async (linkedinUrl: string | undefined) => {
+    if (linkedinUrl) {
+      const email = await onGetEmail(linkedinUrl);
+      if (email) {
+        await navigator.clipboard.writeText(email);
+        toast.success('Email copied to clipboard');
+      }
+    }
   };
 
   const handleSparklesClick = (e: React.MouseEvent, candidateId: string) => {
@@ -83,6 +94,14 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
                   >
                     <Linkedin size={18} />
                   </a>
+                )}
+                {candidate.url && (
+                  <button
+                    onClick={() => handleGetEmail(candidate.url)}
+                    className="p-1.5 text-gray-400 hover:text-purple-500 hover:bg-purple-50 rounded-md"
+                  >
+                    <Mail size={18} />
+                  </button>
                 )}
                 <div className="relative">
                   <button

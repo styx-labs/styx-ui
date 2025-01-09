@@ -144,5 +144,12 @@ export const apiService = {
       `/jobs/${jobId}/candidates/${candidateId}/generate-reachout`,
       {format}
     );
-  }
+  },
+
+  getEmail: (linkedin_profile_url: string) => {
+    return api.post<{ email: string }>(
+      "/get-email",
+      { linkedin_profile_url }
+    );
+  },
 };
