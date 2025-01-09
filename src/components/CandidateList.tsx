@@ -365,25 +365,76 @@ export const CandidateList: React.FC<CandidateListProps> = ({
               {/* Citations Content */}
               {selectedSections[candidate.id!] === "citations" &&
                 candidate.citations && (
-                  <div className="space-y-2">
-                    {candidate.citations.map((citation, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 text-sm text-gray-600"
-                      >
-                        <span>[{index + 1}]</span>
-                        <a
-                          href={citation.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-purple-600 hover:underline"
+                  <div className="space-y-4">
+                    {candidate.citations.map((citation, index) => {
+                      const citationKey = `${candidate.id}-${index}`;
+                      const isExpanded =
+                        selectedTraits[citationKey] === "expanded";
+
+                      return (
+                        <div
+                          key={index}
+                          className="bg-white rounded-lg border border-gray-100 p-4 hover:shadow-sm transition-shadow"
                         >
-                          {citation.url}
-                        </a>
-                        <span className="text-gray-400">•</span>
-                        <span>Confidence: {citation.confidence}</span>
-                      </div>
-                    ))}
+                          <div className="space-y-2">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-center gap-2">
+                                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
+                                  {index + 1}
+                                </span>
+                                <a
+                                  href={citation.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-purple-600 hover:text-purple-800 hover:underline text-sm font-medium truncate"
+                                >
+                                  {citation.url}
+                                </a>
+                              </div>
+                              <div
+                                className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                                  citation.confidence >= 0.8
+                                    ? "bg-green-100 text-green-800"
+                                    : citation.confidence >= 0.6
+                                    ? "bg-blue-100 text-blue-800"
+                                    : citation.confidence >= 0.4
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {Math.round(citation.confidence * 100)}%
+                                confidence
+                              </div>
+                            </div>
+                            <div
+                              className="flex items-center gap-2 cursor-pointer select-none"
+                              onClick={() =>
+                                setSelectedTraits((prev) => ({
+                                  ...prev,
+                                  [citationKey]: isExpanded ? "" : "expanded",
+                                }))
+                              }
+                            >
+                              <div className="text-gray-400">
+                                {isExpanded ? (
+                                  <ChevronUp size={16} />
+                                ) : (
+                                  <ChevronDown size={16} />
+                                )}
+                              </div>
+                              <span className="text-sm text-gray-600">
+                                {isExpanded ? "Show less" : "Show more"}
+                              </span>
+                            </div>
+                            {isExpanded && (
+                              <p className="text-sm text-gray-600 whitespace-pre-wrap pt-2 border-t border-gray-100">
+                                {citation.distilled_content}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
             </div>
