@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus, Search, Users, Sparkles } from "lucide-react";
+import { Plus, BookOpenCheck, Users, Sparkles, Globe } from "lucide-react";
 
 interface WelcomeProps {
   onCreateClick: () => void;
@@ -13,7 +13,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ onCreateClick }) => {
           Welcome to Styx
         </h1>
         <p className="text-xl text-gray-600">
-          Your AI-powered recruiting assistant
+          Your sourcing co-pilot
         </p>
       </div>
 
@@ -28,8 +28,8 @@ export const Welcome: React.FC<WelcomeProps> = ({ onCreateClick }) => {
             </h2>
           </div>
           <p className="text-gray-600 mb-4">
-            Start by creating a job posting. Add the job description, and Styx
-            will automatically identify key traits.
+            Start by creating a job. Add the job description, and Styx
+            will automatically identify key traits and details.
           </p>
           <button
             onClick={onCreateClick}
@@ -45,12 +45,12 @@ export const Welcome: React.FC<WelcomeProps> = ({ onCreateClick }) => {
               <Sparkles className="w-6 h-6 text-blue-600" />
             </div>
             <h2 className="text-xl font-semibold text-gray-900 ml-3">
-              AI-Powered Matching
+              AI-Powered Pre-Vetting
             </h2>
           </div>
           <p className="text-gray-600">
-            Our AI analyzes job descriptions and candidate profiles to find the
-            perfect match based on key traits and qualifications.
+            Our AI agents pre-vet candidates you source by gathering online information 
+            and providing detailed evaluations and matching scores.
           </p>
         </div>
       </div>
@@ -61,32 +61,34 @@ export const Welcome: React.FC<WelcomeProps> = ({ onCreateClick }) => {
         </h2>
         <div className="grid md:grid-cols-3 gap-6">
           <div className="flex flex-col items-center text-center">
-            <div className="bg-purple-100 p-3 rounded-full mb-4">
-              <Plus className="w-6 h-6 text-purple-600" />
-            </div>
-            <h3 className="font-medium text-gray-900 mb-2">Create a Job</h3>
-            <p className="text-gray-600 text-sm">
-              Add your job description and let AI identify key traits
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center text-center">
             <div className="bg-blue-100 p-3 rounded-full mb-4">
               <Users className="w-6 h-6 text-blue-600" />
             </div>
-            <h3 className="font-medium text-gray-900 mb-2">Add Candidates</h3>
+            <h3 className="font-medium text-gray-900 mb-2">Source Candidates</h3>
             <p className="text-gray-600 text-sm">
-              Import candidates from various sources
+              Go through you normal sourcing workflow on LinkedIn - our Chrome extension 
+              will help you gather candidates and add them to Styx.
             </p>
           </div>
 
           <div className="flex flex-col items-center text-center">
             <div className="bg-green-100 p-3 rounded-full mb-4">
-              <Search className="w-6 h-6 text-green-600" />
+              <Globe className="w-6 h-6 text-green-600" />
             </div>
-            <h3 className="font-medium text-gray-900 mb-2">Match & Analyze</h3>
+            <h3 className="font-medium text-gray-900 mb-2">AI Search</h3>
             <p className="text-gray-600 text-sm">
-              Get AI-powered insights and matching scores
+              Our AI agents will search the web for additional information about the candidates you source.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center text-center">
+            <div className="bg-purple-100 p-3 rounded-full mb-4">
+              <BookOpenCheck className="w-6 h-6 text-purple-600" />
+            </div>
+            <h3 className="font-medium text-gray-900 mb-2">Evaluation</h3>
+            <p className="text-gray-600 text-sm">
+              We'll automatically assess the candidates, providing accurate scores 
+              and a detailed report with citations so you know we got it right.
             </p>
           </div>
         </div>

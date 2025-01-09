@@ -74,7 +74,9 @@ export const KeyTraitsEditor: React.FC<KeyTraitsEditorProps> = ({
       <div className="space-y-2">
         <h4 className="text-lg font-medium text-gray-900">Key Traits</h4>
         <p className="text-sm text-gray-500">
-          These traits will be used to evaluate candidates. Each trait should include a description elaborating on what is required from the candidate.
+          These traits will be used to evaluate candidates. 
+          Each trait should include a description elaborating on what is required from the candidate.
+          The more specific you are, the more accurate the evaluation will be.
         </p>
       </div>
 
