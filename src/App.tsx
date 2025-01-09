@@ -16,6 +16,7 @@ import { UnauthorizedError } from "./api";
 import { useEffect } from "react";
 import { Welcome } from "./components/Welcome";
 import { User } from "firebase/auth";
+import { LoadingSpinner } from "./components/LoadingSpinner";
 
 // Extend Window interface
 interface ExtendedWindow extends Window {
@@ -197,18 +198,19 @@ function App() {
 
   const handleCreateJob = async (
     description: string,
-    keyTraits: string[],
+    keyTraits: { trait: string; description: string }[],
     jobTitle: string,
     companyName: string
   ) => {
-    const success = await createJob(
+    const jobId = await createJob(
       description,
       keyTraits,
       jobTitle,
       companyName
     );
-    if (success) {
+    if (jobId) {
       setIsCreatingJob(false);
+      navigate(`/jobs/${jobId}`);
     }
   };
 
@@ -236,7 +238,7 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
+        <LoadingSpinner />
       </div>
     );
   }

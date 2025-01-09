@@ -91,16 +91,13 @@ export const JobSection: React.FC<JobSectionProps> = ({
 
         {!isCollapsed && (
           <div className="flex-1 overflow-y-auto">
-            {isLoading ? (
-              <p className="p-4">Loading jobs...</p>
-            ) : (
-              <JobList
-                jobs={jobs}
-                onJobSelect={onJobSelect}
-                onDeleteJob={onJobDelete}
-                selectedJobId={selectedJobId}
-              />
-            )}
+            <JobList
+              jobs={jobs}
+              onJobSelect={onJobSelect}
+              onDeleteJob={onJobDelete}
+              selectedJobId={selectedJobId}
+              isLoading={isLoading}
+            />
           </div>
         )}
       </div>

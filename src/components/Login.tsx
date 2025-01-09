@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import styxLogo from "../assets/styx_name_logo.png";
+import styxLogo from "../assets/styx_name_logo_transparent.png";
 
 export const Login: React.FC = () => {
   const { signInWithGoogle } = useAuth();
