@@ -43,7 +43,7 @@ export function useJobs() {
 
   const createJob = async (
     description: string,
-    keyTraits: string[],
+    keyTraits: { trait: string; description: string }[],
     jobTitle: string,
     companyName: string
   ) => {
@@ -58,9 +58,9 @@ export function useJobs() {
       if (jobResponse.data.job_id) {
         toast.success("Job created successfully");
         await loadJobs();
-        return true;
+        return jobResponse.data.job_id;
       }
-      return false;
+      return null;
     } catch (error) {
       console.error("Error creating job:", error);
       throw error instanceof Error ? error : new Error("Failed to create job");

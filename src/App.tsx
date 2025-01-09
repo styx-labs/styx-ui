@@ -198,18 +198,19 @@ function App() {
 
   const handleCreateJob = async (
     description: string,
-    keyTraits: string[],
+    keyTraits: { trait: string; description: string }[],
     jobTitle: string,
     companyName: string
   ) => {
-    const success = await createJob(
+    const jobId = await createJob(
       description,
       keyTraits,
       jobTitle,
       companyName
     );
-    if (success) {
+    if (jobId) {
       setIsCreatingJob(false);
+      navigate(`/jobs/${jobId}`);
     }
   };
 
