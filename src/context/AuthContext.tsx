@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../config/firebase";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
@@ -30,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -45,6 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       toast.success("Successfully signed in!");
+      navigate("/");
     } catch (error) {
       toast.error("Failed to sign in with Google");
       console.error("Error signing in with Google:", error);
