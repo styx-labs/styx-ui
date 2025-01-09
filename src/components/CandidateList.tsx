@@ -378,8 +378,8 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                         >
                           <div className="space-y-2">
                             <div className="flex items-start justify-between gap-4">
-                              <div className="flex items-center gap-2">
-                                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
                                   {index + 1}
                                 </span>
                                 <a
@@ -392,7 +392,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                                 </a>
                               </div>
                               <div
-                                className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                                className={`flex-shrink-0 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                                   citation.confidence >= 0.8
                                     ? "bg-green-100 text-green-800"
                                     : citation.confidence >= 0.6

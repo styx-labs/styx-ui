@@ -211,10 +211,10 @@ export const JobSection: React.FC<JobSectionProps> = ({
               </div>
             </div>
             {/* Dropdown Menu */}
-            <div className="absolute left-auto right-0 bottom-full mb-2 w-32 py-1 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-in-out">
+            <div className="absolute left-4 right-auto bottom-full mb-2 w-24 py-1 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-in-out">
               <button
                 onClick={onLogout}
-                className="w-full text-left px-3 py-1.5 text-sm text-red-600 hover:bg-gray-50 transition-colors"
+                className="w-full text-center px-3 py-1.5 text-sm text-red-600 hover:bg-gray-50 transition-colors"
               >
                 Sign Out
               </button>
