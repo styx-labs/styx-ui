@@ -29,3 +29,7 @@ export interface Candidate {
     index: number;
   }[];
 }
+
+export interface Reachout {
+  format: string;
+}

@@ -1,21 +1,22 @@
 import React, { useState } from "react";
-import { UserCircle, Trash2, Linkedin, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Mail, Trash2, Linkedin, Loader2, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Candidate } from "../types";
+import toast from "react-hot-toast";
+import { createPortal } from "react-dom";
 
 interface CandidateListProps {
   candidates: Candidate[];
   onDeleteCandidate: (candidateId: string) => void;
+  onReachout: (candidateId: string, format: string) => void;
 }
 
-const makeUrlsClickable = (text: string): string => {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  return text.replace(urlRegex, (url) => `[[${url}]](${url})`);
-};
 
-export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDeleteCandidate }) => {
+export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDeleteCandidate, onReachout }) => {
   const [selectedSections, setSelectedSections] = useState<Record<string, string>>({});
   const [selectedTraits, setSelectedTraits] = useState<Record<string, string>>({});
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
 
   const toggleSection = (candidateId: string, sectionName: string) => {
     setSelectedSections(prev => ({
@@ -29,6 +30,25 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
         [candidateId]: ''
       }));
     }
+  };
+
+  const handleReachout = async (candidateId: string, format: string) => {
+    const message = await onReachout(candidateId, format);
+    if (message !== undefined) {
+      await navigator.clipboard.writeText(message);
+      toast.success('Reachout copied to clipboard');
+    }
+    setOpenDropdownId(null);
+  };
+
+  const handleSparklesClick = (e: React.MouseEvent, candidateId: string) => {
+    const button = e.currentTarget;
+    const rect = button.getBoundingClientRect();
+    setDropdownPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX
+    });
+    setOpenDropdownId(openDropdownId === candidateId ? null : candidateId);
   };
 
   const sortedCandidates = [...candidates].sort((a, b) => {
@@ -64,6 +84,43 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
                     <Linkedin size={18} />
                   </a>
                 )}
+                <div className="relative">
+                  <button
+                    onClick={(e) => handleSparklesClick(e, candidate.id!)}
+                    className="p-1.5 text-gray-400 hover:text-purple-500 hover:bg-purple-50 rounded-md"
+                  >
+                    <Sparkles size={18} />
+                  </button>
+                  
+                  {openDropdownId === candidate.id && dropdownPosition && createPortal(
+                    <div 
+                      className="absolute z-50 w-64 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5"
+                      style={{
+                        top: `${dropdownPosition.top}px`,
+                        left: `${dropdownPosition.left}px`,
+                      }}
+                    >
+                      <div className="py-1">
+                        <div className="px-4 py-2 text-sm text-gray-500">
+                          Choose Generated Message Format
+                        </div>
+                        <button
+                          onClick={() => handleReachout(candidate.id!, 'linkedin')}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2"
+                        >
+                          <Linkedin size={16} /> LinkedIn
+                        </button>
+                        <button
+                          onClick={() => handleReachout(candidate.id!, 'email')}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2"
+                        >
+                          <Mail size={16} /> Email
+                        </button>
+                      </div>
+                    </div>,
+                    document.body
+                  )}
+                </div>
                 {candidate.overall_score !== undefined && (
                   <span className={`px-2 py-0.5 text-sm font-medium rounded ${
                     candidate.overall_score >= 8 ? 'bg-green-100 text-green-800' :

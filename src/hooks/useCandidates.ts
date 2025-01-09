@@ -108,6 +108,17 @@ export function useCandidates(jobId: string | undefined) {
     }
   };
 
+  const getCandidateReachout = async (candidateId: string, format: string) => {
+    if (!jobId || !user) return;
+
+    try {
+      const response = await apiService.getCandidateReachout(jobId, candidateId, format);
+      return response.data.reachout;
+    } catch (error) {
+      toast.error('Failed to generate reachout');
+    }
+  };
+
   useEffect(() => {
     // Only load candidates when auth is ready and we have a user
     if (!authLoading && user && jobId) {
@@ -128,6 +139,7 @@ export function useCandidates(jobId: string | undefined) {
     deleteCandidate,
     getCandidate,
     createCandidatesBatch,
+    getCandidateReachout,
     error,
     isLoading: authLoading,
   };

@@ -138,4 +138,11 @@ export const apiService = {
       }
     );
   },
+
+  getCandidateReachout: (jobId: string, candidateId: string, format: string) => {
+    return api.post<{ reachout: string }>(
+      `/jobs/${jobId}/candidates/${candidateId}/generate-reachout`,
+      {format}
+    );
+  }
 };

@@ -16,6 +16,7 @@ interface CandidateSectionProps {
   ) => Promise<void>;
   onCandidateDelete: (candidateId: string) => void;
   onCandidatesBatch: (file: File) => Promise<void>;
+  onCandidateReachout: (candidateId: string, format: string) => Promise<string | undefined>;
 }
 
 export const CandidateSection: React.FC<CandidateSectionProps> = ({
@@ -23,7 +24,8 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
   candidates,
   onCandidateCreate,
   onCandidateDelete,
-  onCandidatesBatch
+  onCandidatesBatch,
+  onCandidateReachout
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -202,6 +204,7 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
         <CandidateList
           candidates={filteredCandidates}
           onDeleteCandidate={onCandidateDelete}
+          onReachout={onCandidateReachout}
         />
       </div>
     </div>
