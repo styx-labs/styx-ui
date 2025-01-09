@@ -33,8 +33,6 @@ function JobDetail() {
     createCandidate,
     deleteCandidate,
     createCandidatesBatch,
-    getCandidateReachout,
-    getEmail,
     error: candidatesError,
   } = useCandidates(jobId);
 
@@ -142,8 +140,6 @@ function JobDetail() {
       onCandidateCreate={createCandidate}
       onCandidateDelete={deleteCandidate}
       onCandidatesBatch={createCandidatesBatch}
-      onCandidateReachout={getCandidateReachout}
-      onGetEmail={getEmail}
     />
   ) : null;
 }
@@ -202,19 +198,18 @@ function App() {
 
   const handleCreateJob = async (
     description: string,
-    keyTraits: { trait: string; description: string }[],
+    keyTraits: string[],
     jobTitle: string,
     companyName: string
   ) => {
-    const jobId = await createJob(
+    const success = await createJob(
       description,
       keyTraits,
       jobTitle,
       companyName
     );
-    if (jobId) {
+    if (success) {
       setIsCreatingJob(false);
-      navigate(`/jobs/${jobId}`);
     }
   };
 

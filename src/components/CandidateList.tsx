@@ -1,34 +1,123 @@
 import React, { useState } from "react";
-import { Mail, Trash2, Linkedin, Loader2, Sparkles } from "lucide-react";
+import {
+  Mail,
+  Trash2,
+  Linkedin,
+  Loader2,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { Candidate } from "../types";
+import { Candidate, TraitEvaluation, Citation, TraitType } from "../types";
 import toast from "react-hot-toast";
 import { createPortal } from "react-dom";
+import { TraitValue } from "./TraitValue";
 
 interface CandidateListProps {
   candidates: Candidate[];
   onDeleteCandidate: (candidateId: string) => void;
-  onReachout: (candidateId: string, format: string) => void;
+  onReachout: (
+    candidateId: string,
+    format: string
+  ) => Promise<string | undefined>;
   onGetEmail: (linkedinUrl: string) => Promise<string | undefined>;
 }
 
+interface Section {
+  section: string;
+  content: string;
+  trait_type?: "BOOLEAN" | "NUMERIC" | "SCORE" | "CATEGORICAL";
+  score?: number;
+  value?: string | number | boolean;
+  value_type?: string;
+  required?: boolean;
+}
 
-export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDeleteCandidate, onReachout, onGetEmail }) => {
-  const [selectedSections, setSelectedSections] = useState<Record<string, string>>({});
-  const [selectedTraits, setSelectedTraits] = useState<Record<string, string>>({});
+const transformSection = (section: Section): TraitEvaluation => {
+  // Default to SCORE type if not specified
+  const trait_type = (section.trait_type as TraitType) || "TraitType.SCORE";
+
+  return {
+    section: section.section,
+    content: section.content,
+    trait_type,
+    value:
+      trait_type === TraitType.SCORE
+        ? section.score || 0
+        : section.value || section.score || 0,
+    normalized_score: section.score || 0,
+    required: section.required || false,
+    value_type: section.value_type,
+  };
+};
+
+const getScoreBucket = (score: number) => {
+  // Then check score buckets
+  if (score >= 8)
+    return { text: "Good fit", color: "bg-green-100 text-green-800" };
+  if (score >= 6)
+    return { text: "Likely a good fit", color: "bg-blue-100 text-blue-800" };
+  if (score >= 4)
+    return { text: "Likely a bad fit", color: "bg-yellow-100 text-yellow-800" };
+  return { text: "Bad fit", color: "bg-red-100 text-red-800" };
+};
+
+const hasEnoughInformation = (citations?: Citation[]) => {
+  return citations && citations.length > 4;
+};
+
+const OverallScore: React.FC<{ score: number; citations?: Citation[] }> = ({
+  score,
+  citations,
+}) => {
+  const bucket = getScoreBucket(score);
+  const enoughInfo = hasEnoughInformation(citations);
+
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className={`px-2 py-0.5 text-sm font-medium rounded ${bucket.color}`}
+      >
+        {bucket.text}
+      </span>
+      {!enoughInfo && score < 6 && (
+        <span className="px-2 py-0.5 text-sm font-medium rounded bg-gray-100 text-gray-800">
+          Not enough information
+        </span>
+      )}
+    </div>
+  );
+};
+
+export const CandidateList: React.FC<CandidateListProps> = ({
+  candidates,
+  onDeleteCandidate,
+  onReachout,
+  onGetEmail,
+}) => {
+  const [selectedSections, setSelectedSections] = useState<
+    Record<string, string>
+  >({});
+  const [selectedTraits, setSelectedTraits] = useState<Record<string, string>>(
+    {}
+  );
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   const toggleSection = (candidateId: string, sectionName: string) => {
-    setSelectedSections(prev => ({
+    setSelectedSections((prev) => ({
       ...prev,
-      [candidateId]: prev[candidateId] === sectionName ? '' : sectionName
+      [candidateId]: prev[candidateId] === sectionName ? "" : sectionName,
     }));
     // Clear selected trait when changing sections
-    if (sectionName !== 'breakdown') {
-      setSelectedTraits(prev => ({
+    if (sectionName !== "breakdown") {
+      setSelectedTraits((prev) => ({
         ...prev,
-        [candidateId]: ''
+        [candidateId]: "",
       }));
     }
   };
@@ -37,7 +126,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
     const message = await onReachout(candidateId, format);
     if (message !== undefined) {
       await navigator.clipboard.writeText(message);
-      toast.success('Reachout copied to clipboard');
+      toast.success("Reachout copied to clipboard");
     }
     setOpenDropdownId(null);
   };
@@ -47,7 +136,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
       const email = await onGetEmail(linkedinUrl);
       if (email) {
         await navigator.clipboard.writeText(email);
-        toast.success('Email copied to clipboard');
+        toast.success("Email copied to clipboard");
       }
     }
   };
@@ -57,13 +146,13 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
     const rect = button.getBoundingClientRect();
     setDropdownPosition({
       top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX
+      left: rect.left + window.scrollX,
     });
     setOpenDropdownId(openDropdownId === candidateId ? null : candidateId);
   };
 
   const sortedCandidates = [...candidates].sort((a, b) => {
-    if (a.status !== 'complete' || b.status !== 'complete') return 0;
+    if (a.status !== "complete" || b.status !== "complete") return 0;
     return (b.overall_score ?? 0) - (a.overall_score ?? 0);
   });
 
@@ -81,7 +170,10 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   {candidate.name}
                   {candidate.status === "processing" && (
-                    <Loader2 size={16} className="animate-spin text-purple-600" />
+                    <Loader2
+                      size={16}
+                      className="animate-spin text-purple-600"
+                    />
                   )}
                 </h2>
                 {candidate.url && (
@@ -110,45 +202,47 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
                   >
                     <Sparkles size={18} />
                   </button>
-                  
-                  {openDropdownId === candidate.id && dropdownPosition && createPortal(
-                    <div 
-                      className="absolute z-50 w-64 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5"
-                      style={{
-                        top: `${dropdownPosition.top}px`,
-                        left: `${dropdownPosition.left}px`,
-                      }}
-                    >
-                      <div className="py-1">
-                        <div className="px-4 py-2 text-sm text-gray-500">
-                          Choose Generated Message Format
+
+                  {openDropdownId === candidate.id &&
+                    dropdownPosition &&
+                    createPortal(
+                      <div
+                        className="absolute z-50 w-64 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5"
+                        style={{
+                          top: `${dropdownPosition.top}px`,
+                          left: `${dropdownPosition.left}px`,
+                        }}
+                      >
+                        <div className="py-1">
+                          <div className="px-4 py-2 text-sm text-gray-500">
+                            Choose Generated Message Format
+                          </div>
+                          <button
+                            onClick={() =>
+                              handleReachout(candidate.id!, "linkedin")
+                            }
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2"
+                          >
+                            <Linkedin size={16} /> LinkedIn
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleReachout(candidate.id!, "email")
+                            }
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2"
+                          >
+                            <Mail size={16} /> Email
+                          </button>
                         </div>
-                        <button
-                          onClick={() => handleReachout(candidate.id!, 'linkedin')}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2"
-                        >
-                          <Linkedin size={16} /> LinkedIn
-                        </button>
-                        <button
-                          onClick={() => handleReachout(candidate.id!, 'email')}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2"
-                        >
-                          <Mail size={16} /> Email
-                        </button>
-                      </div>
-                    </div>,
-                    document.body
-                  )}
+                      </div>,
+                      document.body
+                    )}
                 </div>
                 {candidate.overall_score !== undefined && (
-                  <span className={`px-2 py-0.5 text-sm font-medium rounded ${
-                    candidate.overall_score >= 8 ? 'bg-green-100 text-green-800' :
-                    candidate.overall_score >= 6 ? 'bg-blue-100 text-blue-800' :
-                    candidate.overall_score >= 4 ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    Score: {candidate.overall_score.toFixed(1)}
-                  </span>
+                  <OverallScore
+                    score={candidate.overall_score}
+                    citations={candidate.citations}
+                  />
                 )}
               </div>
               <button
@@ -163,11 +257,11 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
             <div className="flex gap-3 mb-4">
               {candidate.summary && (
                 <button
-                  onClick={() => toggleSection(candidate.id!, 'summary')}
+                  onClick={() => toggleSection(candidate.id!, "summary")}
                   className={`flex-1 px-3 py-1.5 text-center rounded-md transition-colors text-sm ${
-                    selectedSections[candidate.id!] === 'summary'
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                    selectedSections[candidate.id!] === "summary"
+                      ? "bg-purple-600 text-white"
+                      : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   Summary
@@ -175,11 +269,11 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
               )}
               {candidate.sections && candidate.sections.length > 0 && (
                 <button
-                  onClick={() => toggleSection(candidate.id!, 'breakdown')}
+                  onClick={() => toggleSection(candidate.id!, "breakdown")}
                   className={`flex-1 px-3 py-1.5 text-center rounded-md transition-colors text-sm ${
-                    selectedSections[candidate.id!] === 'breakdown'
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                    selectedSections[candidate.id!] === "breakdown"
+                      ? "bg-purple-600 text-white"
+                      : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   Breakdown
@@ -187,11 +281,11 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
               )}
               {candidate.citations && (
                 <button
-                  onClick={() => toggleSection(candidate.id!, 'citations')}
+                  onClick={() => toggleSection(candidate.id!, "citations")}
                   className={`flex-1 px-3 py-1.5 text-center rounded-md transition-colors text-sm ${
-                    selectedSections[candidate.id!] === 'citations'
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                    selectedSections[candidate.id!] === "citations"
+                      ? "bg-purple-600 text-white"
+                      : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   Citations
@@ -202,72 +296,96 @@ export const CandidateList: React.FC<CandidateListProps> = ({ candidates, onDele
             {/* Content Display */}
             <div className="mt-4">
               {/* Summary Content */}
-              {selectedSections[candidate.id!] === 'summary' && candidate.summary && (
-                <div className="prose prose-sm max-w-none">
-                  <ReactMarkdown>{candidate.summary}</ReactMarkdown>
-                </div>
-              )}
+              {selectedSections[candidate.id!] === "summary" &&
+                candidate.summary && (
+                  <div className="prose prose-sm max-w-none">
+                    <ReactMarkdown>{candidate.summary}</ReactMarkdown>
+                  </div>
+                )}
 
               {/* Breakdown Content */}
-              {selectedSections[candidate.id!] === 'breakdown' && candidate.sections && (
-                <div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
-                    {candidate.sections.map((section) => (
-                      <button
-                        key={section.section}
-                        onClick={() => setSelectedTraits(prev => ({
-                          ...prev,
-                          [candidate.id!]: prev[candidate.id!] === section.section ? '' : section.section
-                        }))}
-                        className={`flex items-center justify-between px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          selectedTraits[candidate.id!] === section.section
-                            ? 'bg-purple-100 text-purple-800 border-2 border-purple-200'
-                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                        }`}
-                      >
-                        <span>{section.section.charAt(0).toUpperCase() + section.section.slice(1)}</span>
-                        <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
-                          selectedTraits[candidate.id!] === section.section
-                            ? 'bg-purple-200 text-purple-800'
-                            : 'bg-white text-gray-600'
-                        }`}>
-                          {section.score}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                  {selectedTraits[candidate.id!] && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="prose prose-sm max-w-none prose-a:text-purple-600 prose-a:hover:underline">
-                        <ReactMarkdown className="markdown">
-                          {candidate.sections.find(s => s.section === selectedTraits[candidate.id!])?.content || ''}
-                        </ReactMarkdown>
-                      </div>
+              {selectedSections[candidate.id!] === "breakdown" &&
+                candidate.sections && (
+                  <div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {candidate.sections.map((section) => (
+                        <div
+                          key={section.section}
+                          className={`bg-white rounded-lg shadow-sm border ${
+                            transformSection(section).required
+                              ? "border-purple-200"
+                              : "border-gray-100"
+                          } transition-all duration-200 hover:shadow-md`}
+                        >
+                          <div
+                            className={`p-4 cursor-pointer ${
+                              selectedTraits[candidate.id!] === section.section
+                                ? "bg-purple-50"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              setSelectedTraits((prev) => ({
+                                ...prev,
+                                [candidate.id!]:
+                                  prev[candidate.id!] === section.section
+                                    ? ""
+                                    : section.section,
+                              }))
+                            }
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <TraitValue
+                                  trait={transformSection(section)}
+                                  citations={candidate.citations}
+                                />
+                              </div>
+                              <div className="ml-2 text-gray-400">
+                                {selectedTraits[candidate.id!] ===
+                                section.section ? (
+                                  <ChevronUp size={20} />
+                                ) : (
+                                  <ChevronDown size={20} />
+                                )}
+                              </div>
+                            </div>
+                            {selectedTraits[candidate.id!] ===
+                              section.section && (
+                              <div className="mt-4 prose prose-sm max-w-none prose-a:text-purple-600 prose-a:hover:underline border-t border-gray-100 pt-4">
+                                <ReactMarkdown>{section.content}</ReactMarkdown>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                </div>
-              )}
+                  </div>
+                )}
 
               {/* Citations Content */}
-              {selectedSections[candidate.id!] === 'citations' && candidate.citations && (
-                <div className="space-y-2">
-                  {candidate.citations.map((citation, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
-                      <span>[{index + 1}]</span>
-                      <a
-                        href={citation.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-purple-600 hover:underline"
+              {selectedSections[candidate.id!] === "citations" &&
+                candidate.citations && (
+                  <div className="space-y-2">
+                    {candidate.citations.map((citation, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 text-sm text-gray-600"
                       >
-                        {citation.url}
-                      </a>
-                      <span className="text-gray-400">•</span>
-                      <span>Confidence: {citation.confidence}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+                        <span>[{index + 1}]</span>
+                        <a
+                          href={citation.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-600 hover:underline"
+                        >
+                          {citation.url}
+                        </a>
+                        <span className="text-gray-400">•</span>
+                        <span>Confidence: {citation.confidence}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
             </div>
           </div>
         </div>

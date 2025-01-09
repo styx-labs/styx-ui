@@ -3,11 +3,20 @@ import { Send } from "lucide-react";
 import { KeyTraitsEditor } from "./KeyTraitsEditor";
 import { apiService } from "../api";
 import { toast } from "react-hot-toast";
+import { TraitType } from "../types";
+
+interface KeyTrait {
+  trait: string;
+  description: string;
+  trait_type: TraitType;
+  value_type?: string;
+  required: boolean;
+}
 
 interface JobFormProps {
   onSubmit: (
     description: string,
-    keyTraits: { trait: string; description: string }[],
+    keyTraits: KeyTrait[],
     jobTitle: string,
     companyName: string
   ) => void;
@@ -18,7 +27,7 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
   const [jobTitle, setJobTitle] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [suggestedTraits, setSuggestedTraits] = useState<{ trait: string; description: string }[]>([]);
+  const [suggestedTraits, setSuggestedTraits] = useState<KeyTrait[]>([]);
   const [isEditingTraits, setIsEditingTraits] = useState(false);
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
@@ -27,13 +36,34 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
       setIsSubmitting(true);
       try {
         const response = await apiService.getKeyTraits(description);
-        const formattedTraits = Array.isArray(response.data.key_traits) 
-          ? response.data.key_traits.map((trait: string | { trait: string; description: string }) => {
-              if (typeof trait === 'string') {
-                return { trait, description: '' };
+        const formattedTraits = Array.isArray(response.data.key_traits)
+          ? response.data.key_traits.map(
+              (
+                trait:
+                  | string
+                  | {
+                      trait: string;
+                      description: string;
+                      trait_type?: TraitType;
+                      value_type?: string;
+                      required?: boolean;
+                    }
+              ) => {
+                if (typeof trait === "string") {
+                  return {
+                    trait,
+                    description: "",
+                    trait_type: "CATEGORICAL" as TraitType,
+                    required: false,
+                  };
+                }
+                return {
+                  ...trait,
+                  trait_type: trait.trait_type || ("CATEGORICAL" as TraitType),
+                  required: trait.required ?? false,
+                };
               }
-              return trait;
-            })
+            )
           : response.data.key_traits;
         setSuggestedTraits(formattedTraits);
         setJobTitle(response.data.job_title);
@@ -49,7 +79,7 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
   };
 
   const handleTraitsConfirm = async (
-    traits: { trait: string; description: string }[],
+    traits: KeyTrait[],
     updatedJobTitle: string,
     updatedCompanyName: string
   ) => {
