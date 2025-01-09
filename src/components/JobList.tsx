@@ -7,14 +7,35 @@ interface JobListProps {
   selectedJobId?: string;
   onJobSelect: (job: Job) => void;
   onDeleteJob: (jobId: string) => void;
+  isLoading?: boolean;
 }
+
+const JobSkeleton = () => (
+  <div className="p-4 animate-pulse">
+    <div className="flex flex-col gap-2">
+      <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+    </div>
+  </div>
+);
 
 export const JobList: React.FC<JobListProps> = ({
   jobs,
   selectedJobId,
   onJobSelect,
   onDeleteJob,
+  isLoading = false,
 }) => {
+  if (isLoading) {
+    return (
+      <div className="divide-y divide-solid divide-gray-200 bg-white -mt-2">
+        {[...Array(3)].map((_, index) => (
+          <JobSkeleton key={index} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="divide-y divide-solid divide-gray-200 bg-white -mt-2">
       {jobs.map((job) => (
