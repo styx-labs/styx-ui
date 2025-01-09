@@ -262,7 +262,7 @@ function App() {
         {/* Sidebar - Fixed height, scrollable */}
         <div
           className={`${
-            isSidebarCollapsed ? "w-12" : "w-1/4 min-w-[300px]"
+            isSidebarCollapsed ? "w-12" : "w-1/5 min-w-[300px]"
           } bg-white border-r border-gray-200 flex flex-col h-screen transition-all duration-200 ease-in-out overflow-hidden`}
         >
           <div className="flex-1 overflow-y-auto">

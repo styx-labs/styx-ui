@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import {
   Mail,
   Trash2,
@@ -7,6 +7,8 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
+  ArrowUpDown,
+  SlidersHorizontal,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Candidate, TraitEvaluation, Citation, TraitType } from "../types";
@@ -107,6 +109,102 @@ export const CandidateList: React.FC<CandidateListProps> = ({
     top: number;
     left: number;
   } | null>(null);
+  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [filters, setFilters] = useState<
+    Array<{
+      trait: string;
+      minScore: number;
+    }>
+  >([]);
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const [currentFilter, setCurrentFilter] = useState<{
+    trait: string;
+    minScore: number;
+  }>({ trait: "", minScore: 6 });
+  const filterMenuRef = useRef<HTMLDivElement>(null);
+
+  // Get all unique traits from candidates
+  const allTraits = useMemo(() => {
+    const traits = new Set<string>();
+    candidates.forEach((candidate) => {
+      candidate.sections?.forEach((section) => {
+        traits.add(section.section);
+      });
+    });
+    return Array.from(traits);
+  }, [candidates]);
+
+  // Handle sorting and filtering
+  const processedCandidates = useMemo(() => {
+    let result = [...candidates];
+
+    // Apply all filters
+    if (filters.length > 0) {
+      result = result.filter((candidate) => {
+        return filters.every((filter) => {
+          const section = candidate.sections?.find(
+            (s) => s.section === filter.trait
+          );
+          if (!section) return false;
+          return (
+            (transformSection(section).normalized_score || 0) >= filter.minScore
+          );
+        });
+      });
+    }
+
+    // Then sort
+    if (sortBy) {
+      result.sort((a, b) => {
+        const aSection = a.sections?.find((s) => s.section === sortBy);
+        const bSection = b.sections?.find((s) => s.section === sortBy);
+        const aScore = aSection
+          ? transformSection(aSection).normalized_score
+          : 0;
+        const bScore = bSection
+          ? transformSection(bSection).normalized_score
+          : 0;
+        return sortOrder === "desc" ? bScore - aScore : aScore - bScore;
+      });
+    } else {
+      // Default sort by overall score
+      result.sort((a, b) => {
+        if (a.status !== "complete" || b.status !== "complete") return 0;
+        return (b.overall_score ?? 0) - (a.overall_score ?? 0);
+      });
+    }
+
+    return result;
+  }, [candidates, sortBy, sortOrder, filters]);
+
+  const handleAddFilter = () => {
+    if (currentFilter.trait) {
+      setFilters((prev) => [...prev, currentFilter]);
+      setCurrentFilter({ trait: "", minScore: 6 });
+    }
+  };
+
+  const handleRemoveFilter = (index: number) => {
+    setFilters((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Close filter menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterMenuRef.current &&
+        !filterMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsFilterMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const toggleSection = (candidateId: string, sectionName: string) => {
     setSelectedSections((prev) => ({
@@ -151,14 +249,192 @@ export const CandidateList: React.FC<CandidateListProps> = ({
     setOpenDropdownId(openDropdownId === candidateId ? null : candidateId);
   };
 
-  const sortedCandidates = [...candidates].sort((a, b) => {
-    if (a.status !== "complete" || b.status !== "complete") return 0;
-    return (b.overall_score ?? 0) - (a.overall_score ?? 0);
-  });
-
   return (
     <div className="space-y-4">
-      {sortedCandidates.map((candidate) => (
+      {/* Controls */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="relative" ref={filterMenuRef}>
+              <button
+                onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50"
+              >
+                <SlidersHorizontal size={16} />
+                {filters.length > 0 ? `Filters (${filters.length})` : "Filter"}
+              </button>
+
+              {isFilterMenuOpen && (
+                <div className="absolute left-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                  <div className="p-3 space-y-3">
+                    {/* Active Filters */}
+                    {filters.length > 0 && (
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Active Filters
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {filters.map((filter, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 rounded-md text-sm"
+                            >
+                              <span>
+                                {filter.trait} ≥ {filter.minScore}
+                              </span>
+                              <button
+                                onClick={() => handleRemoveFilter(index)}
+                                className="ml-1 hover:text-purple-900"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Add New Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Add Filter
+                      </label>
+                      <div className="flex gap-2">
+                        <select
+                          value={currentFilter.trait}
+                          onChange={(e) =>
+                            setCurrentFilter((prev) => ({
+                              ...prev,
+                              trait: e.target.value,
+                            }))
+                          }
+                          className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        >
+                          <option value="">Select trait...</option>
+                          {allTraits
+                            .filter(
+                              (trait) => !filters.some((f) => f.trait === trait)
+                            )
+                            .map((trait) => (
+                              <option key={trait} value={trait}>
+                                {trait}
+                              </option>
+                            ))}
+                        </select>
+                        {currentFilter.trait && (
+                          <select
+                            value={currentFilter.minScore}
+                            onChange={(e) =>
+                              setCurrentFilter((prev) => ({
+                                ...prev,
+                                minScore: Number(e.target.value),
+                              }))
+                            }
+                            className="w-24 px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          >
+                            {[0, 2, 4, 6, 8].map((score) => (
+                              <option key={score} value={score}>
+                                ≥ {score}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button
+                        onClick={() => {
+                          setFilters([]);
+                          setCurrentFilter({ trait: "", minScore: 6 });
+                          setIsFilterMenuOpen(false);
+                        }}
+                        className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
+                      >
+                        Clear All
+                      </button>
+                      {currentFilter.trait && (
+                        <button
+                          onClick={() => {
+                            handleAddFilter();
+                          }}
+                          className="px-3 py-1.5 text-sm text-white bg-purple-600 rounded-md hover:bg-purple-700"
+                        >
+                          Add Filter
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Display active filters outside menu */}
+            {filters.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {filters.map((filter, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 rounded-md text-sm"
+                  >
+                    <span>
+                      {filter.trait} ≥ {filter.minScore}
+                    </span>
+                    <button
+                      onClick={() => handleRemoveFilter(index)}
+                      className="ml-1 hover:text-purple-900"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <select
+              value={sortBy || ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSortBy(value || null);
+                if (value && !sortOrder) setSortOrder("desc");
+              }}
+              className="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-purple-500"
+            >
+              <option value="">Sort by Overall Score</option>
+              {allTraits.map((trait) => (
+                <option key={trait} value={trait}>
+                  {trait}
+                </option>
+              ))}
+            </select>
+
+            {sortBy && (
+              <button
+                onClick={() =>
+                  setSortOrder((order) => (order === "asc" ? "desc" : "asc"))
+                }
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md"
+                title={`Sort ${
+                  sortOrder === "asc" ? "Descending" : "Ascending"
+                }`}
+              >
+                <ArrowUpDown
+                  size={16}
+                  className={sortOrder === "asc" ? "rotate-180" : ""}
+                />
+              </button>
+            )}
+          </div>
+
+          <div className="text-sm text-gray-500">
+            {processedCandidates.length} candidate
+            {processedCandidates.length !== 1 ? "s" : ""}
+          </div>
+        </div>
+      </div>
+
+      {/* Candidates List */}
+      {processedCandidates.map((candidate) => (
         <div
           key={candidate.id}
           className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden"
@@ -343,9 +619,9 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                               <div className="ml-2 text-gray-400">
                                 {selectedTraits[candidate.id!] ===
                                 section.section ? (
-                                  <ChevronUp size={20} />
+                                  <ChevronUp className="w-4 h-4" />
                                 ) : (
-                                  <ChevronDown size={20} />
+                                  <ChevronDown className="w-4 h-4" />
                                 )}
                               </div>
                             </div>
@@ -417,9 +693,9 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                             >
                               <div className="text-gray-400">
                                 {isExpanded ? (
-                                  <ChevronUp size={16} />
+                                  <ChevronUp className="w-4 h-4" />
                                 ) : (
-                                  <ChevronDown size={16} />
+                                  <ChevronDown className="w-4 h-4" />
                                 )}
                               </div>
                               <span className="text-sm text-gray-600">

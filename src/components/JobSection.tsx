@@ -104,7 +104,7 @@ export const JobSection: React.FC<JobSectionProps> = ({
                   }
                 `}
                 >
-                  <ChevronRight className="w-5 h-5 text-gray-500 hover:text-gray-700" />
+                  <ChevronRight className="w-4 h-4 text-gray-500 hover:text-gray-700" />
                 </div>
               </div>
             </div>
