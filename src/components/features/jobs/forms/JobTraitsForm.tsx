@@ -42,7 +42,7 @@ export const JobTraitsForm: React.FC<JobTraitsFormProps> = ({
       {
         trait: "",
         description: "",
-        trait_type: TraitType.CATEGORICAL,
+        trait_type: TraitType.SCORE,
         required: false,
         value_type: "",
       },

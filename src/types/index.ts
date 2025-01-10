@@ -30,9 +30,9 @@ export interface Reachout {
 
 export enum TraitType {
   BOOLEAN = "BOOLEAN",
-  NUMERIC = "NUMERIC",
+  // NUMERIC = "NUMERIC",
   SCORE = "SCORE",
-  CATEGORICAL = "CATEGORICAL",
+  // CATEGORICAL = "CATEGORICAL",
 }
 
 export interface TraitEvaluation {

@@ -27,21 +27,21 @@ export const TraitCard: React.FC<TraitCardProps> = ({
     switch (type) {
       case TraitType.BOOLEAN:
         return "Yes/No";
-      case TraitType.NUMERIC:
-        return "Number";
+      //   case TraitType.NUMERIC:
+      // return "Number";
       case TraitType.SCORE:
         return "Score (0-10)";
-      case TraitType.CATEGORICAL:
-        return "Category";
+      // case TraitType.CATEGORICAL:
+      //   return "Category";
     }
   };
 
   const getValueTypePlaceholder = (type: TraitType) => {
     switch (type) {
-      case TraitType.NUMERIC:
-        return "e.g., years, dollars";
-      case TraitType.CATEGORICAL:
-        return "e.g., location, tech_stack";
+      //   case TraitType.NUMERIC:
+      // return "e.g., years, dollars";
+      //   case TraitType.CATEGORICAL:
+      // return "e.g., location, tech_stack";
       case TraitType.SCORE:
         return "e.g., proficiency level";
       default:
@@ -51,12 +51,12 @@ export const TraitCard: React.FC<TraitCardProps> = ({
 
   const getTraitTypeIcon = (type: TraitType) => {
     switch (type) {
-      case TraitType.NUMERIC:
-        return <Hash className="w-4 h-4" />;
+      //   case TraitType.NUMERIC:
+      // return <Hash className="w-4 h-4" />;
       case TraitType.SCORE:
         return <Scale className="w-4 h-4" />;
-      case TraitType.CATEGORICAL:
-        return <List className="w-4 h-4" />;
+      //   case TraitType.CATEGORICAL:
+      // return <List className="w-4 h-4" />;
       default:
         return null;
     }
@@ -119,13 +119,7 @@ export const TraitCard: React.FC<TraitCardProps> = ({
             />
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
               <span className="text-sm text-gray-500">
-                {trait.trait_type === TraitType.NUMERIC
-                  ? "Units"
-                  : trait.trait_type === TraitType.SCORE
-                  ? "Scale"
-                  : trait.trait_type === TraitType.CATEGORICAL
-                  ? "Categories"
-                  : ""}
+                {trait.trait_type === TraitType.SCORE ? "Scale" : ""}
               </span>
             </div>
           </div>

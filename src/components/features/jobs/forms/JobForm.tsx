@@ -53,13 +53,13 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
                   return {
                     trait,
                     description: "",
-                    trait_type: TraitType.CATEGORICAL,
+                    trait_type: TraitType.SCORE,
                     required: false,
                   };
                 }
                 return {
                   ...trait,
-                  trait_type: trait.trait_type || TraitType.CATEGORICAL,
+                  trait_type: trait.trait_type || TraitType.SCORE,
                   required: trait.required ?? false,
                 };
               }
