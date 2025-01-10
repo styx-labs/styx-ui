@@ -1,9 +1,8 @@
 import React, { useState, useRef } from "react";
 import { Users, ChevronDown, ChevronUp, Upload, UserPlus } from "lucide-react";
-import { Candidate, Job } from "../types";
+import { Candidate, Job } from "../../../types";
 import { CandidateList } from "./CandidateList";
 import { CandidateForm } from "./CandidateForm";
-import { apiService } from "../api";
 import { toast } from "react-hot-toast";
 
 interface CandidateSectionProps {
@@ -16,7 +15,10 @@ interface CandidateSectionProps {
   ) => Promise<void>;
   onCandidateDelete: (candidateId: string) => void;
   onCandidatesBatch: (file: File) => Promise<void>;
-  onCandidateReachout: (candidateId: string, format: string) => Promise<string | undefined>;
+  onCandidateReachout: (
+    candidateId: string,
+    format: string
+  ) => Promise<string | undefined>;
   onGetEmail: (linkedinUrl: string) => Promise<string | undefined>;
 }
 
@@ -27,12 +29,14 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
   onCandidateDelete,
   onCandidatesBatch,
   onCandidateReachout,
-  onGetEmail
+  onGetEmail,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [showCandidateForm, setShowCandidateForm] = useState(false);
-  const [expandedTraitIndex, setExpandedTraitIndex] = useState<number | null>(null);
+  const [expandedTraitIndex, setExpandedTraitIndex] = useState<number | null>(
+    null
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [statusFilter, setStatusFilter] = useState<"processing" | "complete">(
     "complete"
@@ -83,11 +87,11 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
               >
                 {isExpanded ? (
                   <>
-                    Show Less <ChevronUp className="ml-1" size={16} />
+                    Show Less <ChevronUp className="ml-1 w-4 h-4" />
                   </>
                 ) : (
                   <>
-                    Show More <ChevronDown className="ml-1" size={16} />
+                    Show More <ChevronDown className="ml-1 w-4 h-4" />
                   </>
                 )}
               </button>
@@ -104,9 +108,15 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
                     <div
                       key={index}
                       className={`inline-flex items-center px-3 py-1 bg-white rounded-full shadow-sm cursor-pointer hover:bg-gray-50 transition-colors ${
-                        expandedTraitIndex === index ? 'ring-1 ring-purple-500 bg-purple-50' : ''
+                        expandedTraitIndex === index
+                          ? "ring-1 ring-purple-500 bg-purple-50"
+                          : ""
                       }`}
-                      onClick={() => setExpandedTraitIndex(expandedTraitIndex === index ? null : index)}
+                      onClick={() =>
+                        setExpandedTraitIndex(
+                          expandedTraitIndex === index ? null : index
+                        )
+                      }
                     >
                       <span className="text-xs font-medium text-purple-800">
                         {trait.trait}
@@ -114,11 +124,12 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
                     </div>
                   ))}
                 </div>
-                {expandedTraitIndex !== null && job.key_traits[expandedTraitIndex]?.description && (
-                  <div className="bg-white rounded-lg p-3 mt-2 text-xs text-gray-600">
-                    {job.key_traits[expandedTraitIndex].description}
-                  </div>
-                )}
+                {expandedTraitIndex !== null &&
+                  job.key_traits[expandedTraitIndex]?.description && (
+                    <div className="bg-white rounded-lg p-3 mt-2 text-xs text-gray-600">
+                      {job.key_traits[expandedTraitIndex].description}
+                    </div>
+                  )}
               </div>
             </div>
           )}

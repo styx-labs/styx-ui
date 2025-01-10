@@ -1,8 +1,16 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import { Job } from "../types";
+import { Job, TraitType } from "../types";
 import { apiService } from "../api";
 import { useAuth } from "../context/AuthContext";
+
+interface KeyTrait {
+  trait: string;
+  description: string;
+  trait_type: TraitType;
+  value_type?: string;
+  required: boolean;
+}
 
 export function useJobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -43,7 +51,7 @@ export function useJobs() {
 
   const createJob = async (
     description: string,
-    keyTraits: { trait: string; description: string }[],
+    keyTraits: KeyTrait[],
     jobTitle: string,
     companyName: string
   ) => {
@@ -58,9 +66,9 @@ export function useJobs() {
       if (jobResponse.data.job_id) {
         toast.success("Job created successfully");
         await loadJobs();
-        return jobResponse.data.job_id;
+        return true;
       }
-      return null;
+      return false;
     } catch (error) {
       console.error("Error creating job:", error);
       throw error instanceof Error ? error : new Error("Failed to create job");

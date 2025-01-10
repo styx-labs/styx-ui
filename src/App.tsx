@@ -1,22 +1,26 @@
 import React from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useJobs } from "./hooks/useJobs";
 import { useCandidates } from "./hooks/useCandidates";
-import { JobSection } from "./components/JobSection";
-import { CandidateSection } from "./components/CandidateSection";
-import { ErrorBoundary } from "./components/ErrorBoundary";
-import { ConnectionError } from "./components/ConnectionError";
-import { JobForm } from "./components/JobForm";
+import { useAllCandidates } from "./hooks/useAllCandidates";
+import { JobSection } from "./components/features/jobs/JobSection";
+import { CandidateSection } from "./components/features/candidates/CandidateSection";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
+import { ConnectionError } from "./components/common/ConnectionError";
+import { JobForm } from "./components/features/jobs/forms/JobForm";
 import { useParams } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
-import { Login } from "./components/Login";
-import { setAuthUser } from "./api";
+import { Login } from "./components/auth/Login";
+import { setAuthUser, apiService } from "./api";
 import { UnauthorizedError } from "./api";
 import { useEffect } from "react";
-import { Welcome } from "./components/Welcome";
+import { Welcome } from "./components/layout/Welcome";
+import { HomeScreen } from "./components/layout/HomeScreen";
 import { User } from "firebase/auth";
-import { LoadingSpinner } from "./components/LoadingSpinner";
+import { LoadingSpinner } from "./components/common/LoadingSpinner";
+import { Job } from "./types";
 
 // Extend Window interface
 interface ExtendedWindow extends Window {
@@ -33,8 +37,6 @@ function JobDetail() {
     createCandidate,
     deleteCandidate,
     createCandidatesBatch,
-    getCandidateReachout,
-    getEmail,
     error: candidatesError,
   } = useCandidates(jobId);
 
@@ -135,6 +137,35 @@ function JobDetail() {
     );
   }
 
+  const handleCandidateReachout = async (
+    candidateId: string,
+    format: string
+  ) => {
+    try {
+      const response = await apiService.getCandidateReachout(
+        jobId!,
+        candidateId,
+        format
+      );
+      return response.data.reachout;
+    } catch (error) {
+      console.error("Error getting reachout:", error);
+      toast.error("Failed to generate reachout message");
+      return undefined;
+    }
+  };
+
+  const handleGetEmail = async (linkedinUrl: string) => {
+    try {
+      const response = await apiService.getEmail(linkedinUrl);
+      return response.data.email;
+    } catch (error) {
+      console.error("Error getting email:", error);
+      toast.error("Failed to get email");
+      return undefined;
+    }
+  };
+
   return selectedJob ? (
     <CandidateSection
       job={selectedJob}
@@ -142,8 +173,8 @@ function JobDetail() {
       onCandidateCreate={createCandidate}
       onCandidateDelete={deleteCandidate}
       onCandidatesBatch={createCandidatesBatch}
-      onCandidateReachout={getCandidateReachout}
-      onGetEmail={getEmail}
+      onCandidateReachout={handleCandidateReachout}
+      onGetEmail={handleGetEmail}
     />
   ) : null;
 }
@@ -151,10 +182,10 @@ function JobDetail() {
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isCreatingJob, setIsCreatingJob] = React.useState<boolean>(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] =
     React.useState<boolean>(false);
   const { jobs, isLoading, createJob, deleteJob, error, retry } = useJobs();
+  const { candidates: allCandidates } = useAllCandidates(jobs);
   const { user, loading, logout } = useAuth();
   const [imageError, setImageError] = React.useState(false);
 
@@ -202,19 +233,18 @@ function App() {
 
   const handleCreateJob = async (
     description: string,
-    keyTraits: { trait: string; description: string }[],
+    keyTraits: Job["key_traits"],
     jobTitle: string,
     companyName: string
   ) => {
-    const jobId = await createJob(
+    const success = await createJob(
       description,
       keyTraits,
       jobTitle,
       companyName
     );
-    if (jobId) {
-      setIsCreatingJob(false);
-      navigate(`/jobs/${jobId}`);
+    if (success) {
+      navigate("/");
     }
   };
 
@@ -267,7 +297,7 @@ function App() {
         {/* Sidebar - Fixed height, scrollable */}
         <div
           className={`${
-            isSidebarCollapsed ? "w-12" : "w-1/4 min-w-[300px]"
+            isSidebarCollapsed ? "w-12" : "w-1/5 min-w-[300px]"
           } bg-white border-r border-gray-200 flex flex-col h-screen transition-all duration-200 ease-in-out overflow-hidden`}
         >
           <div className="flex-1 overflow-y-auto">
@@ -276,14 +306,12 @@ function App() {
               isLoading={isLoading}
               onJobSelect={(job) => {
                 navigate(`/jobs/${job.id}`);
-                setIsCreatingJob(false);
                 if (isSidebarCollapsed) {
                   setIsSidebarCollapsed(false);
                 }
               }}
               onCreateClick={() => {
-                setIsCreatingJob(true);
-                navigate("/");
+                navigate("/jobs/create");
                 if (isSidebarCollapsed) {
                   setIsSidebarCollapsed(false);
                 }
@@ -308,18 +336,18 @@ function App() {
               <Route
                 path="/"
                 element={
-                  isCreatingJob ? (
-                    <div className="max-w-2xl mx-auto">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                        Create New Job
-                      </h2>
-                      <JobForm onSubmit={handleCreateJob} />
-                    </div>
-                  ) : jobs.length === 0 && !isLoading ? (
+                  jobs.length === 0 && !isLoading ? (
                     <Welcome
                       onCreateClick={() => {
-                        setIsCreatingJob(true);
-                        navigate("/");
+                        navigate("/jobs/create");
+                      }}
+                    />
+                  ) : !jobId ? (
+                    <HomeScreen
+                      jobs={jobs}
+                      candidates={allCandidates || []}
+                      onCreateJob={() => {
+                        navigate("/jobs/create");
                       }}
                     />
                   ) : (
@@ -328,6 +356,10 @@ function App() {
                     </div>
                   )
                 }
+              />
+              <Route
+                path="/jobs/create"
+                element={<JobForm onSubmit={handleCreateJob} />}
               />
               <Route path="/jobs/:jobId" element={<JobDetail />} />
             </Routes>

@@ -12,9 +12,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ onCreateClick }) => {
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
           Welcome to Styx
         </h1>
-        <p className="text-xl text-gray-600">
-          Your sourcing co-pilot
-        </p>
+        <p className="text-xl text-gray-600">Your sourcing co-pilot</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 mb-12">
@@ -28,8 +26,8 @@ export const Welcome: React.FC<WelcomeProps> = ({ onCreateClick }) => {
             </h2>
           </div>
           <p className="text-gray-600 mb-4">
-            Start by creating a job. Add the job description, and Styx
-            will automatically identify key traits and details.
+            Start by creating a job. Add the job description, and Styx will
+            automatically identify key traits and details.
           </p>
           <button
             onClick={onCreateClick}
@@ -45,13 +43,21 @@ export const Welcome: React.FC<WelcomeProps> = ({ onCreateClick }) => {
               <Sparkles className="w-6 h-6 text-blue-600" />
             </div>
             <h2 className="text-xl font-semibold text-gray-900 ml-3">
-              AI-Powered Pre-Vetting
+              Install Our Chrome Extension
             </h2>
           </div>
-          <p className="text-gray-600">
-            Our AI agents pre-vet candidates you source by gathering online information 
-            and providing detailed evaluations and matching scores.
+          <p className="text-gray-600 mb-4">
+            Get our Chrome extension to seamlessly evaluate profiles on LinkedIn
+            against job descriptions. No need to learn new tools or workflows.
           </p>
+          <a
+            href="https://chromewebstore.google.com/detail/styx-linkedin-profile-eva/aoehfbedlmpcinddkobkgaddmifnenjl"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Add to Chrome
+          </a>
         </div>
       </div>
 
@@ -64,10 +70,12 @@ export const Welcome: React.FC<WelcomeProps> = ({ onCreateClick }) => {
             <div className="bg-blue-100 p-3 rounded-full mb-4">
               <Users className="w-6 h-6 text-blue-600" />
             </div>
-            <h3 className="font-medium text-gray-900 mb-2">Source Candidates</h3>
+            <h3 className="font-medium text-gray-900 mb-2">
+              Source Candidates
+            </h3>
             <p className="text-gray-600 text-sm">
-              Go through you normal sourcing workflow on LinkedIn - our Chrome extension 
-              will help you gather candidates and add them to Styx.
+              Go through you normal sourcing workflow on LinkedIn - our Chrome
+              extension will help you gather candidates and add them to Styx.
             </p>
           </div>
 
@@ -77,7 +85,8 @@ export const Welcome: React.FC<WelcomeProps> = ({ onCreateClick }) => {
             </div>
             <h3 className="font-medium text-gray-900 mb-2">AI Search</h3>
             <p className="text-gray-600 text-sm">
-              Our AI agents will search the web for additional information about the candidates you source.
+              Our AI agents will search the web for additional information about
+              the candidates you source.
             </p>
           </div>
 
@@ -87,8 +96,9 @@ export const Welcome: React.FC<WelcomeProps> = ({ onCreateClick }) => {
             </div>
             <h3 className="font-medium text-gray-900 mb-2">Evaluation</h3>
             <p className="text-gray-600 text-sm">
-              We'll automatically assess the candidates, providing accurate scores 
-              and a detailed report with citations so you know we got it right.
+              We'll automatically assess the candidates, providing accurate
+              scores and a detailed report with citations so you know we got it
+              right.
             </p>
           </div>
         </div>
