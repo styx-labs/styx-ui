@@ -44,7 +44,8 @@ export const JobSection: React.FC<JobSectionProps> = ({
     <div
       className={`h-full flex flex-col ${isCollapsed ? "overflow-hidden" : ""}`}
     >
-      <div className="flex-1 flex flex-col">
+      {/* Header and Job List Container */}
+      <div className="flex-1 min-h-0 flex flex-col">
         <SidebarHeader
           isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
@@ -52,13 +53,9 @@ export const JobSection: React.FC<JobSectionProps> = ({
           onSearch={setSearchQuery}
         />
 
-        {/* Job list */}
+        {/* Job list with its own scrollable container */}
         {!isCollapsed && (
-          <div
-            className={`flex-1 ${
-              isCollapsed ? "overflow-hidden" : "overflow-y-auto"
-            }`}
-          >
+          <div className="flex-1 overflow-y-auto">
             <JobList
               jobs={filteredJobs}
               onJobSelect={onJobSelect}
@@ -70,12 +67,15 @@ export const JobSection: React.FC<JobSectionProps> = ({
         )}
       </div>
 
-      <ProfileMenu
-        user={user}
-        onLogout={onLogout}
-        renderAvatar={renderAvatar}
-        isCollapsed={isCollapsed}
-      />
+      {/* Profile Menu - Sticky at bottom */}
+      <div className="flex-shrink-0 border-t border-gray-200">
+        <ProfileMenu
+          user={user}
+          onLogout={onLogout}
+          renderAvatar={renderAvatar}
+          isCollapsed={isCollapsed}
+        />
+      </div>
     </div>
   );
 };
