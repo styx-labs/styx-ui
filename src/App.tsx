@@ -182,7 +182,6 @@ function JobDetail() {
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isCreatingJob, setIsCreatingJob] = React.useState<boolean>(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] =
     React.useState<boolean>(false);
   const { jobs, isLoading, createJob, deleteJob, error, retry } = useJobs();
@@ -245,7 +244,7 @@ function App() {
       companyName
     );
     if (success) {
-      setIsCreatingJob(false);
+      navigate("/");
     }
   };
 
@@ -307,14 +306,12 @@ function App() {
               isLoading={isLoading}
               onJobSelect={(job) => {
                 navigate(`/jobs/${job.id}`);
-                setIsCreatingJob(false);
                 if (isSidebarCollapsed) {
                   setIsSidebarCollapsed(false);
                 }
               }}
               onCreateClick={() => {
-                setIsCreatingJob(true);
-                navigate("/");
+                navigate("/jobs/create");
                 if (isSidebarCollapsed) {
                   setIsSidebarCollapsed(false);
                 }
@@ -339,18 +336,10 @@ function App() {
               <Route
                 path="/"
                 element={
-                  isCreatingJob ? (
-                    <div className="max-w-2xl mx-auto">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                        Create New Job
-                      </h2>
-                      <JobForm onSubmit={handleCreateJob} />
-                    </div>
-                  ) : jobs.length === 0 && !isLoading ? (
+                  jobs.length === 0 && !isLoading ? (
                     <Welcome
                       onCreateClick={() => {
-                        setIsCreatingJob(true);
-                        navigate("/");
+                        navigate("/jobs/create");
                       }}
                     />
                   ) : !jobId ? (
@@ -358,8 +347,7 @@ function App() {
                       jobs={jobs}
                       candidates={allCandidates || []}
                       onCreateJob={() => {
-                        setIsCreatingJob(true);
-                        navigate("/");
+                        navigate("/jobs/create");
                       }}
                     />
                   ) : (
@@ -368,6 +356,10 @@ function App() {
                     </div>
                   )
                 }
+              />
+              <Route
+                path="/jobs/create"
+                element={<JobForm onSubmit={handleCreateJob} />}
               />
               <Route path="/jobs/:jobId" element={<JobDetail />} />
             </Routes>
