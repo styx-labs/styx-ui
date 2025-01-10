@@ -1,8 +1,10 @@
 import React from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useJobs } from "./hooks/useJobs";
 import { useCandidates } from "./hooks/useCandidates";
+import { useAllCandidates } from "./hooks/useAllCandidates";
 import { JobSection } from "./components/features/jobs/JobSection";
 import { CandidateSection } from "./components/features/candidates/CandidateSection";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
@@ -11,12 +13,14 @@ import { JobForm } from "./components/features/jobs/JobForm";
 import { useParams } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { Login } from "./components/auth/Login";
-import { setAuthUser } from "./api";
+import { setAuthUser, apiService } from "./api";
 import { UnauthorizedError } from "./api";
 import { useEffect } from "react";
 import { Welcome } from "./components/layout/Welcome";
+import { HomeScreen } from "./components/layout/HomeScreen";
 import { User } from "firebase/auth";
 import { LoadingSpinner } from "./components/common/LoadingSpinner";
+import { Job } from "./types";
 
 // Extend Window interface
 interface ExtendedWindow extends Window {
@@ -133,6 +137,35 @@ function JobDetail() {
     );
   }
 
+  const handleCandidateReachout = async (
+    candidateId: string,
+    format: string
+  ) => {
+    try {
+      const response = await apiService.getCandidateReachout(
+        jobId!,
+        candidateId,
+        format
+      );
+      return response.data.reachout;
+    } catch (error) {
+      console.error("Error getting reachout:", error);
+      toast.error("Failed to generate reachout message");
+      return undefined;
+    }
+  };
+
+  const handleGetEmail = async (linkedinUrl: string) => {
+    try {
+      const response = await apiService.getEmail(linkedinUrl);
+      return response.data.email;
+    } catch (error) {
+      console.error("Error getting email:", error);
+      toast.error("Failed to get email");
+      return undefined;
+    }
+  };
+
   return selectedJob ? (
     <CandidateSection
       job={selectedJob}
@@ -140,6 +173,8 @@ function JobDetail() {
       onCandidateCreate={createCandidate}
       onCandidateDelete={deleteCandidate}
       onCandidatesBatch={createCandidatesBatch}
+      onCandidateReachout={handleCandidateReachout}
+      onGetEmail={handleGetEmail}
     />
   ) : null;
 }
@@ -151,6 +186,7 @@ function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] =
     React.useState<boolean>(false);
   const { jobs, isLoading, createJob, deleteJob, error, retry } = useJobs();
+  const { candidates: allCandidates } = useAllCandidates(jobs);
   const { user, loading, logout } = useAuth();
   const [imageError, setImageError] = React.useState(false);
 
@@ -198,7 +234,7 @@ function App() {
 
   const handleCreateJob = async (
     description: string,
-    keyTraits: string[],
+    keyTraits: Job["key_traits"],
     jobTitle: string,
     companyName: string
   ) => {
@@ -313,6 +349,15 @@ function App() {
                   ) : jobs.length === 0 && !isLoading ? (
                     <Welcome
                       onCreateClick={() => {
+                        setIsCreatingJob(true);
+                        navigate("/");
+                      }}
+                    />
+                  ) : !jobId ? (
+                    <HomeScreen
+                      jobs={jobs}
+                      candidates={allCandidates || []}
+                      onCreateJob={() => {
                         setIsCreatingJob(true);
                         navigate("/");
                       }}
