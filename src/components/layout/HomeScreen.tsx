@@ -66,7 +66,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        {/* <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">
@@ -101,12 +101,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <BarChart2 className="w-6 h-6 text-green-600" />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
               Recent Candidates
@@ -148,7 +148,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </div>
             )}
           </div>
-        </div>
+        </div> */}
 
         {/* Quick Actions */}
         <div className="space-y-6">
