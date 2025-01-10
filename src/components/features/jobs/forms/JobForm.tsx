@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Send, ArrowRight } from "lucide-react";
-import { KeyTraitsEditor } from "./KeyTraitsEditor";
-import { apiService } from "../../../api";
+import { JobTraitsForm } from "./JobTraitsForm";
+import { apiService } from "../../../../api";
 import { toast } from "react-hot-toast";
-import { TraitType } from "../../../types";
+import { TraitType } from "../../../../types";
 
 interface KeyTrait {
   trait: string;
@@ -28,7 +28,7 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
   const [companyName, setCompanyName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTraits, setSuggestedTraits] = useState<KeyTrait[]>([]);
-  const [isEditingTraits, setIsEditingTraits] = useState(false);
+  const [showTraitsEditor, setShowTraitsEditor] = useState(false);
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +68,7 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
         setSuggestedTraits(formattedTraits);
         setJobTitle(response.data.job_title);
         setCompanyName(response.data.company_name);
-        setIsEditingTraits(true);
+        setShowTraitsEditor(true);
       } catch (error) {
         toast.error("Failed to get key traits");
         console.error("Error getting key traits:", error);
@@ -78,19 +78,14 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
     }
   };
 
-  if (isEditingTraits) {
-    return (
-      <KeyTraitsEditor
-        suggestedTraits={suggestedTraits}
-        jobTitle={jobTitle}
-        companyName={companyName}
-        onConfirm={(traits, title, company) =>
-          onSubmit(description, traits, title, company)
-        }
-        onCancel={() => setIsEditingTraits(false)}
-      />
-    );
-  }
+  const handleTraitsConfirm = (
+    traits: KeyTrait[],
+    title: string,
+    company: string
+  ) => {
+    onSubmit(description, traits, title, company);
+    setShowTraitsEditor(false);
+  };
 
   return (
     <div className="space-y-8 max-w-3xl mx-auto">
@@ -154,6 +149,16 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
           <li>Mention preferred technologies or tools</li>
         </ul>
       </div>
+
+      {showTraitsEditor && (
+        <JobTraitsForm
+          suggestedTraits={suggestedTraits}
+          jobTitle={jobTitle}
+          companyName={companyName}
+          onConfirm={handleTraitsConfirm}
+          onCancel={() => setShowTraitsEditor(false)}
+        />
+      )}
     </div>
   );
 };

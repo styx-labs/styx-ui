@@ -8,7 +8,7 @@ import {
   Briefcase,
   ChevronRight,
 } from "lucide-react";
-import { Job, Candidate } from "../../../types";
+import { Job, Candidate } from "../../types";
 import { useNavigate } from "react-router-dom";
 
 interface HomeScreenProps {

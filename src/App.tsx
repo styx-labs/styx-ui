@@ -9,7 +9,7 @@ import { JobSection } from "./components/features/jobs/JobSection";
 import { CandidateSection } from "./components/features/candidates/CandidateSection";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { ConnectionError } from "./components/common/ConnectionError";
-import { JobForm } from "./components/features/jobs/JobForm";
+import { JobForm } from "./components/features/jobs/forms/JobForm";
 import { useParams } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { Login } from "./components/auth/Login";
