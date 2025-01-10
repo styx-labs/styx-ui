@@ -1,6 +1,6 @@
 import React from "react";
 import { Check, X, Star, Tag, Circle } from "lucide-react";
-import { TraitEvaluation, Citation, TraitType } from "../types";
+import { TraitEvaluation, Citation } from "../../../types";
 
 interface TraitValueProps {
   trait: TraitEvaluation;

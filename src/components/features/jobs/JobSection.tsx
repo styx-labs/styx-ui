@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Plus, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { Job } from "../types";
+import { Job } from "../../../types";
 import { JobList } from "./JobList";
-import styxLogo from "../assets/styx_name_logo.png";
+import styxLogo from "../../../assets/styx_name_logo.png";
 import { User } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 

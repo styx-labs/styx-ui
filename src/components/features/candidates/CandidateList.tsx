@@ -11,7 +11,12 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { Candidate, TraitEvaluation, Citation, TraitType } from "../types";
+import {
+  Candidate,
+  TraitEvaluation,
+  Citation,
+  TraitType,
+} from "../../../types";
 import toast from "react-hot-toast";
 import { createPortal } from "react-dom";
 import { TraitValue } from "./TraitValue";
@@ -81,7 +86,7 @@ const OverallScore: React.FC<{ score: number; citations?: Citation[] }> = ({
       <span
         className={`px-2 py-0.5 text-sm font-medium rounded ${bucket.color}`}
       >
-        {bucket.text}
+        {score}
       </span>
       {!enoughInfo && score < 6 && (
         <span className="px-2 py-0.5 text-sm font-medium rounded bg-gray-100 text-gray-800">

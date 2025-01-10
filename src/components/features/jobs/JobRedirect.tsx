@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useJobs } from "../hooks/useJobs";
+import { useJobs } from "../../../hooks/useJobs";
 
 export const JobRedirect: React.FC = () => {
   const { jobId } = useParams();

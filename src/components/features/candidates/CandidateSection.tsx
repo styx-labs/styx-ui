@@ -1,9 +1,8 @@
 import React, { useState, useRef } from "react";
 import { Users, ChevronDown, ChevronUp, Upload, UserPlus } from "lucide-react";
-import { Candidate, Job } from "../types";
+import { Candidate, Job } from "../../../types";
 import { CandidateList } from "./CandidateList";
 import { CandidateForm } from "./CandidateForm";
-import { apiService } from "../api";
 import { toast } from "react-hot-toast";
 
 interface CandidateSectionProps {

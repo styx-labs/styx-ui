@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Send, ArrowRight, Sparkles } from "lucide-react";
+import { Send, ArrowRight } from "lucide-react";
 import { KeyTraitsEditor } from "./KeyTraitsEditor";
-import { apiService } from "../api";
+import { apiService } from "../../../api";
 import { toast } from "react-hot-toast";
-import { TraitType } from "../types";
+import { TraitType } from "../../../types";
 
 interface KeyTrait {
   trait: string;

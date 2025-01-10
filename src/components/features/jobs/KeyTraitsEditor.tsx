@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { X, Plus, Check, AlertCircle, Scale, Hash, List } from "lucide-react";
-import { TraitType } from "../types";
+import { TraitType } from "../../../types";
 
 interface KeyTrait {
   trait: string;

@@ -3,20 +3,20 @@ import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useJobs } from "./hooks/useJobs";
 import { useCandidates } from "./hooks/useCandidates";
-import { JobSection } from "./components/JobSection";
-import { CandidateSection } from "./components/CandidateSection";
-import { ErrorBoundary } from "./components/ErrorBoundary";
-import { ConnectionError } from "./components/ConnectionError";
-import { JobForm } from "./components/JobForm";
+import { JobSection } from "./components/features/jobs/JobSection";
+import { CandidateSection } from "./components/features/candidates/CandidateSection";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
+import { ConnectionError } from "./components/common/ConnectionError";
+import { JobForm } from "./components/features/jobs/JobForm";
 import { useParams } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
-import { Login } from "./components/Login";
+import { Login } from "./components/auth/Login";
 import { setAuthUser } from "./api";
 import { UnauthorizedError } from "./api";
 import { useEffect } from "react";
-import { Welcome } from "./components/Welcome";
+import { Welcome } from "./components/layout/Welcome";
 import { User } from "firebase/auth";
-import { LoadingSpinner } from "./components/LoadingSpinner";
+import { LoadingSpinner } from "./components/common/LoadingSpinner";
 
 // Extend Window interface
 interface ExtendedWindow extends Window {
