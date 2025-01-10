@@ -3,7 +3,6 @@ import { TraitEvaluation, TraitType } from "../../../../types";
 export const transformSection = (section: TraitEvaluation): TraitEvaluation => {
   // Convert trait_type to uppercase and ensure it matches the enum
   let trait_type: TraitType;
-  console.log("section", section);
   if (!section.trait_type) {
     trait_type = TraitType.SCORE;
   } else {
@@ -11,7 +10,6 @@ export const transformSection = (section: TraitEvaluation): TraitEvaluation => {
       section.trait_type === "TraitType.SCORE"
         ? TraitType.SCORE
         : TraitType.BOOLEAN;
-    console.log("trait_type", trait_type);
   }
 
   return {
