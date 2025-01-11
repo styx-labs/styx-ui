@@ -20,14 +20,14 @@ const api = axios.create({
 
 // Function to set cross-site cookie for extension
 const setExtensionCookie = (token: string | null) => {
+  const isDev = import.meta.env.DEV;
+  const domainAttr = isDev ? "" : "domain=styxlabs.co;";
+  const secureFlag = isDev ? "" : "Secure;";
+  
   if (token) {
-    // Set cookie that can be accessed by extension on LinkedIn
-    // SameSite=None allows cross-site access, Secure is required for SameSite=None
-    document.cookie = `styxExtensionToken=${token}; path=/; domain=styxlabs.co; max-age=3600; SameSite=None; Secure`;
+    document.cookie = `styxExtensionToken=${token}; path=/; ${domainAttr} max-age=3600; SameSite=None; ${secureFlag}`;
   } else {
-    // Clear the cookie
-    document.cookie =
-      "styxExtensionToken=; path=/; domain=styxlabs.co; max-age=0; SameSite=None; Secure";
+    document.cookie = `styxExtensionToken=; path=/; ${domainAttr} max-age=0; SameSite=None; ${secureFlag}`;
   }
 };
 
