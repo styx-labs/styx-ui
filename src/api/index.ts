@@ -152,4 +152,8 @@ export const apiService = {
       { linkedin_profile_url }
     );
   },
+
+  getSearchCredits: () => {
+    return api.post<{ search_credits: number }>("/get-search-credits");
+  },
 };

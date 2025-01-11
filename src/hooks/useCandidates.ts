@@ -3,6 +3,7 @@ import { toast } from "react-hot-toast";
 import { Candidate } from "../types";
 import { apiService } from "../api";
 import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 
 const POLLING_INTERVAL = 2000;
 
@@ -72,6 +73,14 @@ export function useCandidates(jobId: string | undefined) {
       loadCandidates();
     } catch (error) {
       console.error("Error creating candidate:", error);
+
+      if (axios.isAxiosError(error) && error.response?.status === 402) {
+        const errorMessage = "Out of search credits";
+        setError(new Error(errorMessage));
+        toast.error(errorMessage);
+        return;
+      }
+      
       setError(
         error instanceof Error ? error : new Error("Failed to add candidate")
       );
@@ -87,7 +96,15 @@ export function useCandidates(jobId: string | undefined) {
       toast.success('Candidates added successfully');
       loadCandidates();
     } catch (error) {
-      toast.error('Failed to add candidates');
+      if (axios.isAxiosError(error) && error.response?.status === 402) {
+        setError(new Error("Out of search credits"));
+        toast.error("Out of search credits");
+      } else {
+        setError(
+          error instanceof Error ? error : new Error("Failed to add candidates")
+        );
+        toast.error("Failed to add candidates");
+      }
     }
   };
 

@@ -1,6 +1,7 @@
 import React from "react";
-import { Chrome, LogOut } from "lucide-react";
+import { Chrome, LogOut, Search } from "lucide-react";
 import { User } from "firebase/auth";
+import { useSearchCredits } from "../../../hooks/useSearchCredits";
 
 interface ProfileMenuProps {
   user: User | null;
@@ -15,6 +16,8 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   renderAvatar,
   isCollapsed,
 }) => {
+  const { searchCredits, loading } = useSearchCredits();
+
   return (
     <div
       className={`
@@ -30,7 +33,15 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
               <p className="text-sm font-medium text-gray-900 truncate">
                 {user?.displayName || user?.email?.split("@")[0]}
               </p>
-              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+              <div className="flex items-center gap-1">
+                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                {!loading && searchCredits !== null && (
+                  <div className="flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">
+                    <Search className="w-3 h-3" />
+                    <span>{searchCredits}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           {/* Dropdown Menu */}
@@ -42,6 +53,12 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   {user?.displayName || user?.email?.split("@")[0]}
                 </p>
                 <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+                {!loading && searchCredits !== null && (
+                  <div className="flex items-center gap-1 mt-1 text-sm text-purple-600">
+                    <Search className="w-4 h-4" />
+                    <span>{searchCredits} remaining search credits</span>
+                  </div>
+                )}
               </div>
 
               {/* Menu Items */}
