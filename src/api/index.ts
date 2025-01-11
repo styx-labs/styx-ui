@@ -20,14 +20,17 @@ const api = axios.create({
 
 // Function to set cross-site cookie for extension
 const setExtensionCookie = (token: string | null) => {
-  const isDev = import.meta.env.DEV;
-  const domainAttr = isDev ? "" : "domain=styxlabs.co;";
-  const secureFlag = isDev ? "" : "Secure;";
+  const isDev = import.meta.env.VITE_APP_NODE_ENV === "development";
   
   if (token) {
-    document.cookie = `styxExtensionToken=${token}; path=/; ${domainAttr} max-age=3600; SameSite=None; ${secureFlag}`;
+    // Simplified cookie string for development testing
+    document.cookie = isDev 
+      ? `styxExtensionToken=${token}; path=/;` 
+      : `styxExtensionToken=${token}; path=/; domain=.styxlabs.co; max-age=3600; SameSite=None; Secure;`;
   } else {
-    document.cookie = `styxExtensionToken=; path=/; ${domainAttr} max-age=0; SameSite=None; ${secureFlag}`;
+    document.cookie = isDev
+      ? `styxExtensionToken=; path=/; max-age=0;`
+      : `styxExtensionToken=; path=/; domain=.styxlabs.co; max-age=0; SameSite=None; Secure;`;
   }
 };
 
