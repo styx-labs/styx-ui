@@ -31,13 +31,15 @@ declare const window: ExtendedWindow;
 function JobDetail() {
   const { jobId } = useParams();
   const navigate = useNavigate();
-  const { jobs, isLoading, error, retry } = useJobs();
+  const { jobs, isLoading: jobsLoading, error, retry } = useJobs();
   const {
     candidates,
     createCandidate,
     deleteCandidate,
     createCandidatesBatch,
+    loadCandidates,
     error: candidatesError,
+    isLoading: candidatesLoading,
   } = useCandidates(jobId);
 
   const selectedJob = jobs.find((job) => job.id === jobId);
@@ -100,7 +102,7 @@ function JobDetail() {
     return <ConnectionError onRetry={retry} />;
   }
 
-  if (!selectedJob && !isLoading) {
+  if (!selectedJob && !jobsLoading) {
     return (
       <div className="p-6 text-center">
         <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -170,11 +172,13 @@ function JobDetail() {
     <CandidateSection
       job={selectedJob}
       candidates={candidates}
+      isLoading={candidatesLoading}
       onCandidateCreate={createCandidate}
       onCandidateDelete={deleteCandidate}
       onCandidatesBatch={createCandidatesBatch}
       onCandidateReachout={handleCandidateReachout}
       onGetEmail={handleGetEmail}
+      onRefresh={loadCandidates}
     />
   ) : null;
 }

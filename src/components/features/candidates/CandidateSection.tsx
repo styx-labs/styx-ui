@@ -1,35 +1,40 @@
 import React, { useState, useRef } from "react";
-import { Users, ChevronDown, ChevronUp, Upload, UserPlus } from "lucide-react";
+import { Users, ChevronDown, ChevronUp, Upload, UserPlus, RefreshCw } from "lucide-react";
 import { Candidate, Job } from "../../../types";
 import { CandidateList } from "./CandidateList";
 import { CandidateForm } from "./CandidateForm";
 import { toast } from "react-hot-toast";
+import Papa from "papaparse";
 
 interface CandidateSectionProps {
   job: Job;
   candidates: Candidate[];
+  isLoading?: boolean;
   onCandidateCreate: (
     name?: string,
     context?: string,
     url?: string
   ) => Promise<void>;
   onCandidateDelete: (candidateId: string) => void;
-  onCandidatesBatch: (file: File) => Promise<void>;
+  onCandidatesBatch: (urls: string[]) => Promise<void>;
   onCandidateReachout: (
     candidateId: string,
     format: string
   ) => Promise<string | undefined>;
   onGetEmail: (linkedinUrl: string) => Promise<string | undefined>;
+  onRefresh: () => void;
 }
 
 export const CandidateSection: React.FC<CandidateSectionProps> = ({
   job,
   candidates,
+  isLoading = false,
   onCandidateCreate,
   onCandidateDelete,
   onCandidatesBatch,
   onCandidateReachout,
   onGetEmail,
+  onRefresh,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -155,10 +160,40 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
                   if (file) {
                     setIsUploading(true);
                     try {
-                      await onCandidatesBatch(file);
+                      // Parse CSV file
+                      const results = await new Promise<string[]>((resolve, reject) => {
+                        Papa.parse(file, {
+                          header: true,
+                          skipEmptyLines: true,
+                          complete: (results) => {
+                            // Check if 'url' column exists
+                            if (!results.meta.fields?.includes('url')) {
+                              reject(new Error("The CSV file must have a column labeled 'url' containing LinkedIn URLs"));
+                              return;
+                            }
+
+                            const urls = results.data
+                              .map((row: any) => row.url)
+                              .filter((url: string | undefined): url is string => 
+                                typeof url === 'string' && url.trim() !== ''
+                              );
+                            resolve(urls);
+                          },
+                          error: (error) => {
+                            reject(error);
+                          }
+                        });
+                      });
+
+                      if (results.length === 0) {
+                        throw new Error("No valid LinkedIn URLs found in the 'url' column");
+                      }
+
+                      await onCandidatesBatch(results);
+                      toast.success(`Found ${results.length} LinkedIn URLs to process`);
                     } catch (error) {
-                      console.error("Error uploading candidates:", error);
-                      toast.error("Failed to upload candidates");
+                      console.error("Error processing CSV:", error);
+                      toast.error(error instanceof Error ? error.message : "Failed to process CSV file");
                     } finally {
                       setIsUploading(false);
                       if (fileInputRef.current) {
@@ -188,6 +223,13 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
               <UserPlus size={16} className="mr-2" />
               Add Candidate
             </button>
+            <button
+              onClick={onRefresh}
+              className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md bg-purple-100 text-purple-700 hover:bg-purple-200"
+            >
+              <RefreshCw size={16} className="mr-2" />
+              Refresh
+            </button>
             <div className="inline-flex items-center bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setStatusFilter("complete")}
@@ -214,12 +256,28 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
         </div>
 
         {showCandidateForm && <CandidateForm onSubmit={onCandidateCreate} />}
-        <CandidateList
-          candidates={filteredCandidates}
-          onDeleteCandidate={onCandidateDelete}
-          onReachout={onCandidateReachout}
-          onGetEmail={onGetEmail}
-        />
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-lg p-6 shadow-sm animate-pulse">
+                <div className="flex items-center space-x-4">
+                  <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <CandidateList
+            candidates={filteredCandidates}
+            onDeleteCandidate={onCandidateDelete}
+            onReachout={onCandidateReachout}
+            onGetEmail={onGetEmail}
+          />
+        )}
       </div>
     </div>
   );

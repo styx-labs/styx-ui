@@ -128,19 +128,16 @@ export const apiService = {
       `/jobs/${jobId}/candidates/${candidateId}`
     ),
 
-  createCandidatesBatch: (jobId: string, file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    return api.post<{ success: boolean }>(
-      `/jobs/${jobId}/candidates_batch`,
-      formData,
+  createCandidatesBatch: (jobId: string, urls: string[]) => 
+    api.post<{ success: boolean }>(
+      `/jobs/${jobId}/candidates_bulk`,
+      { urls },
       {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
         },
       }
-    );
-  },
+    ),
 
   getCandidateReachout: (jobId: string, candidateId: string, format: string) => {
     return api.post<{ reachout: string }>(

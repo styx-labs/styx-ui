@@ -10,11 +10,17 @@ const POLLING_INTERVAL = 2000;
 export function useCandidates(jobId: string | undefined) {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isPolling, setIsPolling] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const pollingTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const loadCandidates = async () => {
+  const loadCandidates = async (isPollingUpdate = false) => {
     if (!jobId || !user) return;
+    if (!isPollingUpdate) {
+      setIsLoading(true);
+    }
+    setIsPolling(isPollingUpdate);
 
     try {
       const response = await apiService.getCandidates(jobId);
@@ -33,7 +39,7 @@ export function useCandidates(jobId: string | undefined) {
 
       // Set up next poll if there are processing candidates
       if (hasProcessingCandidates) {
-        pollingTimeoutRef.current = setTimeout(loadCandidates, POLLING_INTERVAL);
+        pollingTimeoutRef.current = setTimeout(() => loadCandidates(true), POLLING_INTERVAL);
       }
     } catch (error) {
       console.error("Error loading candidates:", error);
@@ -41,6 +47,11 @@ export function useCandidates(jobId: string | undefined) {
         error instanceof Error ? error : new Error("Failed to load candidates")
       );
       toast.error("Failed to load candidates");
+    } finally {
+      if (!isPollingUpdate) {
+        setIsLoading(false);
+      }
+      setIsPolling(false);
     }
   };
 
@@ -88,11 +99,11 @@ export function useCandidates(jobId: string | undefined) {
     }
   };
 
-  const createCandidatesBatch = async (file: File) => {
+  const createCandidatesBatch = async (urls: string[]) => {
     if (!jobId) return;
 
     try {
-      await apiService.createCandidatesBatch(jobId, file);
+      await apiService.createCandidatesBatch(jobId, urls);
       toast.success('Candidates added successfully');
       loadCandidates();
     } catch (error) {
@@ -150,7 +161,7 @@ export function useCandidates(jobId: string | undefined) {
   useEffect(() => {
     // Only load candidates when auth is ready and we have a user
     if (!authLoading && user && jobId) {
-      loadCandidates();
+      loadCandidates(false);
     }
 
     // Cleanup function to clear timeout when component unmounts or jobId changes
@@ -169,7 +180,8 @@ export function useCandidates(jobId: string | undefined) {
     createCandidatesBatch,
     getCandidateReachout,
     getEmail,
+    loadCandidates: () => loadCandidates(false),
     error,
-    isLoading: authLoading,
+    isLoading: (isLoading && !isPolling) || authLoading,
   };
 }
