@@ -7,6 +7,7 @@ import {
   Clock,
   Briefcase,
   ChevronRight,
+  CreditCard,
 } from "lucide-react";
 import { Job, Candidate } from "../../types";
 import { useNavigate } from "react-router-dom";
@@ -15,12 +16,14 @@ interface HomeScreenProps {
   jobs: Job[];
   candidates: Candidate[];
   onCreateJob: () => void;
+  onOpenPricing: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   jobs,
   candidates,
   onCreateJob,
+  onOpenPricing,
 }) => {
   const navigate = useNavigate();
   const activeJobs = jobs.length;
@@ -164,6 +167,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <div className="flex items-center">
                   <Plus className="w-5 h-5 mr-3" />
                   <span className="font-medium">Create New Job</span>
+                </div>
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              <button
+                onClick={onOpenPricing}
+                className="w-full flex items-center justify-between p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"
+              >
+                <div className="flex items-center">
+                  <CreditCard className="w-5 h-5 mr-3" />
+                  <span className="font-medium">Purchase Search Credits</span>
                 </div>
                 <ChevronRight className="w-5 h-5" />
               </button>

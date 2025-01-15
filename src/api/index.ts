@@ -21,11 +21,11 @@ const api = axios.create({
 // Function to set cross-site cookie for extension
 const setExtensionCookie = (token: string | null) => {
   const isDev = import.meta.env.VITE_APP_NODE_ENV === "development";
-  
+
   if (token) {
     // Simplified cookie string for development testing
-    document.cookie = isDev 
-      ? `styxExtensionToken=${token}; path=/;` 
+    document.cookie = isDev
+      ? `styxExtensionToken=${token}; path=/;`
       : `styxExtensionToken=${token}; path=/; domain=.styxlabs.co; max-age=3600; SameSite=None; Secure;`;
   } else {
     document.cookie = isDev
@@ -128,7 +128,7 @@ export const apiService = {
       `/jobs/${jobId}/candidates/${candidateId}`
     ),
 
-  createCandidatesBatch: (jobId: string, urls: string[]) => 
+  createCandidatesBatch: (jobId: string, urls: string[]) =>
     api.post<{ success: boolean }>(
       `/jobs/${jobId}/candidates_bulk`,
       { urls },
@@ -139,21 +139,28 @@ export const apiService = {
       }
     ),
 
-  getCandidateReachout: (jobId: string, candidateId: string, format: string) => {
+  getCandidateReachout: (
+    jobId: string,
+    candidateId: string,
+    format: string
+  ) => {
     return api.post<{ reachout: string }>(
       `/jobs/${jobId}/candidates/${candidateId}/generate-reachout`,
-      {format}
+      { format }
     );
   },
 
   getEmail: (linkedin_profile_url: string) => {
-    return api.post<{ email: string }>(
-      "/get-email",
-      { linkedin_profile_url }
-    );
+    return api.post<{ email: string }>("/get-email", { linkedin_profile_url });
   },
 
   getSearchCredits: () => {
     return api.post<{ search_credits: number }>("/get-search-credits");
+  },
+
+  getCheckoutSession: (planId: string) => {
+    return api.post<{ url: string }>("/payments/create-checkout-session", {
+      planId,
+    });
   },
 };

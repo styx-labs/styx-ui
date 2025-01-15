@@ -1,5 +1,5 @@
 import React from "react";
-import { Chrome, LogOut, Search } from "lucide-react";
+import { Chrome, LogOut, Search, CreditCard, Plus } from "lucide-react";
 import { User } from "firebase/auth";
 import { useSearchCredits } from "../../../hooks/useSearchCredits";
 
@@ -8,6 +8,7 @@ interface ProfileMenuProps {
   onLogout: () => Promise<void>;
   renderAvatar: () => React.ReactNode;
   isCollapsed: boolean;
+  onOpenPricing: () => void;
 }
 
 export const ProfileMenu: React.FC<ProfileMenuProps> = ({
@@ -15,6 +16,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   onLogout,
   renderAvatar,
   isCollapsed,
+  onOpenPricing,
 }) => {
   const { searchCredits, loading } = useSearchCredits();
 
@@ -36,9 +38,17 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
               <div className="flex items-center gap-1">
                 <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                 {!loading && searchCredits !== null && (
-                  <div className="flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">
-                    <Search className="w-3 h-3" />
-                    <span>{searchCredits}</span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={onOpenPricing}
+                      className="p-0.5 text-purple-600 hover:bg-purple-50 rounded"
+                      title="Add Search Credits"
+                    >
+                      <div className="flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">
+                        <Search className="w-3 h-3" />
+                        <span>{searchCredits}</span>
+                      </div>{" "}
+                    </button>
                   </div>
                 )}
               </div>
@@ -72,6 +82,17 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   <Chrome className="w-4 h-4" />
                   Chrome Extension
                 </a>
+              </div>
+
+              {/* Pricing */}
+              <div className="py-1">
+                <button
+                  onClick={onOpenPricing}
+                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  Pricing & Credits
+                </button>
               </div>
 
               {/* Logout */}
