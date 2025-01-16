@@ -21,6 +21,8 @@ import { HomeScreen } from "./components/layout/HomeScreen";
 import { User } from "firebase/auth";
 import { LoadingSpinner } from "./components/common/LoadingSpinner";
 import { Job } from "./types";
+import { PricingPage } from "./components/features/payment/PricingPage";
+import { PaymentStatus } from "./components/features/payment/PaymentStatus";
 
 // Extend Window interface
 interface ExtendedWindow extends Window {
@@ -329,6 +331,7 @@ function App() {
               onToggleCollapse={() =>
                 setIsSidebarCollapsed(!isSidebarCollapsed)
               }
+              onOpenPricing={() => navigate("/pricing")}
             />
           </div>
         </div>
@@ -353,6 +356,9 @@ function App() {
                       onCreateJob={() => {
                         navigate("/jobs/create");
                       }}
+                      onOpenPricing={() => {
+                        navigate("/pricing");
+                      }}
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full text-gray-500">
@@ -366,6 +372,15 @@ function App() {
                 element={<JobForm onSubmit={handleCreateJob} />}
               />
               <Route path="/jobs/:jobId" element={<JobDetail />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route
+                path="/pricing/success"
+                element={<PaymentStatus status="success" />}
+              />
+              <Route
+                path="/pricing/cancel"
+                element={<PaymentStatus status="cancel" />}
+              />
             </Routes>
           </div>
         </div>

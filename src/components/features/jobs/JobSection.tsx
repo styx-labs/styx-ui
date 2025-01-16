@@ -17,6 +17,7 @@ interface JobSectionProps {
   onLogout: () => Promise<void>;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  onOpenPricing: () => void;
 }
 
 export const JobSection: React.FC<JobSectionProps> = ({
@@ -31,6 +32,7 @@ export const JobSection: React.FC<JobSectionProps> = ({
   onLogout,
   isCollapsed,
   onToggleCollapse,
+  onOpenPricing,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -74,6 +76,7 @@ export const JobSection: React.FC<JobSectionProps> = ({
           onLogout={onLogout}
           renderAvatar={renderAvatar}
           isCollapsed={isCollapsed}
+          onOpenPricing={onOpenPricing}
         />
       </div>
     </div>
