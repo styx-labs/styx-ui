@@ -61,6 +61,19 @@ export const Welcome: React.FC<WelcomeProps> = ({ onCreateClick }) => {
         </div>
       </div>
 
+      {/* Demo Video */}
+      <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-12">
+        <div className="h-full">
+          <iframe
+            src="https://www.youtube.com/embed/HbRXibt4wKA"
+            title="Styx Demo Video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="w-full aspect-video rounded-lg shadow-lg"
+          ></iframe>
+        </div>
+      </div>
+
       <div className="bg-gray-50 rounded-lg p-8 border border-gray-200">
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">
           How It Works
