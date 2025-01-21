@@ -12,6 +12,13 @@ export interface Job {
   company_name: string;
 }
 
+interface AILinkedinJobDescription {
+  role_summary: string;
+  skills: string[];
+  requirements: string[];
+  sources: string[];
+}
+
 export interface ProfileExperience {
   company: string;
   title: string;
@@ -19,10 +26,7 @@ export interface ProfileExperience {
   starts_at: string;
   ends_at: string;
   location: string;
-  summarized_job_description: {
-    job_description: string;
-    sources: string[];
-  } | null;
+  summarized_job_description: AILinkedinJobDescription | null;
 }
 
 export interface ProfileEducation {

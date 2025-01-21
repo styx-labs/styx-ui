@@ -71,7 +71,9 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ profile }) => {
                       <h4 className="font-semibold text-gray-900">
                         {exp.title}
                       </h4>
-                      <p className="text-purple-600 font-medium">{exp.company}</p>
+                      <p className="text-purple-600 font-medium">
+                        {exp.company}
+                      </p>
                     </div>
                     <div className="text-right">
                       <div className="text-sm text-gray-500 whitespace-nowrap">
@@ -94,9 +96,36 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ profile }) => {
                       <p className="text-sm text-gray-700 font-medium">
                         Generated Job Description
                       </p>
-                      <p className="text-gray-600 text-sm mt-1">
-                        {exp.summarized_job_description.job_description}
-                      </p>
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-xs">Role Summary:</h4>
+                          <p className="text-gray-600 text-xs">
+                            {exp.summarized_job_description.role_summary}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="font-medium text-xs">Skills:</h4>
+                          <ul className="list-disc list-inside text-gray-600 text-xs pl-2 space-y-1">
+                            {exp.summarized_job_description?.skills?.map(
+                              (skill, idx) => (
+                                <li key={idx}>{skill}</li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+
+                        <div>
+                          <h4 className="font-medium text-xs">Requirements:</h4>
+                          <ul className="list-disc list-inside text-gray-600 text-xs pl-2 space-y-1">
+                            {exp.summarized_job_description?.requirements?.map(
+                              (req, idx) => (
+                                <li key={idx}>{req}</li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      </div>
                       {exp.summarized_job_description.sources.length > 0 && (
                         <div className="mt-2 pt-2 border-t border-purple-100">
                           <p className="text-xs text-gray-500">Sources:</p>
