@@ -15,6 +15,13 @@ export function useCandidates(jobId: string | undefined) {
   const { user, loading: authLoading } = useAuth();
   const pollingTimeoutRef = useRef<NodeJS.Timeout>();
 
+  // Clear candidates when jobId changes
+  useEffect(() => {
+    setCandidates([]);
+    setError(null);
+    setIsLoading(true);
+  }, [jobId]);
+
   const loadCandidates = async (isPollingUpdate = false) => {
     if (!jobId || !user) return;
     if (!isPollingUpdate) {
@@ -26,10 +33,10 @@ export function useCandidates(jobId: string | undefined) {
       const response = await apiService.getCandidates(jobId);
       setCandidates(response.data.candidates);
       setError(null);
-      
+
       // Check if there are any processing candidates
       const hasProcessingCandidates = response.data.candidates.some(
-        (candidate: Candidate) => candidate.status === 'processing'
+        (candidate: Candidate) => candidate.status === "processing"
       );
 
       // Clear existing timeout
@@ -39,7 +46,10 @@ export function useCandidates(jobId: string | undefined) {
 
       // Set up next poll if there are processing candidates
       if (hasProcessingCandidates) {
-        pollingTimeoutRef.current = setTimeout(() => loadCandidates(true), POLLING_INTERVAL);
+        pollingTimeoutRef.current = setTimeout(
+          () => loadCandidates(true),
+          POLLING_INTERVAL
+        );
       }
     } catch (error) {
       console.error("Error loading candidates:", error);
@@ -62,7 +72,7 @@ export function useCandidates(jobId: string | undefined) {
       const response = await apiService.getCandidate(jobId, candidateId);
       return response.data.candidate;
     } catch (error) {
-      toast.error('Failed to load candidate');
+      toast.error("Failed to load candidate");
     }
   };
 
@@ -91,7 +101,7 @@ export function useCandidates(jobId: string | undefined) {
         toast.error(errorMessage);
         return;
       }
-      
+
       setError(
         error instanceof Error ? error : new Error("Failed to add candidate")
       );
@@ -104,7 +114,7 @@ export function useCandidates(jobId: string | undefined) {
 
     try {
       await apiService.createCandidatesBatch(jobId, urls);
-      toast.success('Candidates added successfully');
+      toast.success("Candidates added successfully");
       loadCandidates();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 402) {
@@ -140,10 +150,14 @@ export function useCandidates(jobId: string | undefined) {
     if (!jobId || !user) return;
 
     try {
-      const response = await apiService.getCandidateReachout(jobId, candidateId, format);
+      const response = await apiService.getCandidateReachout(
+        jobId,
+        candidateId,
+        format
+      );
       return response.data.reachout;
     } catch (error) {
-      toast.error('Failed to generate reachout');
+      toast.error("Failed to generate reachout");
     }
   };
 
@@ -154,7 +168,7 @@ export function useCandidates(jobId: string | undefined) {
       const response = await apiService.getEmail(linkedinUrl);
       return response.data.email;
     } catch (error) {
-      toast.error('Could not find email');
+      toast.error("Could not find email");
     }
   };
 

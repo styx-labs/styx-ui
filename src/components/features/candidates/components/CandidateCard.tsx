@@ -54,6 +54,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
           hasSummary={!!candidate.summary}
           hasSections={!!candidate.sections && candidate.sections.length > 0}
           hasCitations={!!candidate.citations}
+          hasProfile={!!candidate.profile}
           selectedSection={selectedSection}
           onSectionChange={onSectionChange}
         />

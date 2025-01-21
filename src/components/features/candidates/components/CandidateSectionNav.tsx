@@ -5,6 +5,7 @@ interface CandidateSectionNavProps {
   hasSummary: boolean;
   hasSections: boolean;
   hasCitations: boolean;
+  hasProfile: boolean;
   selectedSection: string;
   onSectionChange: (candidateId: string, section: string) => void;
 }
@@ -14,6 +15,7 @@ export const CandidateSectionNav: React.FC<CandidateSectionNavProps> = ({
   hasSummary,
   hasSections,
   hasCitations,
+  hasProfile,
   selectedSection,
   onSectionChange,
 }) => {
@@ -29,6 +31,18 @@ export const CandidateSectionNav: React.FC<CandidateSectionNavProps> = ({
           }`}
         >
           Summary
+        </button>
+      )}
+      {hasProfile && (
+        <button
+          onClick={() => onSectionChange(candidateId, "profile")}
+          className={`flex-1 px-3 py-1.5 text-center rounded-md transition-colors text-sm ${
+            selectedSection === "profile"
+              ? "bg-purple-600 text-white"
+              : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+          }`}
+        >
+          Profile
         </button>
       )}
       {hasSections && (

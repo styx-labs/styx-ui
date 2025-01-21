@@ -13,6 +13,44 @@ export interface Job {
   company_name: string;
 }
 
+interface AILinkedinJobDescription {
+  role_summary: string;
+  skills: string[];
+  requirements: string[];
+  sources: string[];
+}
+
+export interface ProfileExperience {
+  company: string;
+  title: string;
+  description: string | null;
+  starts_at: string;
+  ends_at: string;
+  location: string;
+  summarized_job_description: AILinkedinJobDescription | null;
+}
+
+export interface ProfileEducation {
+  degree_name: string;
+  field_of_study: string;
+  school: string;
+  starts_at: string | null;
+  ends_at: string | null;
+}
+
+export interface Profile {
+  full_name: string;
+  headline: string;
+  occupation: string;
+  public_identifier: string;
+  summary: string | null;
+  source_str: string;
+  updated_at: string;
+  url: string;
+  experiences?: ProfileExperience[];
+  education?: ProfileEducation[];
+}
+
 export interface Candidate {
   id?: string;
   name?: string;
@@ -23,6 +61,7 @@ export interface Candidate {
   overall_score?: number;
   sections?: TraitEvaluation[];
   citations?: Citation[];
+  profile?: Profile;
 }
 
 export interface Reachout {

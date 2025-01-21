@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Candidate, Section, Citation } from "../../../../types";
 import { TraitValue } from "../TraitValue";
 import { CitationCard } from "./CitationCard";
+import { ProfileContent } from "./ProfileContent";
 import { transformSection } from "../utils/transformSection";
 
 interface CandidateContentProps {
@@ -98,6 +99,11 @@ export const CandidateContent: React.FC<CandidateContentProps> = ({
             );
           })}
         </div>
+      )}
+
+      {/* Profile Content */}
+      {selectedSection === "profile" && candidate.profile && (
+        <ProfileContent profile={candidate.profile} />
       )}
     </div>
   );
