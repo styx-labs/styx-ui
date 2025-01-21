@@ -22,7 +22,7 @@ interface JobTraitsFormProps {
     jobTitle: string,
     companyName: string
   ) => void;
-  onCancel: () => void;
+  onBack: () => void;
 }
 
 export const JobTraitsForm: React.FC<JobTraitsFormProps> = ({
@@ -30,11 +30,12 @@ export const JobTraitsForm: React.FC<JobTraitsFormProps> = ({
   jobTitle: initialJobTitle,
   companyName: initialCompanyName,
   onConfirm,
-  onCancel,
+  onBack,
 }) => {
   const [traits, setTraits] = useState<KeyTrait[]>(suggestedTraits);
   const [jobTitle, setJobTitle] = useState(initialJobTitle);
   const [companyName, setCompanyName] = useState(initialCompanyName);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const addTrait = () => {
     setTraits([
@@ -59,17 +60,26 @@ export const JobTraitsForm: React.FC<JobTraitsFormProps> = ({
     setTraits(newTraits);
   };
 
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      await onConfirm(traits, jobTitle, companyName);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="space-y-8 max-w-3xl mx-auto">
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">Review Key Traits</h2>
-        <p className="text-gray-500">
+    <div className="max-w-3xl mx-auto py-8">
+      <div className="mb-10 space-y-3">
+        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Review Key Traits</h1>
+        <p className="text-lg text-gray-600 leading-relaxed">
           We've analyzed your job description and identified these key traits.
           Edit them to better match your requirements.
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-8">
         {/* Job Details */}
         <JobDetailsForm
           jobTitle={jobTitle}
@@ -94,34 +104,44 @@ export const JobTraitsForm: React.FC<JobTraitsFormProps> = ({
         {/* Add Trait Button */}
         <button
           onClick={addTrait}
-          className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-purple-300 hover:text-purple-600 hover:bg-purple-50 transition-colors flex items-center justify-center gap-2 group"
+          className="w-full py-2.5 text-sm text-gray-500 hover:text-purple-600 flex items-center justify-center gap-1.5 group"
         >
-          <Plus
-            size={16}
-            className="group-hover:scale-110 transition-transform"
-          />
-          Add Another Trait
+          <span className="h-5 w-5 rounded-full border-2 border-gray-300 inline-flex items-center justify-center group-hover:border-purple-300 group-hover:bg-purple-50 transition-all">
+            <Plus size={14} className="group-hover:scale-110 transition-transform" />
+          </span>
+          Add another trait
         </button>
 
         {/* Tips */}
         <TraitTips />
-      </div>
 
-      {/* Action Buttons */}
-      <div className="flex justify-end gap-4">
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 text-gray-700 hover:text-gray-900"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() => onConfirm(traits, jobTitle, companyName)}
-          className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
-        >
-          <Check size={16} className="mr-2" />
-          Create Job
-        </button>
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-4 pt-6 border-t">
+          <button
+            onClick={onBack}
+            disabled={isSubmitting}
+            className="px-6 py-2.5 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50"
+          >
+            Back
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="px-6 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm"
+          >
+            {isSubmitting ? (
+              <>
+                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent" />
+                Creating Job...
+              </>
+            ) : (
+              <>
+                <Check size={18} />
+                Create Job
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

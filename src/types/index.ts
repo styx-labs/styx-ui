@@ -8,6 +8,7 @@ export interface Job {
     value_type?: string;
     required: boolean;
   }[];
+  ideal_profiles: string[];
   job_title: string;
   company_name: string;
 }

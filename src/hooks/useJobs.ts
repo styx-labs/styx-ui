@@ -37,9 +37,9 @@ export function useJobs() {
     }
   };
 
-  const getKeyTraits = async (description: string) => {
+  const getKeyTraits = async (description: string, ideal_profile_urls: string[]) => {
     try {
-      const response = await apiService.getKeyTraits(description);
+      const response = await apiService.getKeyTraits(description, ideal_profile_urls);
       return response.data.key_traits;
     } catch (error) {
       console.error("Error getting key traits:", error);
@@ -53,7 +53,8 @@ export function useJobs() {
     description: string,
     keyTraits: KeyTrait[],
     jobTitle: string,
-    companyName: string
+    companyName: string,
+    ideal_profile_urls: string[]
   ) => {
     try {
       const jobResponse = await apiService.createJob({
@@ -61,6 +62,7 @@ export function useJobs() {
         key_traits: keyTraits,
         job_title: jobTitle,
         company_name: companyName,
+        ideal_profiles: ideal_profile_urls,
       });
 
       if (jobResponse.data.job_id) {

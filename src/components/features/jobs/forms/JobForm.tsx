@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Send, ArrowRight } from "lucide-react";
 import { JobTraitsForm } from "./JobTraitsForm";
+import { JobIdealProfilesForm } from "./JobIdealProfilesForm";
 import { apiService } from "../../../../api";
 import { toast } from "react-hot-toast";
 import { TraitType } from "../../../../types";
@@ -18,7 +19,8 @@ interface JobFormProps {
     description: string,
     keyTraits: KeyTrait[],
     jobTitle: string,
-    companyName: string
+    companyName: string,
+    ideal_profile_urls: string[]
   ) => void;
 }
 
@@ -26,55 +28,57 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
   const [description, setDescription] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTraits, setSuggestedTraits] = useState<KeyTrait[]>([]);
   const [showTraitsEditor, setShowTraitsEditor] = useState(false);
+  const [showIdealProfiles, setShowIdealProfiles] = useState(false);
+  const [idealProfiles, setIdealProfiles] = useState<string[]>([]);
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (description.trim() && !isSubmitting) {
-      setIsSubmitting(true);
-      try {
-        const response = await apiService.getKeyTraits(description);
-        const formattedTraits = Array.isArray(response.data.key_traits)
-          ? response.data.key_traits.map(
-              (
-                trait:
-                  | string
-                  | {
-                      trait: string;
-                      description: string;
-                      trait_type?: TraitType;
-                      value_type?: string;
-                      required?: boolean;
-                    }
-              ) => {
-                if (typeof trait === "string") {
-                  return {
-                    trait,
-                    description: "",
-                    trait_type: TraitType.SCORE,
-                    required: false,
-                  };
-                }
+    setShowIdealProfiles(true);
+  };
+
+  const handleIdealProfilesSubmit = async (urls: string[]) => {
+    try {
+      const response = await apiService.getKeyTraits(description, urls);
+      const formattedTraits = Array.isArray(response.data.key_traits)
+        ? response.data.key_traits.map(
+            (
+              trait:
+                | string
+                | {
+                    trait: string;
+                    description: string;
+                    trait_type?: TraitType;
+                    value_type?: string;
+                    required?: boolean;
+                  }
+            ) => {
+              if (typeof trait === "string") {
                 return {
-                  ...trait,
-                  trait_type: trait.trait_type || TraitType.SCORE,
-                  required: trait.required ?? false,
+                  trait,
+                  description: "",
+                  trait_type: TraitType.SCORE,
+                  required: false,
                 };
               }
-            )
-          : response.data.key_traits;
-        setSuggestedTraits(formattedTraits);
-        setJobTitle(response.data.job_title);
-        setCompanyName(response.data.company_name);
-        setShowTraitsEditor(true);
-      } catch (error) {
-        toast.error("Failed to get key traits");
-        console.error("Error getting key traits:", error);
-      } finally {
-        setIsSubmitting(false);
-      }
+              return {
+                ...trait,
+                trait_type: trait.trait_type || TraitType.SCORE,
+                required: trait.required ?? false,
+              };
+            }
+          )
+        : response.data.key_traits;
+
+      setSuggestedTraits(formattedTraits);
+      setJobTitle(response.data.job_title);
+      setCompanyName(response.data.company_name);
+      setIdealProfiles(response.data.ideal_profiles);
+      setShowTraitsEditor(true);
+    } catch (error) {
+      toast.error("Failed to get key traits");
+      console.error("Error getting key traits:", error);
     }
   };
 
@@ -83,7 +87,7 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
     title: string,
     company: string
   ) => {
-    onSubmit(description, traits, title, company);
+    onSubmit(description, traits, title, company, idealProfiles);
   };
 
   if (showTraitsEditor) {
@@ -93,7 +97,16 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
         jobTitle={jobTitle}
         companyName={companyName}
         onConfirm={handleTraitsConfirm}
-        onCancel={() => setShowTraitsEditor(false)}
+        onBack={() => setShowTraitsEditor(false)}
+      />
+    );
+  }
+
+  if (showIdealProfiles) {
+    return (
+      <JobIdealProfilesForm
+        onSubmit={handleIdealProfilesSubmit}
+        onBack={() => setShowIdealProfiles(false)}
       />
     );
   }
@@ -129,24 +142,10 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={!description.trim() || isSubmitting}
-                className={`inline-flex items-center px-4 py-2 rounded-lg text-white font-medium transition-colors ${
-                  !description.trim() || isSubmitting
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-purple-600 hover:bg-purple-700"
-                }`}
+                className="inline-flex items-center px-4 py-2 rounded-lg text-white font-medium transition-colors bg-purple-600 hover:bg-purple-700"
               >
-                {isSubmitting ? (
-                  <>
-                    <Send className="w-5 h-5 mr-2" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    Next Step
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </>
-                )}
+                Next Step
+                <ArrowRight className="w-5 h-5 ml-2" />
               </button>
             </div>
           </form>
