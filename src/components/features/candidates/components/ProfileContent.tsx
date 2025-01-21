@@ -5,6 +5,33 @@ interface ProfileContentProps {
   profile: Profile;
 }
 
+const formatDate = (dateStr: string | null) => {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+};
+
+const calculateDuration = (startDate: string, endDate: string) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate || new Date());
+
+  const months =
+    (end.getFullYear() - start.getFullYear()) * 12 +
+    (end.getMonth() - start.getMonth());
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+
+  if (years === 0) {
+    return `${remainingMonths} mo${remainingMonths !== 1 ? "s" : ""}`;
+  } else if (remainingMonths === 0) {
+    return `${years} yr${years !== 1 ? "s" : ""}`;
+  } else {
+    return `${years} yr${years !== 1 ? "s" : ""} ${remainingMonths} mo${
+      remainingMonths !== 1 ? "s" : ""
+    }`;
+  }
+};
+
 export const ProfileContent: React.FC<ProfileContentProps> = ({ profile }) => {
   return (
     <div className="space-y-8 p-6 bg-white rounded-lg shadow-sm">
@@ -14,7 +41,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ profile }) => {
           {profile.full_name}
         </h2>
         <div className="space-y-1">
-          <p className="text-lg font-medium text-blue-600">
+          <p className="text-lg font-medium text-purple-600">
             {profile.headline}
           </p>
           <p className="text-gray-600">{profile.occupation}</p>
@@ -36,7 +63,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ profile }) => {
             {profile.experiences.map((exp, index) => (
               <div
                 key={index}
-                className="relative pl-6 border-l-2 border-blue-100 hover:border-blue-500 transition-colors"
+                className="relative pl-6 border-l-2 border-purple-100 hover:border-purple-500 transition-colors"
               >
                 <div className="space-y-2">
                   <div className="flex justify-between items-start">
@@ -44,10 +71,16 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ profile }) => {
                       <h4 className="font-semibold text-gray-900">
                         {exp.title}
                       </h4>
-                      <p className="text-blue-600 font-medium">{exp.company}</p>
+                      <p className="text-purple-600 font-medium">{exp.company}</p>
                     </div>
-                    <div className="text-sm text-gray-500 whitespace-nowrap">
-                      {exp.starts_at} - {exp.ends_at}
+                    <div className="text-right">
+                      <div className="text-sm text-gray-500 whitespace-nowrap">
+                        {formatDate(exp.starts_at)} -{" "}
+                        {formatDate(exp.ends_at) || "Present"}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        {calculateDuration(exp.starts_at, exp.ends_at)}
+                      </div>
                     </div>
                   </div>
                   <p className="text-gray-600 text-sm">{exp.location}</p>
@@ -57,15 +90,15 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ profile }) => {
                     </p>
                   )}
                   {exp.summarized_job_description && (
-                    <div className="mt-3 p-3 bg-blue-50 rounded-md">
+                    <div className="mt-3 p-3 bg-purple-50 rounded-md">
                       <p className="text-sm text-gray-700 font-medium">
-                        AI Summary
+                        Generated Job Description
                       </p>
                       <p className="text-gray-600 text-sm mt-1">
                         {exp.summarized_job_description.job_description}
                       </p>
                       {exp.summarized_job_description.sources.length > 0 && (
-                        <div className="mt-2 pt-2 border-t border-blue-100">
+                        <div className="mt-2 pt-2 border-t border-purple-100">
                           <p className="text-xs text-gray-500">Sources:</p>
                           <div className="mt-1 space-y-1">
                             {exp.summarized_job_description.sources.map(
@@ -75,7 +108,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ profile }) => {
                                   href={source}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="block text-xs text-blue-600 hover:text-blue-800 hover:underline truncate"
+                                  className="block text-xs text-purple-600 hover:text-purple-800 hover:underline truncate"
                                 >
                                   {source}
                                 </a>
@@ -119,8 +152,19 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ profile }) => {
                       </p>
                     </div>
                     {(edu.starts_at || edu.ends_at) && (
-                      <div className="text-sm text-gray-500 whitespace-nowrap">
-                        {edu.starts_at} - {edu.ends_at || "Present"}
+                      <div className="text-right">
+                        <div className="text-sm text-gray-500 whitespace-nowrap">
+                          {formatDate(edu.starts_at)} -{" "}
+                          {formatDate(edu.ends_at) || "Present"}
+                        </div>
+                        {edu.starts_at && (
+                          <div className="text-xs text-gray-400 mt-0.5">
+                            {calculateDuration(
+                              edu.starts_at,
+                              edu.ends_at || new Date().toISOString()
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
