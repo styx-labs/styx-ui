@@ -1,40 +1,27 @@
 import React from "react";
 import {
   Plus,
-  Users,
   Sparkles,
-  BarChart2,
-  Clock,
   Briefcase,
   ChevronRight,
   CreditCard,
 } from "lucide-react";
-import { Job, Candidate } from "../../types";
+import { Job } from "../../types";
 import { useNavigate } from "react-router-dom";
 
 interface HomeScreenProps {
   jobs: Job[];
-  candidates: Candidate[];
   onCreateJob: () => void;
   onOpenPricing: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   jobs,
-  candidates,
   onCreateJob,
   onOpenPricing,
 }) => {
   const navigate = useNavigate();
   const activeJobs = jobs.length;
-  const totalCandidates = candidates.length;
-  const recentCandidates = candidates
-    .sort((a, b) => {
-      const dateA = a.created_at ? new Date(a.created_at) : new Date(0);
-      const dateB = b.created_at ? new Date(b.created_at) : new Date(0);
-      return dateB.getTime() - dateA.getTime();
-    })
-    .slice(0, 5);
 
   const recentJobs = jobs
     .sort((a, b) => {
@@ -53,108 +40,25 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </p>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Active Jobs</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {activeJobs}
-              </p>
-            </div>
-            <div className="bg-purple-100 p-3 rounded-lg">
-              <Briefcase className="w-6 h-6 text-purple-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">
-                Total Candidates
-              </p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {totalCandidates}
-              </p>
-            </div>
-            <div className="bg-blue-100 p-3 rounded-lg">
-              <Users className="w-6 h-6 text-blue-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Average Score</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {candidates.length > 0
-                  ? (
-                      candidates.reduce(
-                        (acc, curr) => acc + (curr.overall_score || 0),
-                        0
-                      ) / candidates.length
-                    ).toFixed(1)
-                  : "-"}
-              </p>
-            </div>
-            <div className="bg-green-100 p-3 rounded-lg">
-              <BarChart2 className="w-6 h-6 text-green-600" />
-            </div>
-          </div>
-        </div> */}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Activity */}
-        {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Recent Candidates
-            </h2>
-          </div>
-          <div className="divide-y divide-gray-200">
-            {recentCandidates.map((candidate) => (
-              <div key={candidate.id} className="p-4 hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {candidate.name}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {candidate.current_title || "No title"}
-                    </p>
-                  </div>
-                  {candidate.overall_score !== undefined && (
-                    <span
-                      className={`px-2 py-1 text-sm font-medium rounded ${
-                        candidate.overall_score >= 8
-                          ? "bg-green-100 text-green-800"
-                          : candidate.overall_score >= 6
-                          ? "bg-blue-100 text-blue-800"
-                          : candidate.overall_score >= 4
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {candidate.overall_score.toFixed(1)}
-                    </span>
-                  )}
-                </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column - Stats & Actions */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Stats Card */}
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Active Jobs</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">
+                  {activeJobs}
+                </p>
               </div>
-            ))}
-            {recentCandidates.length === 0 && (
-              <div className="p-4 text-center text-gray-500">
-                No candidates yet
+              <div className="bg-purple-100 p-3 rounded-lg">
+                <Briefcase className="w-6 h-6 text-purple-600" />
               </div>
-            )}
+            </div>
           </div>
-        </div> */}
 
-        {/* Quick Actions */}
-        <div className="space-y-6">
+          {/* Quick Actions */}
           <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               Quick Actions
@@ -195,6 +99,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </div>
           </div>
 
+          {/* Recent Jobs */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">
@@ -219,6 +124,29 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   No jobs created yet
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Demo Video */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-full flex flex-col">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Quick Demo
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Watch how to get the most out of Styx
+              </p>
+            </div>
+            <div className="flex-1 relative">
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/HbRXibt4wKA"
+                frameBorder="0"
+                allowFullScreen
+                title="Styx Demo Video"
+              />
             </div>
           </div>
         </div>

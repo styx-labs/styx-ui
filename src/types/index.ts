@@ -11,6 +11,7 @@ export interface Job {
   ideal_profiles: string[];
   job_title: string;
   company_name: string;
+  created_at?: string;
 }
 
 interface AILinkedinJobDescription {
@@ -62,6 +63,7 @@ export interface Candidate {
   sections?: TraitEvaluation[];
   citations?: Citation[];
   profile?: Profile;
+  created_at?: string;
 }
 
 export interface Reachout {
