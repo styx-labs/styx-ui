@@ -242,16 +242,18 @@ function App() {
     keyTraits: Job["key_traits"],
     jobTitle: string,
     companyName: string,
-    ideal_profile_urls: string[]  
+    ideal_profile_urls: string[]
   ) => {
-    const success = await createJob(
+    const jobId = await createJob(
       description,
       keyTraits,
       jobTitle,
       companyName,
       ideal_profile_urls
     );
-    if (success) {
+    if (jobId) {
+      navigate(`/jobs/${jobId}`);
+    } else {
       navigate("/");
     }
   };

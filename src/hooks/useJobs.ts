@@ -37,9 +37,15 @@ export function useJobs() {
     }
   };
 
-  const getKeyTraits = async (description: string, ideal_profile_urls: string[]) => {
+  const getKeyTraits = async (
+    description: string,
+    ideal_profile_urls: string[]
+  ) => {
     try {
-      const response = await apiService.getKeyTraits(description, ideal_profile_urls);
+      const response = await apiService.getKeyTraits(
+        description,
+        ideal_profile_urls
+      );
       return response.data.key_traits;
     } catch (error) {
       console.error("Error getting key traits:", error);
@@ -68,9 +74,9 @@ export function useJobs() {
       if (jobResponse.data.job_id) {
         toast.success("Job created successfully");
         await loadJobs();
-        return true;
+        return jobResponse.data.job_id;
       }
-      return false;
+      return null;
     } catch (error) {
       console.error("Error creating job:", error);
       throw error instanceof Error ? error : new Error("Failed to create job");
