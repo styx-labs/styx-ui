@@ -162,7 +162,7 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
             <button
               type="button"
               onClick={() => setSearchMode(!searchMode)}
-              className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                 searchMode
                   ? "bg-purple-100 text-purple-700"
                   : "bg-gray-100 text-gray-600"
