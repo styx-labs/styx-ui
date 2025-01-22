@@ -78,28 +78,30 @@ export const CandidateContent: React.FC<CandidateContentProps> = ({
       )}
 
       {/* Citations Content */}
-      {selectedSection === "citations" && candidate.citations && (
-        <div className="space-y-4">
-          {candidate.citations.map((citation, index) => {
-            const citationKey = `${candidate.id}-${index}`;
-            return (
-              <CitationCard
-                key={citationKey}
-                citation={citation}
-                index={index}
-                citationKey={citationKey}
-                isExpanded={selectedTraits[citationKey] === "expanded"}
-                onToggleExpand={(key) =>
-                  onTraitToggle(
-                    key,
-                    selectedTraits[key] === "expanded" ? "" : "expanded"
-                  )
-                }
-              />
-            );
-          })}
-        </div>
-      )}
+      {selectedSection === "citations" &&
+        candidate.citations &&
+        candidate.search_mode && (
+          <div className="space-y-4">
+            {candidate.citations.map((citation, index) => {
+              const citationKey = `${candidate.id}-${index}`;
+              return (
+                <CitationCard
+                  key={citationKey}
+                  citation={citation}
+                  index={index}
+                  citationKey={citationKey}
+                  isExpanded={selectedTraits[citationKey] === "expanded"}
+                  onToggleExpand={(key) =>
+                    onTraitToggle(
+                      key,
+                      selectedTraits[key] === "expanded" ? "" : "expanded"
+                    )
+                  }
+                />
+              );
+            })}
+          </div>
+        )}
 
       {/* Profile Content */}
       {selectedSection === "profile" && candidate.profile && (

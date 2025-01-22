@@ -41,6 +41,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
           url={candidate.url}
           overall_score={candidate.overall_score}
           citations={candidate.citations}
+          search_mode={candidate.search_mode}
           openDropdownId={openDropdownId}
           dropdownPosition={dropdownPosition}
           onDelete={onDelete}
@@ -55,6 +56,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
           hasSections={!!candidate.sections && candidate.sections.length > 0}
           hasCitations={!!candidate.citations}
           hasProfile={!!candidate.profile}
+          search_mode={candidate.search_mode}
           selectedSection={selectedSection}
           onSectionChange={onSectionChange}
         />

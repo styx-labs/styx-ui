@@ -1,5 +1,13 @@
 import React, { useState, useRef } from "react";
-import { Users, ChevronDown, ChevronUp, Upload, UserPlus, RefreshCw } from "lucide-react";
+import {
+  Users,
+  ChevronDown,
+  ChevronUp,
+  Upload,
+  UserPlus,
+  RefreshCw,
+  Search,
+} from "lucide-react";
 import { Candidate, Job } from "../../../types";
 import { CandidateList } from "./CandidateList";
 import { CandidateForm } from "./CandidateForm";
@@ -13,10 +21,11 @@ interface CandidateSectionProps {
   onCandidateCreate: (
     name?: string,
     context?: string,
-    url?: string
+    url?: string,
+    searchMode: boolean
   ) => Promise<void>;
   onCandidateDelete: (candidateId: string) => void;
-  onCandidatesBatch: (urls: string[]) => Promise<void>;
+  onCandidatesBatch: (urls: string[], searchMode: boolean) => Promise<void>;
   onCandidateReachout: (
     candidateId: string,
     format: string
@@ -39,6 +48,7 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [showCandidateForm, setShowCandidateForm] = useState(false);
+  const [searchMode, setSearchMode] = useState(true);
   const [expandedTraitIndex, setExpandedTraitIndex] = useState<number | null>(
     null
   );
@@ -149,72 +159,105 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
             <h2 className="text-2xl font-bold text-gray-900">Candidates</h2>
           </div>
           <div className="flex items-center space-x-3">
-            <div className="relative">
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept=".csv"
-                className="hidden"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setIsUploading(true);
-                    try {
-                      // Parse CSV file
-                      const results = await new Promise<string[]>((resolve, reject) => {
-                        Papa.parse(file, {
-                          header: true,
-                          skipEmptyLines: true,
-                          complete: (results) => {
-                            // Check if 'url' column exists
-                            if (!results.meta.fields?.includes('url')) {
-                              reject(new Error("The CSV file must have a column labeled 'url' containing LinkedIn URLs"));
-                              return;
-                            }
+            <button
+              type="button"
+              onClick={() => setSearchMode(!searchMode)}
+              className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                searchMode
+                  ? "bg-purple-100 text-purple-700"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              <Search size={14} className="mr-1.5" />
+              Search Mode {searchMode ? "On" : "Off"}
+              <span className="ml-2 text-xs text-gray-500">
+                {searchMode ? "(Slower, More Info)" : "(Faster, Basic Info)"}
+              </span>
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept=".csv"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setIsUploading(true);
+                      try {
+                        // Parse CSV file
+                        const results = await new Promise<string[]>(
+                          (resolve, reject) => {
+                            Papa.parse(file, {
+                              header: true,
+                              skipEmptyLines: true,
+                              complete: (results) => {
+                                // Check if 'url' column exists
+                                if (!results.meta.fields?.includes("url")) {
+                                  reject(
+                                    new Error(
+                                      "The CSV file must have a column labeled 'url' containing LinkedIn URLs"
+                                    )
+                                  );
+                                  return;
+                                }
 
-                            const urls = results.data
-                              .map((row: any) => row.url)
-                              .filter((url: string | undefined): url is string => 
-                                typeof url === 'string' && url.trim() !== ''
-                              );
-                            resolve(urls);
-                          },
-                          error: (error) => {
-                            reject(error);
+                                const urls = results.data
+                                  .map((row: any) => row.url)
+                                  .filter(
+                                    (url: string | undefined): url is string =>
+                                      typeof url === "string" &&
+                                      url.trim() !== ""
+                                  );
+                                resolve(urls);
+                              },
+                              error: (error) => {
+                                reject(error);
+                              },
+                            });
                           }
-                        });
-                      });
+                        );
 
-                      if (results.length === 0) {
-                        throw new Error("No valid LinkedIn URLs found in the 'url' column");
-                      }
+                        if (results.length === 0) {
+                          throw new Error(
+                            "No valid LinkedIn URLs found in the 'url' column"
+                          );
+                        }
 
-                      await onCandidatesBatch(results);
-                      toast.success(`Found ${results.length} LinkedIn URLs to process`);
-                    } catch (error) {
-                      console.error("Error processing CSV:", error);
-                      toast.error(error instanceof Error ? error.message : "Failed to process CSV file");
-                    } finally {
-                      setIsUploading(false);
-                      if (fileInputRef.current) {
-                        fileInputRef.current.value = "";
+                        await onCandidatesBatch(results, searchMode);
+                        toast.success(
+                          `Found ${results.length} LinkedIn URLs to process`
+                        );
+                      } catch (error) {
+                        console.error("Error processing CSV:", error);
+                        toast.error(
+                          error instanceof Error
+                            ? error.message
+                            : "Failed to process CSV file"
+                        );
+                      } finally {
+                        setIsUploading(false);
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = "";
+                        }
                       }
                     }
-                  }
-                }}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  isUploading
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-purple-100 text-purple-700 hover:bg-purple-200"
-                }`}
-              >
-                <Upload size={16} className="mr-2" />
-                {isUploading ? "Uploading..." : "Upload CSV"}
-              </button>
+                  }}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    isUploading
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-purple-100 text-purple-700 hover:bg-purple-200"
+                  }`}
+                >
+                  <Upload size={16} className="mr-2" />
+                  {isUploading ? "Uploading..." : "Upload CSV"}
+                </button>
+              </div>
             </div>
             <button
               onClick={() => setShowCandidateForm(!showCandidateForm)}
@@ -255,11 +298,20 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
           </div>
         </div>
 
-        {showCandidateForm && <CandidateForm onSubmit={onCandidateCreate} />}
+        {showCandidateForm && (
+          <CandidateForm
+            onSubmit={(name, context, url) =>
+              onCandidateCreate(name, context, url, searchMode)
+            }
+          />
+        )}
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-lg p-6 shadow-sm animate-pulse">
+              <div
+                key={i}
+                className="bg-white rounded-lg p-6 shadow-sm animate-pulse"
+              >
                 <div className="flex items-center space-x-4">
                   <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
                   <div className="flex-1 space-y-2">

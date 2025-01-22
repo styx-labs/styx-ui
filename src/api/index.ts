@@ -106,10 +106,12 @@ export const apiService = {
     api.delete<{ success: boolean }>(`/jobs/${jobId}`),
 
   getKeyTraits: (description: string, ideal_profile_urls: string[]) =>
-    api.post<{ key_traits: string[]; job_title: string; company_name: string, ideal_profiles: string[] }>(
-      "/get-key-traits",
-      { description, ideal_profile_urls }
-    ),
+    api.post<{
+      key_traits: string[];
+      job_title: string;
+      company_name: string;
+      ideal_profiles: string[];
+    }>("/get-key-traits", { description, ideal_profile_urls }),
 
   // Candidates
   getCandidates: (jobId: string) =>
@@ -128,10 +130,14 @@ export const apiService = {
       `/jobs/${jobId}/candidates/${candidateId}`
     ),
 
-  createCandidatesBatch: (jobId: string, urls: string[]) =>
+  createCandidatesBatch: (
+    jobId: string,
+    urls: string[],
+    search_mode: boolean = true
+  ) =>
     api.post<{ success: boolean }>(
       `/jobs/${jobId}/candidates_bulk`,
-      { urls },
+      { urls, search_mode },
       {
         headers: {
           "Content-Type": "application/json",

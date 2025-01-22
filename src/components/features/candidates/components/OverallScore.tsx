@@ -4,6 +4,7 @@ import { Citation } from "../../../../types";
 interface OverallScoreProps {
   score: number;
   citations?: Citation[];
+  search_mode?: boolean;
 }
 
 const getScoreBucket = (score: number) => {
@@ -25,6 +26,7 @@ const hasEnoughInformation = (citations?: Citation[]) => {
 export const OverallScore: React.FC<OverallScoreProps> = ({
   score,
   citations,
+  search_mode,
 }) => {
   const bucket = getScoreBucket(score);
   const enoughInfo = hasEnoughInformation(citations);
@@ -36,11 +38,15 @@ export const OverallScore: React.FC<OverallScoreProps> = ({
       >
         {bucket.text}
       </span>
-      {!enoughInfo && score < 6 && (
+      {!search_mode ? (
+        <span className="px-2 py-0.5 text-sm font-medium rounded bg-gray-100 text-gray-800">
+          Basic Info Only
+        </span>
+      ) : !enoughInfo ? (
         <span className="px-2 py-0.5 text-sm font-medium rounded bg-gray-100 text-gray-800">
           Not enough information
         </span>
-      )}
+      ) : null}
     </div>
   );
 };

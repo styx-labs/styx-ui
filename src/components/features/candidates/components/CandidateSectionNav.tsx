@@ -6,6 +6,7 @@ interface CandidateSectionNavProps {
   hasSections: boolean;
   hasCitations: boolean;
   hasProfile: boolean;
+  search_mode?: boolean;
   selectedSection: string;
   onSectionChange: (candidateId: string, section: string) => void;
 }
@@ -16,6 +17,7 @@ export const CandidateSectionNav: React.FC<CandidateSectionNavProps> = ({
   hasSections,
   hasCitations,
   hasProfile,
+  search_mode = true,
   selectedSection,
   onSectionChange,
 }) => {
@@ -57,7 +59,7 @@ export const CandidateSectionNav: React.FC<CandidateSectionNavProps> = ({
           Breakdown
         </button>
       )}
-      {hasCitations && (
+      {hasCitations && search_mode && (
         <button
           onClick={() => onSectionChange(candidateId, "citations")}
           className={`flex-1 px-3 py-1.5 text-center rounded-md transition-colors text-sm ${
