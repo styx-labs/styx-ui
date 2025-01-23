@@ -79,7 +79,8 @@ export function useCandidates(jobId: string | undefined) {
   const createCandidate = async (
     name?: string,
     context?: string,
-    url?: string
+    url?: string,
+    search_mode: boolean = true
   ) => {
     if (!jobId || !user) return;
 
@@ -88,6 +89,7 @@ export function useCandidates(jobId: string | undefined) {
         name: name || "",
         context: context || "",
         url: url || "",
+        search_mode,
       });
       toast.success("Candidate added successfully");
       setError(null);
@@ -109,11 +111,14 @@ export function useCandidates(jobId: string | undefined) {
     }
   };
 
-  const createCandidatesBatch = async (urls: string[]) => {
+  const createCandidatesBatch = async (
+    urls: string[],
+    search_mode: boolean = true
+  ) => {
     if (!jobId) return;
 
     try {
-      await apiService.createCandidatesBatch(jobId, urls);
+      await apiService.createCandidatesBatch(jobId, urls, search_mode);
       toast.success("Candidates added successfully");
       loadCandidates();
     } catch (error) {

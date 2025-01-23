@@ -64,6 +64,7 @@ export interface Candidate {
   citations?: Citation[];
   profile?: Profile;
   created_at?: string;
+  search_mode?: boolean;
 }
 
 export interface Reachout {

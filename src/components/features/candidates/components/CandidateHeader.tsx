@@ -11,6 +11,7 @@ interface CandidateHeaderProps {
   url?: string;
   overall_score?: number;
   citations?: Citation[];
+  search_mode?: boolean;
   openDropdownId: string | null;
   dropdownPosition: { top: number; left: number } | null;
   onDelete: (id: string) => void;
@@ -26,6 +27,7 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
   url,
   overall_score,
   citations,
+  search_mode,
   openDropdownId,
   dropdownPosition,
   onDelete,
@@ -101,7 +103,11 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
             )}
         </div>
         {overall_score !== undefined && (
-          <OverallScore score={overall_score} citations={citations} />
+          <OverallScore
+            score={overall_score}
+            citations={citations}
+            search_mode={search_mode}
+          />
         )}
       </div>
       <button
