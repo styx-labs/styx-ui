@@ -21,8 +21,8 @@ import { HomeScreen } from "./components/layout/HomeScreen";
 import { User } from "firebase/auth";
 import { LoadingSpinner } from "./components/common/LoadingSpinner";
 import { Job } from "./types";
-import { PricingPage } from "./components/features/payment/PricingPage";
 import { PaymentStatus } from "./components/features/payment/PaymentStatus";
+import PricingPage from "./components/features/payment/PricingPage";
 
 // Extend Window interface
 interface ExtendedWindow extends Window {
