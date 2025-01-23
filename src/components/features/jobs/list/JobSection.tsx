@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Job } from "../../../types";
-import { JobList } from "./list/JobList";
+import { Job } from "../../../../types";
+import { JobList } from "./JobList";
 import { User } from "firebase/auth";
 import { SidebarHeader } from "./SidebarHeader";
 import { ProfileMenu } from "./ProfileMenu";

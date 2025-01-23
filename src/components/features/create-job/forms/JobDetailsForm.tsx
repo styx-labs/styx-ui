@@ -1,4 +1,6 @@
 import React from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface JobDetailsFormProps {
   jobTitle: string;
@@ -14,27 +16,25 @@ export const JobDetailsForm: React.FC<JobDetailsFormProps> = ({
   onCompanyNameChange,
 }) => {
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Job Title
-        </label>
-        <input
+    <div className="grid grid-cols-2 gap-6">
+      <div className="space-y-2">
+        <Label htmlFor="jobTitle">Job Title</Label>
+        <Input
+          id="jobTitle"
           type="text"
           value={jobTitle}
           onChange={(e) => onJobTitleChange(e.target.value)}
-          className="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          placeholder="e.g. Senior Software Engineer"
         />
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Company Name
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="companyName">Company Name</Label>
+        <Input
+          id="companyName"
           type="text"
           value={companyName}
           onChange={(e) => onCompanyNameChange(e.target.value)}
-          className="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          placeholder="e.g. Acme Inc."
         />
       </div>
     </div>

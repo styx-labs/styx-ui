@@ -10,8 +10,8 @@ export const TraitTips: React.FC = () => {
         <ul className="list-disc list-inside space-y-1 text-purple-700">
           <li>Use clear, specific trait names</li>
           <li>Add detailed descriptions to guide the evaluation</li>
+          <li>Focus on traits that are most important for the role</li>
           <li>Mark critical requirements as "Required"</li>
-          <li>Choose appropriate trait types for accurate scoring</li>
         </ul>
       </div>
     </div>

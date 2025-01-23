@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Plus, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import styxLogo from "../../../assets/styx_name_logo.png";
+import styxLogo from "../../../../assets/styx_name_logo.png";
 
 interface SidebarHeaderProps {
   isCollapsed: boolean;
