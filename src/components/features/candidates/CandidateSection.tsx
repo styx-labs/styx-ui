@@ -22,10 +22,10 @@ interface CandidateSectionProps {
     name?: string,
     context?: string,
     url?: string,
-    searchMode: boolean
+    searchMode?: boolean
   ) => Promise<void>;
   onCandidateDelete: (candidateId: string) => void;
-  onCandidatesBatch: (urls: string[], searchMode: boolean) => Promise<void>;
+  onCandidatesBatch: (urls: string[], searchMode?: boolean) => Promise<void>;
   onCandidateReachout: (
     candidateId: string,
     format: string

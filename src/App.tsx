@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { useJobs } from "./hooks/useJobs";
 import { useCandidates } from "./hooks/useCandidates";
 import { useAllCandidates } from "./hooks/useAllCandidates";
-import { JobSection } from "./components/features/jobs/list/JobSection";
+import { JobSection } from "./components/features/sidebar/JobSection";
 import { CandidateSection } from "./components/features/candidates/CandidateSection";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { ConnectionError } from "./components/common/ConnectionError";

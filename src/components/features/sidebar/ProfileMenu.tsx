@@ -1,7 +1,7 @@
 import React from "react";
-import { Chrome, LogOut, Search, CreditCard, Plus } from "lucide-react";
+import { Chrome, LogOut, Search, CreditCard } from "lucide-react";
 import { User } from "firebase/auth";
-import { useSearchCredits } from "../../../../hooks/useSearchCredits";
+import { useSearchCredits } from "../../../hooks/useSearchCredits";
 
 interface ProfileMenuProps {
   user: User | null;
