@@ -1,9 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { Candidate } from "../../../types";
 import toast from "react-hot-toast";
-import { CandidateListControls } from "./components/CandidateListControls";
 import { CandidateCard } from "./components/CandidateCard";
-import { transformSection } from "./utils/transformSection";
 
 interface CandidateListProps {
   candidates: Candidate[];
@@ -32,64 +30,6 @@ export const CandidateList: React.FC<CandidateListProps> = ({
     top: number;
     left: number;
   } | null>(null);
-  const [sortBy, setSortBy] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [filters, setFilters] = useState<
-    Array<{ trait: string; minScore: number }>
-  >([]);
-
-  // Get all unique traits from candidates
-  const allTraits = useMemo(() => {
-    const traits = new Set<string>();
-    candidates.forEach((candidate) => {
-      candidate.sections?.forEach((section) => {
-        traits.add(section.section);
-      });
-    });
-    return Array.from(traits);
-  }, [candidates]);
-
-  // Handle sorting and filtering
-  const processedCandidates = useMemo(() => {
-    let result = [...candidates];
-
-    // Apply all filters
-    if (filters.length > 0) {
-      result = result.filter((candidate) => {
-        return filters.every((filter) => {
-          const section = candidate.sections?.find(
-            (s) => s.section === filter.trait
-          );
-          if (!section) return false;
-          const traitEval = transformSection(section);
-          return (traitEval.normalized_score || 0) >= filter.minScore;
-        });
-      });
-    }
-
-    // Then sort
-    if (sortBy) {
-      result.sort((a, b) => {
-        const aSection = a.sections?.find((s) => s.section === sortBy);
-        const bSection = b.sections?.find((s) => s.section === sortBy);
-        const aScore = aSection
-          ? transformSection(aSection).normalized_score
-          : 0;
-        const bScore = bSection
-          ? transformSection(bSection).normalized_score
-          : 0;
-        return sortOrder === "desc" ? bScore - aScore : aScore - bScore;
-      });
-    } else {
-      // Default sort by overall score
-      result.sort((a, b) => {
-        if (a.status !== "complete" || b.status !== "complete") return 0;
-        return (b.overall_score ?? 0) - (a.overall_score ?? 0);
-      });
-    }
-
-    return result;
-  }, [candidates, sortBy, sortOrder, filters]);
 
   const handleReachout = async (candidateId: string, format: string) => {
     const message = await onReachout(candidateId, format);
@@ -143,20 +83,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* <CandidateListControls
-        allTraits={allTraits}
-        filters={filters}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        candidateCount={processedCandidates.length}
-        onFilterChange={setFilters}
-        onSortChange={(newSortBy, newSortOrder) => {
-          setSortBy(newSortBy);
-          setSortOrder(newSortOrder);
-        }}
-      /> */}
-
-      {processedCandidates.map((candidate) => (
+      {candidates.map((candidate) => (
         <CandidateCard
           key={candidate.id}
           candidate={candidate}

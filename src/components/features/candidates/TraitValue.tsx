@@ -1,5 +1,4 @@
-import React from "react";
-import { Check, X, Star, Tag, Circle } from "lucide-react";
+import { Check, X, Star } from "lucide-react";
 import { TraitEvaluation, Citation, TraitType } from "../../../types";
 
 interface TraitValueProps {
@@ -38,23 +37,6 @@ export const TraitValue: React.FC<TraitValueProps> = ({ trait, citations }) => {
           </div>
         );
       }
-
-      // case "TraitType.NUMERIC":
-      //   return (
-      //     <div className="flex items-center gap-2">
-      //       <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white">
-      //         <span className="text-xs font-bold">#</span>
-      //       </div>
-      //       <div className="flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-      //         <span>{trait.value}</span>
-      //         {trait.value_type && (
-      //           <span className="ml-1 text-blue-600/75">
-      //             {trait.value_type}
-      //           </span>
-      //         )}
-      //       </div>
-      //     </div>
-      //   );
 
       case TraitType.SCORE: {
         const score = Number(trait.value);
@@ -106,24 +88,6 @@ export const TraitValue: React.FC<TraitValueProps> = ({ trait, citations }) => {
           </div>
         );
       }
-
-      // case "TraitType.CATEGORICAL":
-      //   return (
-      //     <div className="flex items-center gap-2">
-      //       <div className="flex items-center justify-center w-6 h-6 rounded-full bg-purple-500 text-white">
-      //         <Tag className="w-4 h-4" />
-      //       </div>
-      //       <div className="flex items-center gap-1 px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-      //         <span>{trait.value}</span>
-      //         {trait.value_type && (
-      //           <>
-      //             <Circle className="w-1 h-1 fill-current" />
-      //             <span className="text-purple-600/75">{trait.value_type}</span>
-      //           </>
-      //         )}
-      //       </div>
-      //     </div>
-      //   );
 
       default:
         return (

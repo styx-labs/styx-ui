@@ -3,16 +3,7 @@ import { toast } from "react-hot-toast";
 import { paymentService } from "../api/payment";
 
 export const usePricing = () => {
-  const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const openPricing = useCallback(() => {
-    setIsPricingOpen(true);
-  }, []);
-
-  const closePricing = useCallback(() => {
-    setIsPricingOpen(false);
-  }, []);
 
   const handleSelectPlan = useCallback(async (planId: string) => {
     try {
@@ -28,10 +19,7 @@ export const usePricing = () => {
   }, []);
 
   return {
-    isPricingOpen,
     isLoading,
-    openPricing,
-    closePricing,
     handleSelectPlan,
   };
 };

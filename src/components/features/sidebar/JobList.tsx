@@ -1,6 +1,18 @@
-import React from "react";
 import { Trash2 } from "lucide-react";
-import { Job } from "../../../types";
+import type { Job } from "@/types";
+import { Button } from "@/components/ui/button";
+import {
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface JobListProps {
   jobs: Job[];
@@ -8,67 +20,111 @@ interface JobListProps {
   onJobSelect: (job: Job) => void;
   onDeleteJob: (jobId: string) => void;
   isLoading?: boolean;
+  isCollapsed?: boolean;
 }
 
-const JobSkeleton = () => (
-  <div className="p-4 animate-pulse">
-    <div className="flex flex-col gap-2">
-      <div className="h-5 bg-gray-200 rounded w-3/4"></div>
-      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+function JobSkeleton() {
+  return (
+    <div className="p-4 space-y-2">
+      <Skeleton className="h-5 w-3/4" />
+      <Skeleton className="h-4 w-1/2" />
     </div>
-  </div>
-);
+  );
+}
 
-export const JobList: React.FC<JobListProps> = ({
+export function JobList({
   jobs,
   selectedJobId,
   onJobSelect,
   onDeleteJob,
   isLoading = false,
-}) => {
+  isCollapsed = false,
+}: JobListProps) {
   if (isLoading) {
     return (
-      <div className="divide-y divide-solid divide-gray-200 bg-white -mt-2">
-        {[...Array(3)].map((_, index) => (
-          <JobSkeleton key={index} />
+      <div className="divide-y divide-border">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <JobSkeleton key={i} />
         ))}
       </div>
     );
   }
 
-  return (
-    <div className="divide-y divide-solid divide-gray-200 bg-white -mt-2">
-      {jobs.map((job) => (
-        <div
-          key={job.id}
-          onClick={() => onJobSelect(job)}
-          className={`group flex items-center justify-between p-4 cursor-pointer
-            ${
-              selectedJobId === job.id
-                ? "bg-gray-100"
-                : "bg-white hover:bg-gray-50"
-            }`}
-        >
-          <div className="flex flex-col overflow-hidden">
-            <p className="font-medium text-gray-900 truncate">
-              {job.company_name}
-            </p>
-            <p className="text-sm text-gray-500 truncate">{job.job_title}</p>
-          </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDeleteJob(job.id!);
-            }}
-            className="p-2 text-gray-400 hover:text-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+  if (jobs.length === 0) {
+    return (
+      <div className="p-4 text-center text-sm text-muted-foreground">
+        No jobs found
+      </div>
+    );
+  }
+
+  const content = (
+    <SidebarMenu>
+      <div className="divide-y divide-border">
+        {jobs.map((job) => (
+          <SidebarMenuItem
+            key={job.id}
+            className="group/item px-2 py-3 first:pt-4 last:pb-4 hover:bg-muted/50"
           >
-            <Trash2 size={20} />
-          </button>
-        </div>
-      ))}
-      {jobs.length === 0 && (
-        <div className="p-4 text-gray-500 text-center">No jobs found</div>
-      )}
-    </div>
+            {isCollapsed ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <SidebarMenuButton
+                    onClick={() => onJobSelect(job)}
+                    isActive={selectedJobId === job.id}
+                    className="relative transition-colors"
+                  >
+                    <div className="flex-1 overflow-hidden">
+                      <p className="font-medium truncate text-center">
+                        {job.company_name.charAt(0)}
+                      </p>
+                    </div>
+                  </SidebarMenuButton>
+                </TooltipTrigger>
+                <TooltipContent side="right" align="center">
+                  <p className="font-medium">{job.company_name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {job.job_title}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <SidebarMenuButton
+                onClick={() => onJobSelect(job)}
+                isActive={selectedJobId === job.id}
+                className="relative transition-colors"
+              >
+                <div className="flex-1 overflow-hidden">
+                  <p className="font-medium truncate leading-normal">
+                    {job.company_name}
+                  </p>
+                  <p className="text-sm text-muted-foreground truncate leading-normal">
+                    {job.job_title}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteJob(job.id!);
+                  }}
+                  className="absolute right-2 hidden group-hover/item:block hover:text-destructive hover:bg-transparent"
+                >
+                  <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-destructive transition-colors" />
+                  <span className="sr-only">Delete job</span>
+                </Button>
+              </SidebarMenuButton>
+            )}
+          </SidebarMenuItem>
+        ))}
+      </div>
+    </SidebarMenu>
   );
-};
+
+  return isCollapsed ? (
+    <TooltipProvider delayDuration={0}>{content}</TooltipProvider>
+  ) : (
+    content
+  );
+}

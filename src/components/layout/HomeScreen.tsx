@@ -12,13 +12,11 @@ import { useNavigate } from "react-router-dom";
 interface HomeScreenProps {
   jobs: Job[];
   onCreateJob: () => void;
-  onOpenPricing: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   jobs,
   onCreateJob,
-  onOpenPricing,
 }) => {
   const navigate = useNavigate();
   const activeJobs = jobs.length;
@@ -32,7 +30,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     .slice(0, 3);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-4">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-600 mt-2">
@@ -75,7 +73,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <ChevronRight className="w-5 h-5" />
               </button>
               <button
-                onClick={onOpenPricing}
+                onClick={() => navigate("/pricing")}
                 className="w-full flex items-center justify-between p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"
               >
                 <div className="flex items-center">

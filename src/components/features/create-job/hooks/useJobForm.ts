@@ -30,10 +30,6 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
 
   const handleDescriptionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (state.description.trim().length < 50) {
-      toast.error("Please provide a more detailed job description");
-      return;
-    }
     updateState({ currentStep: 2 });
   };
 
