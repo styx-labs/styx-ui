@@ -1,17 +1,17 @@
 import React from "react";
 import { AlertCircle, CreditCard } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface NotEnoughCreditsErrorProps {
   creditsNeeded: number;
   creditsAvailable: number;
-  onOpenPricing: () => void;
 }
 
 export const NotEnoughCreditsError: React.FC<NotEnoughCreditsErrorProps> = ({
   creditsNeeded,
   creditsAvailable,
-  onOpenPricing,
 }) => {
+  const navigate = useNavigate();
   return (
     <div className="rounded-lg bg-red-50 p-4">
       <div className="flex">
@@ -31,7 +31,7 @@ export const NotEnoughCreditsError: React.FC<NotEnoughCreditsErrorProps> = ({
           <div className="mt-4">
             <div className="-mx-2 -my-1.5 flex">
               <button
-                onClick={onOpenPricing}
+                onClick={() => navigate("/pricing")}
                 className="flex items-center gap-2 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-800 hover:bg-red-100"
               >
                 <CreditCard className="h-4 w-4" />

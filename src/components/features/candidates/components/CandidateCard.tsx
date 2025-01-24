@@ -36,9 +36,9 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
       <div className="p-4">
         <CandidateHeader
           id={candidate.id!}
-          name={candidate.name}
-          status={candidate.status}
-          url={candidate.url}
+          name={candidate.name!}
+          status={candidate.status!}
+          url={candidate.url!}
           overall_score={candidate.overall_score}
           citations={candidate.citations}
           search_mode={candidate.search_mode}

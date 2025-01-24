@@ -1,28 +1,27 @@
-import React from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
 import { useJobs } from "./hooks/useJobs";
 import { useCandidates } from "./hooks/useCandidates";
-import { useAllCandidates } from "./hooks/useAllCandidates";
-import { JobSection } from "./components/features/jobs/JobSection";
+import { AppSidebar } from "./components/features/sidebar/Sidebar";
 import { CandidateSection } from "./components/features/candidates/CandidateSection";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { ConnectionError } from "./components/common/ConnectionError";
-import { JobForm } from "./components/features/jobs/forms/JobForm";
+import { JobForm } from "./components/features/create-job/JobForm";
 import { useParams } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { Login } from "./components/auth/Login";
 import { setAuthUser, apiService } from "./api";
 import { UnauthorizedError } from "./api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Welcome } from "./components/layout/Welcome";
 import { HomeScreen } from "./components/layout/HomeScreen";
 import { User } from "firebase/auth";
 import { LoadingSpinner } from "./components/common/LoadingSpinner";
 import { Job } from "./types";
-import { PricingPage } from "./components/features/payment/PricingPage";
 import { PaymentStatus } from "./components/features/payment/PaymentStatus";
+import PricingPage from "./components/features/payment/PricingPage";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 // Extend Window interface
 interface ExtendedWindow extends Window {
@@ -188,15 +187,14 @@ function JobDetail() {
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] =
-    React.useState<boolean>(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const { jobs, isLoading, createJob, deleteJob, error, retry } = useJobs();
-  const { candidates: allCandidates } = useAllCandidates(jobs);
   const { user, loading, logout } = useAuth();
-  const [imageError, setImageError] = React.useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
 
   // Set auth token in API service and notify extension when user changes
-  React.useEffect(() => {
+  useEffect(() => {
     const handleAuthChange = async () => {
       if (user) {
         const token = await user.getIdToken();
@@ -300,96 +298,69 @@ function App() {
   }
 
   return (
-    <ErrorBoundary>
-      <div className="h-screen flex bg-gray-100">
-        <Toaster position="top-right" />
-
-        {/* Sidebar - Fixed height, scrollable */}
-        <div
-          className={`${
-            isSidebarCollapsed ? "w-12" : "w-1/5 min-w-[300px]"
-          } bg-white border-r border-gray-200 flex flex-col h-screen transition-all duration-200 ease-in-out overflow-hidden`}
-        >
-          <div className="flex-1 overflow-y-auto">
-            <JobSection
-              jobs={jobs}
-              isLoading={isLoading}
-              onJobSelect={(job) => {
-                navigate(`/jobs/${job.id}`);
-                if (isSidebarCollapsed) {
-                  setIsSidebarCollapsed(false);
-                }
-              }}
-              onCreateClick={() => {
-                navigate("/jobs/create");
-                if (isSidebarCollapsed) {
-                  setIsSidebarCollapsed(false);
-                }
-              }}
-              onJobDelete={handleDeleteJob}
-              selectedJobId={jobId}
-              renderAvatar={renderAvatar}
-              user={user}
-              onLogout={logout}
-              isCollapsed={isSidebarCollapsed}
-              onToggleCollapse={() =>
-                setIsSidebarCollapsed(!isSidebarCollapsed)
+    <>
+      <Toaster position="top-right" />
+      <ErrorBoundary>
+        <SidebarProvider>
+          <AppSidebar
+            jobs={jobs}
+            isLoading={isLoading}
+            onJobSelect={(job) => {
+              navigate(`/jobs/${job.id}`);
+              if (isSidebarCollapsed) {
+                setIsSidebarCollapsed(false);
               }
-              onOpenPricing={() => navigate("/pricing")}
-            />
-          </div>
-        </div>
+            }}
+            onCreateClick={() => {
+              navigate("/create");
+              if (isSidebarCollapsed) {
+                setIsSidebarCollapsed(false);
+              }
+            }}
+            onJobDelete={handleDeleteJob}
+            renderAvatar={renderAvatar}
+            user={user}
+            onLogout={logout}
+          />
 
-        {/* Main Content - Fixed height, scrollable */}
-        <div className="flex-1 h-screen overflow-y-auto">
-          <div className="p-6">
+          <main className="flex-1 relative bg-gray-50 p-8">
             <Routes>
               <Route
                 path="/"
                 element={
-                  jobs.length === 0 && !isLoading ? (
-                    <Welcome
-                      onCreateClick={() => {
-                        navigate("/jobs/create");
-                      }}
-                    />
-                  ) : !jobId ? (
-                    <HomeScreen
-                      jobs={jobs}
-                      candidates={allCandidates || []}
-                      onCreateJob={() => {
-                        navigate("/jobs/create");
-                      }}
-                      onOpenPricing={() => {
-                        navigate("/pricing");
-                      }}
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500">
-                      Select a job or create a new one to get started
-                    </div>
-                  )
+                  <HomeScreen
+                    jobs={jobs}
+                    onCreateJob={() => {
+                      navigate("/create");
+                    }}
+                  />
                 }
               />
               <Route
-                path="/jobs/create"
+                path="/welcome"
+                element={
+                  <Welcome
+                    onCreateClick={() => {
+                      navigate("/create");
+                    }}
+                  />
+                }
+              />
+              <Route
+                path="/create"
                 element={<JobForm onSubmit={handleCreateJob} />}
               />
-              <Route path="/jobs/:jobId" element={<JobDetail />} />
               <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/jobs/:jobId" element={<JobDetail />} />
               <Route
-                path="/pricing/success"
+                path="/payment-status"
                 element={<PaymentStatus status="success" />}
               />
-              <Route
-                path="/pricing/cancel"
-                element={<PaymentStatus status="cancel" />}
-              />
             </Routes>
-          </div>
-        </div>
-      </div>
-    </ErrorBoundary>
+          </main>
+        </SidebarProvider>
+      </ErrorBoundary>
+    </>
   );
 }
 
