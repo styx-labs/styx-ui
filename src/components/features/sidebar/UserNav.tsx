@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { SearchCredits } from "./SearchCredits";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface UserNavProps {
   user: User | null;
@@ -23,6 +24,7 @@ interface UserNavProps {
 export function UserNav({ user, onLogout, renderAvatar }: UserNavProps) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const navigate = useNavigate();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -74,7 +76,7 @@ export function UserNav({ user, onLogout, renderAvatar }: UserNavProps) {
             Chrome Extension
           </a>
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/pricing")}>
           <CreditCard className="mr-2 h-4 w-4" />
           Pricing & Credits
         </DropdownMenuItem>

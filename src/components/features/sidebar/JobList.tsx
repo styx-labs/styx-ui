@@ -72,7 +72,7 @@ export function JobList({
                   <SidebarMenuButton
                     onClick={() => onJobSelect(job)}
                     isActive={selectedJobId === job.id}
-                    className="relative transition-colors"
+                    className="relative transition-colors hover:bg-transparent"
                   >
                     <div className="flex-1 overflow-hidden">
                       <p className="font-medium truncate text-center">
@@ -81,7 +81,11 @@ export function JobList({
                     </div>
                   </SidebarMenuButton>
                 </TooltipTrigger>
-                <TooltipContent side="right" align="center">
+                <TooltipContent
+                  side="right"
+                  align="center"
+                  className="bg-zinc-950 text-zinc-50"
+                >
                   <p className="font-medium">{job.company_name}</p>
                   <p className="text-sm text-muted-foreground">
                     {job.job_title}
@@ -92,7 +96,7 @@ export function JobList({
               <SidebarMenuButton
                 onClick={() => onJobSelect(job)}
                 isActive={selectedJobId === job.id}
-                className="relative transition-colors"
+                className="relative transition-colors hover:bg-transparent"
               >
                 <div className="flex-1 overflow-hidden">
                   <p className="font-medium truncate leading-normal">
