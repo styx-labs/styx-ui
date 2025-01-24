@@ -351,14 +351,7 @@ function App() {
                 element={<JobForm onSubmit={handleCreateJob} />}
               />
               <Route path="/pricing" element={<PricingPage />} />
-              <Route
-                path="/jobs/:jobId"
-                element={
-                  <div className="h-full p-6">
-                    <JobDetail />
-                  </div>
-                }
-              />
+              <Route path="/jobs/:jobId" element={<JobDetail />} />
               <Route
                 path="/payment-status"
                 element={<PaymentStatus status="success" />}
