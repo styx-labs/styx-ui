@@ -4,7 +4,7 @@ export const transformSection = (section: TraitEvaluation): TraitEvaluation => {
   // Convert trait_type to uppercase and ensure it matches the enum
   let trait_type: TraitType;
   if (!section.trait_type) {
-    trait_type = TraitType.SCORE;
+    trait_type = TraitType.BOOLEAN;
   } else {
     trait_type =
       section.trait_type === "TraitType.SCORE"
