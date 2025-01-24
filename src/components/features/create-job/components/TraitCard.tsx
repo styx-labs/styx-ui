@@ -40,11 +40,12 @@ export const TraitCard: React.FC<TraitCardProps> = ({
     >
       <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
         <div className="flex-1">
+          <Label>Trait</Label>
           <Input
             value={trait.trait}
             onChange={(e) => onUpdate(index, { trait: e.target.value })}
             placeholder="Enter trait name..."
-            className="text-lg font-medium border-0 px-0 h-auto focus-visible:ring-0 bg-transparent"
+            className="text-lg font-medium px-3 h-auto focus-visible:ring-0 bg-transparent"
           />
         </div>
         <div className="flex items-center gap-3">
@@ -79,7 +80,7 @@ export const TraitCard: React.FC<TraitCardProps> = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          <Label>Description</Label>
+          <Label>Description - Tell our models exactly how candidates should be evaluated</Label>
           <Textarea
             value={trait.description}
             onChange={(e) => onUpdate(index, { description: e.target.value })}
