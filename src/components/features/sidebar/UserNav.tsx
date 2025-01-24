@@ -66,7 +66,7 @@ export function UserNav({ user, onLogout, renderAvatar }: UserNavProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem className="cursor-pointer" asChild>
           <a
             href="https://chromewebstore.google.com/detail/styx-linkedin-profile-eva/aoehfbedlmpcinddkobkgaddmifnenjl"
             target="_blank"
@@ -76,12 +76,18 @@ export function UserNav({ user, onLogout, renderAvatar }: UserNavProps) {
             Chrome Extension
           </a>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/pricing")}>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => navigate("/pricing")}
+        >
           <CreditCard className="mr-2 h-4 w-4" />
           Pricing & Credits
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onLogout} className="text-destructive">
+        <DropdownMenuItem
+          className="cursor-pointer text-destructive"
+          onClick={onLogout}
+        >
           <LogOut className="mr-2 h-4 w-4" />
           Log out
         </DropdownMenuItem>

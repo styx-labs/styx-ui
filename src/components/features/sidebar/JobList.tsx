@@ -96,7 +96,7 @@ export function JobList({
               <SidebarMenuButton
                 onClick={() => onJobSelect(job)}
                 isActive={selectedJobId === job.id}
-                className="relative transition-colors hover:bg-transparent"
+                className="relative transition-colors hover:bg-transparent h-10"
               >
                 <div className="flex-1 overflow-hidden">
                   <p className="font-medium truncate leading-normal">
