@@ -7,12 +7,14 @@ import {
   UserPlus,
   RefreshCw,
   Search,
+  Edit2,
 } from "lucide-react";
 import { Candidate, Job } from "../../../types";
 import { CandidateList } from "./CandidateList";
 import { CandidateForm } from "./CandidateForm";
 import { toast } from "react-hot-toast";
 import Papa from "papaparse";
+import { EditKeyTraits } from "./components/EditKeyTraits";
 
 interface CandidateSectionProps {
   job: Job;
@@ -49,6 +51,7 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [showCandidateForm, setShowCandidateForm] = useState(false);
   const [searchMode, setSearchMode] = useState(true);
+  const [showEditTraits, setShowEditTraits] = useState(false);
   const [expandedTraitIndex, setExpandedTraitIndex] = useState<number | null>(
     null
   );
@@ -114,9 +117,18 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
           </div>
           {job.key_traits && job.key_traits.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
-                Key Traits
-              </h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  Key Traits
+                </h3>
+                <button
+                  onClick={() => setShowEditTraits(true)}
+                  className="inline-flex items-center text-sm text-purple-600 hover:text-purple-800"
+                >
+                  <Edit2 className="w-4 h-4 mr-1" />
+                  Edit Traits and Re-Evaluate
+                </button>
+              </div>
               <div className="bg-gray-50 rounded-lg p-3">
                 <div className="flex flex-wrap gap-2">
                   {job.key_traits.map((trait, index) => (
@@ -331,6 +343,14 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
           />
         )}
       </div>
+
+      {showEditTraits && (
+        <EditKeyTraits
+          job={job}
+          onClose={() => setShowEditTraits(false)}
+          onSuccess={onRefresh}
+        />
+      )}
     </div>
   );
 };

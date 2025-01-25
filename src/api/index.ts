@@ -169,4 +169,10 @@ export const apiService = {
       planId,
     });
   },
+
+  editKeyTraits: (jobId: string, key_traits: Job['key_traits']) => {
+    return api.patch<{ success: boolean }>(`/jobs/${jobId}/edit-key-traits`, {
+      key_traits,
+    });
+  },
 };
