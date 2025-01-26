@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import type { Job } from "@/types";
+import type { Job } from "@/types/index";
 
 interface CandidateTraitFilterProps {
   job: Job;

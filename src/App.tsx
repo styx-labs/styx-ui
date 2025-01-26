@@ -4,7 +4,6 @@ import toast from "react-hot-toast";
 import { useJobs } from "./hooks/useJobs";
 import { useCandidates } from "./hooks/useCandidates";
 import { AppSidebar } from "./components/features/sidebar/Sidebar";
-import { CandidateSection } from "./components/features/candidates/CandidateSection";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { ConnectionError } from "./components/common/ConnectionError";
 import { JobForm } from "./components/features/create-job/JobForm";
@@ -18,10 +17,11 @@ import { Welcome } from "./components/layout/Welcome";
 import { HomeScreen } from "./components/layout/HomeScreen";
 import { User } from "firebase/auth";
 import { LoadingSpinner } from "./components/common/LoadingSpinner";
-import { Job } from "./types";
+import { Job } from "./types/index";
 import { PaymentStatus } from "./components/features/payment/PaymentStatus";
 import PricingPage from "./components/features/payment/PricingPage";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { TalentEvaluation } from "./components/features/candidates/TalentEvaluation";
 
 // Extend Window interface
 interface ExtendedWindow extends Window {
@@ -171,7 +171,7 @@ function JobDetail() {
   };
 
   return selectedJob ? (
-    <CandidateSection
+    <TalentEvaluation
       job={selectedJob}
       candidates={candidates}
       isLoading={candidatesLoading}
@@ -193,7 +193,6 @@ function App() {
   const { jobs, isLoading, createJob, deleteJob, error, retry } = useJobs();
   const { user, loading, logout } = useAuth();
   const [imageError, setImageError] = useState(false);
-  const [showPricing, setShowPricing] = useState(false);
 
   // Set auth token in API service and notify extension when user changes
   useEffect(() => {
@@ -226,9 +225,6 @@ function App() {
 
     handleAuthChange();
   }, [user]);
-
-  // Extract jobId from the current path
-  const jobId = location.pathname.match(/\/jobs\/([^/]+)/)?.[1];
 
   const handleDeleteJob = async (jobId: string) => {
     const success = await deleteJob(jobId);
