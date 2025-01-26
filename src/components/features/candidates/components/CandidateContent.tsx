@@ -1,7 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { Candidate } from "../../../../types";
+import type { Candidate } from "@/types/index";
 import { TraitValue } from "../TraitValue";
 import { CitationCard } from "./CitationCard";
 import { ProfileContent } from "./ProfileContent";

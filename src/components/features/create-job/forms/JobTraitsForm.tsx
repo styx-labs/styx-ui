@@ -6,7 +6,7 @@ import {
   ListChecks,
   ArrowRight,
 } from "lucide-react";
-import { TraitType } from "../../../../types";
+import type { TraitType } from "@/types/index";
 import { TraitCard } from "../components/TraitCard";
 import { JobDetailsForm } from "./JobDetailsForm";
 import { TraitTips } from "../components/TraitTips";

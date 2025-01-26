@@ -1,7 +1,7 @@
 import React from "react";
 import { Mail, Trash2, Linkedin, Loader2, Sparkles } from "lucide-react";
 import { createPortal } from "react-dom";
-import { Citation } from "../../../../types";
+import type { Citation } from "@/types/index";
 import { OverallScore } from "./OverallScore";
 
 interface CandidateHeaderProps {

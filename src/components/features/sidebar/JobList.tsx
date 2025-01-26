@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react";
-import type { Job } from "@/types";
+import type { Job } from "@/types/index";
 import { Button } from "@/components/ui/button";
 import {
   SidebarMenu,

@@ -15,6 +15,15 @@ import { toast } from "react-hot-toast";
 import Papa from "papaparse";
 import { EditKeyTraits } from "./components/EditKeyTraits";
 import { CandidateTraitFilter } from "./components/CandidateTraitFilter";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHead,
+} from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CandidateSectionProps {
   job: Job;
@@ -320,21 +329,60 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
           />
         )}
         {isLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="bg-white rounded-lg p-6 shadow-sm animate-pulse"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead className="w-[200px]">Current Position</TableHead>
+                  <TableHead className="text-center">
+                    AI Evaluation (Beta)
+                  </TableHead>
+                  <TableHead className="text-center">Traits Met</TableHead>
+                  <TableHead>Trait Breakdown</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...Array(3)].map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell>
+                      <Skeleton className="h-4 w-[120px]" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-[140px]" />
+                        <Skeleton className="h-3 w-[100px]" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Skeleton className="h-5 w-[100px] mx-auto" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col items-center gap-1">
+                        <Skeleton className="h-5 w-[120px]" />
+                        <Skeleton className="h-5 w-[100px]" />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        {[...Array(3)].map((_, j) => (
+                          <Skeleton key={j} className="h-6 w-[80px]" />
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-2">
+                        {[...Array(4)].map((_, j) => (
+                          <Skeleton key={j} className="h-8 w-8" />
+                        ))}
+                        <Skeleton className="h-8 w-[60px]" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         ) : (
           <CandidateList

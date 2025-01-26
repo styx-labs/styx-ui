@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { User } from "firebase/auth";
 import { Plus, Search, X } from "lucide-react";
-import type { Job } from "@/types";
+import type { Job } from "@/types/index";
 import {
   Sidebar,
   SidebarContent,

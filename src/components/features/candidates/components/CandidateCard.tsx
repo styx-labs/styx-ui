@@ -1,5 +1,5 @@
 import React from "react";
-import { Candidate } from "../../../../types";
+import type { Candidate } from "@/types/index";
 import { CandidateHeader } from "./CandidateHeader";
 import { CandidateSectionNav } from "./CandidateSectionNav";
 import { CandidateContent } from "./CandidateContent";

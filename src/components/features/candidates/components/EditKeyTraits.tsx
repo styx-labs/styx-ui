@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Job, TraitType } from '../../../../types';
-import { apiService } from '../../../../api';
-import { toast } from 'react-hot-toast';
-import { TraitCard } from '../../create-job/components/TraitCard';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import React, { useState } from "react";
+import type { Job, TraitType } from "@/types/index";
+import { apiService } from "../../../../api";
+import { toast } from "react-hot-toast";
+import { TraitCard } from "../../create-job/components/TraitCard";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface EditKeyTraitsProps {
   job: Job;
@@ -18,23 +18,23 @@ export const EditKeyTraits: React.FC<EditKeyTraitsProps> = ({
   onSuccess,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [traits, setTraits] = useState<Job['key_traits']>(job.key_traits);
+  const [traits, setTraits] = useState<Job["key_traits"]>(job.key_traits);
 
   const handleSubmit = async () => {
     if (!traits.length) {
-      toast.error('At least one trait is required');
+      toast.error("At least one trait is required");
       return;
     }
 
     setIsSubmitting(true);
     try {
       await apiService.editKeyTraits(job.id!, traits);
-      toast.success('Key traits updated successfully');
+      toast.success("Key traits updated successfully");
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error updating key traits:', error);
-      toast.error('Failed to update key traits');
+      console.error("Error updating key traits:", error);
+      toast.error("Failed to update key traits");
     } finally {
       setIsSubmitting(false);
     }
@@ -44,8 +44,8 @@ export const EditKeyTraits: React.FC<EditKeyTraitsProps> = ({
     setTraits([
       ...traits,
       {
-        trait: '',
-        description: '',
+        trait: "",
+        description: "",
         trait_type: TraitType.SCORE,
         required: false,
       },
@@ -56,7 +56,10 @@ export const EditKeyTraits: React.FC<EditKeyTraitsProps> = ({
     setTraits(traits.filter((_, i) => i !== index));
   };
 
-  const updateTrait = (index: number, updates: Partial<Job['key_traits'][0]>) => {
+  const updateTrait = (
+    index: number,
+    updates: Partial<Job["key_traits"][0]>
+  ) => {
     const newTraits = [...traits];
     newTraits[index] = { ...newTraits[index], ...updates };
     setTraits(newTraits);
@@ -71,7 +74,8 @@ export const EditKeyTraits: React.FC<EditKeyTraitsProps> = ({
               <div>
                 <h2 className="text-2xl font-semibold">Edit Key Traits</h2>
                 <p className="text-sm text-muted-foreground">
-                  Update the key traits for {job.job_title} at {job.company_name}
+                  Update the key traits for {job.job_title} at{" "}
+                  {job.company_name}
                 </p>
               </div>
 
@@ -100,11 +104,8 @@ export const EditKeyTraits: React.FC<EditKeyTraitsProps> = ({
                 >
                   Cancel
                 </Button>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                <Button onClick={handleSubmit} disabled={isSubmitting}>
+                  {isSubmitting ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </div>
@@ -113,4 +114,4 @@ export const EditKeyTraits: React.FC<EditKeyTraitsProps> = ({
       </div>
     </div>
   );
-}; 
+};
