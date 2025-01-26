@@ -15,6 +15,7 @@ import { CandidateForm } from "./CandidateForm";
 import { toast } from "react-hot-toast";
 import Papa from "papaparse";
 import { EditKeyTraits } from "./components/EditKeyTraits";
+import { CandidateTraitFilter } from "./components/CandidateTraitFilter";
 
 interface CandidateSectionProps {
   job: Job;
@@ -34,6 +35,7 @@ interface CandidateSectionProps {
   ) => Promise<string | undefined>;
   onGetEmail: (linkedinUrl: string) => Promise<string | undefined>;
   onRefresh: () => void;
+  onTraitFilterChange: (traits: string[]) => void;
 }
 
 export const CandidateSection: React.FC<CandidateSectionProps> = ({
@@ -46,6 +48,7 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
   onCandidateReachout,
   onGetEmail,
   onRefresh,
+  onTraitFilterChange,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -59,10 +62,18 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
   const [statusFilter, setStatusFilter] = useState<"processing" | "complete">(
     "complete"
   );
+  const [traitFilters, setTraitFilters] = useState<string[]>([]);
 
+  // Only filter by status on frontend since it's a UI state
   const filteredCandidates = candidates.filter(
     (candidate) => candidate.status === statusFilter
   );
+
+  const handleTraitFilterChange = async (traits: string[]) => {
+    setTraitFilters(traits);
+    // Trigger a refresh with the new filters
+    await onRefresh();
+  };
 
   // Function to format the job description
   const formatDescription = (text: string) => {
@@ -171,6 +182,10 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
             <h2 className="text-2xl font-bold text-gray-900">Candidates</h2>
           </div>
           <div className="flex items-center space-x-3">
+            <CandidateTraitFilter
+              candidates={candidates}
+              onFilterChange={onTraitFilterChange}
+            />
             <button
               type="button"
               onClick={() => setSearchMode(!searchMode)}

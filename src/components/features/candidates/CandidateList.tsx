@@ -81,6 +81,8 @@ export const CandidateList: React.FC<CandidateListProps> = ({
     }));
   };
 
+  console.log(candidates);
+
   return (
     <div className="space-y-4">
       {candidates.map((candidate) => (

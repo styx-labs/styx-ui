@@ -114,8 +114,15 @@ export const apiService = {
     }>("/get-key-traits", { description, ideal_profile_urls }),
 
   // Candidates
-  getCandidates: (jobId: string) =>
-    api.get<{ candidates: Candidate[] }>(`/jobs/${jobId}/candidates`),
+  getCandidates: (jobId: string, filterTraits?: string[]) =>
+    api.get<{ candidates: Candidate[] }>(`/jobs/${jobId}/candidates`, {
+      paramsSerializer: {
+        indexes: null // This will ensure no [] in the parameter names
+      },
+      params: filterTraits?.length ? {
+        filter_traits: filterTraits
+      } : undefined,
+    }),
 
   getCandidate: (jobId: string, candidateId: string) =>
     api.get<{ candidate: Candidate }>(

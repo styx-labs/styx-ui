@@ -39,6 +39,7 @@ function JobDetail() {
     deleteCandidate,
     createCandidatesBatch,
     loadCandidates,
+    setTraitFilters,
     error: candidatesError,
     isLoading: candidatesLoading,
   } = useCandidates(jobId);
@@ -180,6 +181,7 @@ function JobDetail() {
       onCandidateReachout={handleCandidateReachout}
       onGetEmail={handleGetEmail}
       onRefresh={loadCandidates}
+      onTraitFilterChange={setTraitFilters}
     />
   ) : null;
 }
