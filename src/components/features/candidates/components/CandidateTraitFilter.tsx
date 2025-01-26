@@ -9,33 +9,27 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
-import type { Candidate } from "@/types";
+import { useState, useEffect } from "react";
+import type { Job } from "@/types";
 
 interface CandidateTraitFilterProps {
-  candidates: Candidate[];
+  job: Job;
   onFilterChange: (traits: string[]) => void;
 }
 
 export function CandidateTraitFilter({
-  candidates,
+  job,
   onFilterChange,
 }: CandidateTraitFilterProps) {
   const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
-  const [availableTraits, setAvailableTraits] = useState<string[]>([]);
 
-  // Extract unique traits from candidates
+  // Reset filters when job changes
   useEffect(() => {
-    const traits = new Set<string>();
-    candidates.forEach((candidate) => {
-      candidate.sections?.forEach((section) => {
-        if (section.section) {
-          traits.add(section.section);
-        }
-      });
-    });
-    setAvailableTraits(Array.from(traits).sort());
-  }, [candidates]);
+    setSelectedTraits([]);
+    onFilterChange([]);
+  }, [job.id, onFilterChange]);
+
+  const availableTraits = job.key_traits.map((trait) => trait.trait);
 
   const handleTraitToggle = (trait: string) => {
     setSelectedTraits((prev) => {
@@ -101,7 +95,7 @@ export function CandidateTraitFilter({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0" align="start">
+        <PopoverContent className="w-auto p-0" align="start">
           <div className="p-2 flex items-center justify-between">
             <p className="text-sm font-medium">Filter by traits</p>
             {hasFilters && (

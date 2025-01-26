@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import {
-  Users,
   ChevronDown,
   ChevronUp,
   Upload,
@@ -16,6 +15,7 @@ import { toast } from "react-hot-toast";
 import Papa from "papaparse";
 import { EditKeyTraits } from "./components/EditKeyTraits";
 import { CandidateTraitFilter } from "./components/CandidateTraitFilter";
+import { cn } from "../../../lib/utils";
 
 interface CandidateSectionProps {
   job: Job;
@@ -178,12 +178,8 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
       <div>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <Users className="text-purple-600" size={24} />
-            <h2 className="text-2xl font-bold text-gray-900">Candidates</h2>
-          </div>
-          <div className="flex items-center space-x-3">
             <CandidateTraitFilter
-              candidates={candidates}
+              job={job}
               onFilterChange={onTraitFilterChange}
             />
             <button
