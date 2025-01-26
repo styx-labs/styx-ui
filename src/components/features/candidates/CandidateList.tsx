@@ -34,7 +34,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { CandidateSidebar } from "./components/CandidateSidebar";
+import { CandidateSidebar } from "./components/sidebar/CandidateSidebar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";

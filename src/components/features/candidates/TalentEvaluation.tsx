@@ -30,11 +30,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -131,78 +126,68 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
       </Card>
 
       {/* Key Traits Card */}
-      <Card className="p-6 border-purple-100">
-        <div className="flex items-center justify-between mb-4">
-          <div className="space-y-1.5">
-            <h2 className="text-lg font-medium text-purple-900">Key Traits</h2>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowEditTraits(true)}
-            className="gap-2"
-          >
-            <Edit2 className="h-4 w-4" />
-            Edit Traits
-          </Button>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-purple-800 flex items-center gap-2">
-              <Star className="h-4 w-4 fill-purple-200 text-purple-800" />
-              Required Traits
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {job.key_traits
-                .filter((trait) => trait.required)
-                .map((trait, index) => (
-                  <HoverCard key={index}>
-                    <HoverCardTrigger asChild>
-                      <Badge
-                        variant="default"
-                        className="bg-purple-100 text-purple-700 hover:bg-purple-200 cursor-help"
-                      >
-                        {trait.trait}
-                      </Badge>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-80">
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-semibold">{trait.trait}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {trait.description || "No description available"}
-                        </p>
-                      </div>
-                    </HoverCardContent>
-                  </HoverCard>
-                ))}
+      <Card className="border-purple-100">
+        <div className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-medium text-purple-900">
+                Key Traits
+              </h2>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <Star className="h-3.5 w-3.5 fill-purple-200 text-purple-800" />
+                  <span>Required</span>
+                </div>
+                <Separator orientation="vertical" className="h-4" />
+                <span>Optional</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowEditTraits(true)}
+                className="gap-2"
+              >
+                <Edit2 className="h-4 w-4" />
+                Edit Traits
+              </Button>
             </div>
           </div>
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-purple-800">
-              Preferred Traits
-            </h3>
+          <div className="mt-4 pt-4 border-t space-y-4">
             <div className="flex flex-wrap gap-2">
-              {job.key_traits
-                .filter((trait) => !trait.required)
+              {[...job.key_traits]
+                .sort((a, b) => {
+                  // Sort by required first, then alphabetically
+                  if (a.required !== b.required) {
+                    return a.required ? -1 : 1;
+                  }
+                  return a.trait.localeCompare(b.trait);
+                })
                 .map((trait, index) => (
-                  <HoverCard key={index}>
-                    <HoverCardTrigger asChild>
-                      <Badge
-                        variant="secondary"
-                        className="hover:bg-purple-100 cursor-help"
-                      >
-                        {trait.trait}
-                      </Badge>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-80">
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-semibold">{trait.trait}</h4>
+                  <div key={index} className="group relative">
+                    <Badge
+                      variant={trait.required ? "default" : "secondary"}
+                      className={cn(
+                        trait.required
+                          ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
+                          : "hover:bg-purple-100",
+                        "cursor-help"
+                      )}
+                    >
+                      {trait.trait}
+                      {trait.required && (
+                        <Star className="h-3 w-3 ml-1 fill-current opacity-75 inline-block" />
+                      )}
+                    </Badge>
+                    {trait.description && (
+                      <div className="absolute left-0 w-80 p-3 rounded-md border bg-white shadow-md mt-2 invisible group-hover:visible z-10">
                         <p className="text-sm text-muted-foreground">
-                          {trait.description || "No description available"}
+                          {trait.description}
                         </p>
                       </div>
-                    </HoverCardContent>
-                  </HoverCard>
+                    )}
+                  </div>
                 ))}
             </div>
           </div>

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import type { Job, TraitType } from "@/types/index";
+import React, { useState, useRef, useEffect } from "react";
+import { TraitType } from "@/types/index";
+import type { Job } from "@/types/index";
 import { apiService } from "../../../../api";
 import { toast } from "react-hot-toast";
 import { TraitCard } from "../../create-job/components/TraitCard";
@@ -19,6 +20,23 @@ export const EditKeyTraits: React.FC<EditKeyTraitsProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [traits, setTraits] = useState<Job["key_traits"]>(job.key_traits);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
 
   const handleSubmit = async () => {
     if (!traits.length) {
@@ -68,7 +86,10 @@ export const EditKeyTraits: React.FC<EditKeyTraitsProps> = ({
   return (
     <div className="fixed inset-0 bg-black/50 z-50 overflow-y-auto">
       <div className="min-h-full flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl">
+        <div
+          ref={modalRef}
+          className="bg-white rounded-lg shadow-xl w-full max-w-4xl"
+        >
           <div className="p-6">
             <div className="space-y-6">
               <div>
