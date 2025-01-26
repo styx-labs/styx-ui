@@ -59,12 +59,13 @@ export interface Candidate {
   status?: string;
   url?: string;
   summary?: string;
-  overall_score?: number;
   sections?: TraitEvaluation[];
   citations?: Citation[];
   profile?: Profile;
   created_at?: string;
   search_mode?: boolean;
+  required_met?: number;
+  optional_met?: number;
 }
 
 export interface Reachout {

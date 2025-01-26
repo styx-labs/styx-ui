@@ -12,6 +12,8 @@ interface CandidateHeaderProps {
   overall_score?: number;
   citations?: Citation[];
   search_mode?: boolean;
+  required_met: number;
+  optional_met: number;
   openDropdownId: string | null;
   dropdownPosition: { top: number; left: number } | null;
   onDelete: (id: string) => void;
@@ -25,9 +27,10 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
   name,
   status,
   url,
-  overall_score,
   citations,
   search_mode,
+  required_met,
+  optional_met,
   openDropdownId,
   dropdownPosition,
   onDelete,
@@ -44,6 +47,15 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
             <Loader2 size={16} className="animate-spin text-purple-600" />
           )}
         </h2>
+        <div className="flex items-center gap-2">
+          <span className="px-2 py-0.5 text-sm font-medium rounded bg-purple-100 text-purple-800">
+            {required_met} required
+          </span>
+          <span className="px-2 py-0.5 text-sm font-medium rounded bg-blue-100 text-blue-800">
+            {optional_met} preferred
+          </span>
+        </div>
+        <OverallScore citations={citations} search_mode={search_mode} />
         {url && (
           <a
             href={url}
@@ -102,13 +114,6 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
               document.body
             )}
         </div>
-        {overall_score !== undefined && (
-          <OverallScore
-            score={overall_score}
-            citations={citations}
-            search_mode={search_mode}
-          />
-        )}
       </div>
       <button
         onClick={() => onDelete(id)}

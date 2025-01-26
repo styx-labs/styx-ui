@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import {
-  Users,
   ChevronDown,
   ChevronUp,
   Upload,
@@ -15,6 +14,7 @@ import { CandidateForm } from "./CandidateForm";
 import { toast } from "react-hot-toast";
 import Papa from "papaparse";
 import { EditKeyTraits } from "./components/EditKeyTraits";
+import { CandidateTraitFilter } from "./components/CandidateTraitFilter";
 
 interface CandidateSectionProps {
   job: Job;
@@ -34,6 +34,7 @@ interface CandidateSectionProps {
   ) => Promise<string | undefined>;
   onGetEmail: (linkedinUrl: string) => Promise<string | undefined>;
   onRefresh: () => void;
+  onTraitFilterChange: (traits: string[]) => void;
 }
 
 export const CandidateSection: React.FC<CandidateSectionProps> = ({
@@ -46,6 +47,7 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
   onCandidateReachout,
   onGetEmail,
   onRefresh,
+  onTraitFilterChange,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -58,10 +60,6 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [statusFilter, setStatusFilter] = useState<"processing" | "complete">(
     "complete"
-  );
-
-  const filteredCandidates = candidates.filter(
-    (candidate) => candidate.status === statusFilter
   );
 
   // Function to format the job description
@@ -167,10 +165,10 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
       <div>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <Users className="text-purple-600" size={24} />
-            <h2 className="text-2xl font-bold text-gray-900">Candidates</h2>
-          </div>
-          <div className="flex items-center space-x-3">
+            <CandidateTraitFilter
+              job={job}
+              onFilterChange={onTraitFilterChange}
+            />
             <button
               type="button"
               onClick={() => setSearchMode(!searchMode)}
@@ -336,7 +334,7 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
           </div>
         ) : (
           <CandidateList
-            candidates={filteredCandidates}
+            candidates={candidates}
             onDeleteCandidate={onCandidateDelete}
             onReachout={onCandidateReachout}
             onGetEmail={onGetEmail}

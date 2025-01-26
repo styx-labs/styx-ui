@@ -12,6 +12,7 @@ export function useCandidates(jobId: string | undefined) {
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isPolling, setIsPolling] = useState(false);
+  const [traitFilters, setTraitFilters] = useState<string[]>([]);
   const { user, loading: authLoading } = useAuth();
   const pollingTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -30,7 +31,7 @@ export function useCandidates(jobId: string | undefined) {
     setIsPolling(isPollingUpdate);
 
     try {
-      const response = await apiService.getCandidates(jobId);
+      const response = await apiService.getCandidates(jobId, traitFilters);
       setCandidates(response.data.candidates);
       setError(null);
 
@@ -64,6 +65,13 @@ export function useCandidates(jobId: string | undefined) {
       setIsPolling(false);
     }
   };
+
+  // Update candidates when trait filters change
+  useEffect(() => {
+    if (jobId && user) {
+      loadCandidates(false);
+    }
+  }, [jobId, user, traitFilters]);
 
   const getCandidate = async (candidateId: string) => {
     if (!jobId) return;
@@ -202,5 +210,6 @@ export function useCandidates(jobId: string | undefined) {
     loadCandidates: () => loadCandidates(false),
     error,
     isLoading: (isLoading && !isPolling) || authLoading,
+    setTraitFilters,
   };
 }
