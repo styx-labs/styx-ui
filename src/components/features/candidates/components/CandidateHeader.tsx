@@ -2,6 +2,7 @@ import React from "react";
 import { Mail, Trash2, Linkedin, Loader2, Sparkles } from "lucide-react";
 import { createPortal } from "react-dom";
 import { Citation } from "../../../../types";
+import { OverallScore } from "./OverallScore";
 
 interface CandidateHeaderProps {
   id: string;
@@ -54,6 +55,7 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
             {optional_met} preferred
           </span>
         </div>
+        <OverallScore citations={citations} search_mode={search_mode} />
         {url && (
           <a
             href={url}

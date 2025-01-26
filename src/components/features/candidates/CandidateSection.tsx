@@ -15,7 +15,6 @@ import { toast } from "react-hot-toast";
 import Papa from "papaparse";
 import { EditKeyTraits } from "./components/EditKeyTraits";
 import { CandidateTraitFilter } from "./components/CandidateTraitFilter";
-import { cn } from "../../../lib/utils";
 
 interface CandidateSectionProps {
   job: Job;
@@ -62,18 +61,6 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
   const [statusFilter, setStatusFilter] = useState<"processing" | "complete">(
     "complete"
   );
-  const [traitFilters, setTraitFilters] = useState<string[]>([]);
-
-  // Only filter by status on frontend since it's a UI state
-  const filteredCandidates = candidates.filter(
-    (candidate) => candidate.status === statusFilter
-  );
-
-  const handleTraitFilterChange = async (traits: string[]) => {
-    setTraitFilters(traits);
-    // Trigger a refresh with the new filters
-    await onRefresh();
-  };
 
   // Function to format the job description
   const formatDescription = (text: string) => {
@@ -347,7 +334,7 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
           </div>
         ) : (
           <CandidateList
-            candidates={filteredCandidates}
+            candidates={candidates}
             onDeleteCandidate={onCandidateDelete}
             onReachout={onCandidateReachout}
             onGetEmail={onGetEmail}
