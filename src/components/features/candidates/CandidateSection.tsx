@@ -62,6 +62,10 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
     "complete"
   );
 
+  const filteredCandidates = candidates.filter(
+    (candidate) => candidate.status === statusFilter
+  );
+
   // Function to format the job description
   const formatDescription = (text: string) => {
     return text.split("\n").map((line, index) => (
@@ -334,7 +338,7 @@ export const CandidateSection: React.FC<CandidateSectionProps> = ({
           </div>
         ) : (
           <CandidateList
-            candidates={candidates}
+            candidates={filteredCandidates}
             onDeleteCandidate={onCandidateDelete}
             onReachout={onCandidateReachout}
             onGetEmail={onGetEmail}
