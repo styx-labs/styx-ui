@@ -8,16 +8,46 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { CheckCircle, XCircle, Star, ChevronDown } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Star,
+  ChevronDown,
+  Check,
+  X,
+} from "lucide-react";
 import { getTraitsMet, getTotalTraits } from "../../utils/traitHelpers";
 
 interface CandidateTraitsProps {
   candidate: Candidate;
+  onSourceClick?: (index: number) => void;
 }
 
 export const CandidateTraits: React.FC<CandidateTraitsProps> = ({
   candidate,
+  onSourceClick,
 }) => {
+  const renderTraitContent = (content: string) => {
+    const parts = content.split(/(\[\d+\]\([^)]+\))/g);
+    return parts.map((part, i) => {
+      const match = part.match(/\[(\d+)\]\(([^)]+)\)/);
+      if (match) {
+        const [_, index] = match;
+        const citationIndex = parseInt(index, 10);
+        return (
+          <button
+            key={i}
+            onClick={() => onSourceClick?.(citationIndex)}
+            className="text-purple-600 hover:text-purple-800 font-medium"
+          >
+            [{index}]
+          </button>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -40,36 +70,37 @@ export const CandidateTraits: React.FC<CandidateTraitsProps> = ({
       </div>
       <Card className="border-purple-100/50">
         <div className="p-4 space-y-3">
-          {candidate.sections?.map((section) => (
-            <Collapsible key={section.section}>
-              <CollapsibleTrigger className="w-full focus-visible:outline-none">
-                <div
-                  className={cn(
-                    "group flex items-center justify-between text-sm p-2.5 rounded-md transition-colors",
-                    section.value === true
-                      ? "bg-green-50/80 text-green-700 hover:bg-green-100/80"
-                      : "bg-red-50/80 text-red-700 hover:bg-red-100/80"
-                  )}
-                >
-                  <div className="flex items-center gap-2.5">
-                    {section.value === true ? (
-                      <CheckCircle className="h-4 w-4 shrink-0" />
-                    ) : (
-                      <XCircle className="h-4 w-4 shrink-0" />
+          {candidate.sections?.map((section, index) => (
+            <Collapsible key={index}>
+              <CollapsibleTrigger className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={cn(
+                      "px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1.5",
+                      section.value === true
+                        ? "bg-green-50 text-green-700 border border-green-200"
+                        : "bg-red-50 text-red-700 border border-red-200",
+                      section.required ? "shadow-sm" : "opacity-75"
                     )}
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-medium">{section.section}</span>
-                      {section.required && (
+                  >
+                    {section.value === true ? (
+                      <Check className="h-3 w-3" />
+                    ) : (
+                      <X className="h-3 w-3" />
+                    )}
+                    <span className="flex items-center gap-1">
+                      {section.section}
+                      {section.required ? (
                         <Star className="h-3 w-3 fill-current opacity-75" />
-                      )}
-                    </div>
+                      ) : null}
+                    </span>
                   </div>
-                  <ChevronDown className="h-4 w-4 shrink-0 transform transition-transform duration-200 ease-in-out group-data-[state=open]:rotate-180" />
                 </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
               </CollapsibleTrigger>
               <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                 <div className="px-4 py-3 mt-1.5 text-sm text-muted-foreground bg-muted/50 rounded-md border border-muted">
-                  {section.content}
+                  {renderTraitContent(section.content)}
                 </div>
               </CollapsibleContent>
             </Collapsible>

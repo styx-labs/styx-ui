@@ -36,6 +36,14 @@ export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
   onDelete,
 }) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const citationRefs = useRef<{ [key: number]: HTMLDivElement }>({});
+
+  const scrollToSource = (index: number) => {
+    const element = citationRefs.current[index];
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -90,7 +98,10 @@ export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
 
         <ScrollArea className="flex-1">
           <div className="p-6 space-y-8">
-            <CandidateTraits candidate={candidate} />
+            <CandidateTraits
+              candidate={candidate}
+              onSourceClick={scrollToSource}
+            />
 
             {/* Summary Section */}
             {candidate.summary && (
@@ -115,7 +126,10 @@ export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
                   {candidate.citations.map((citation, index) => (
                     <Card
                       key={index}
-                      className="overflow-hidden transition-all duration-300 hover:shadow-lg"
+                      ref={(el) => {
+                        if (el) citationRefs.current[citation.index] = el;
+                      }}
+                      className="overflow-hidden transition-all duration-300 hover:shadow-lg scroll-mt-6"
                     >
                       <CardHeader className="bg-gradient-to-r from-purple-100 to-purple-50 p-4">
                         <div className="flex items-center justify-between">
@@ -149,8 +163,7 @@ export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
                                 : "bg-red-100 text-red-800 border-red-200"
                             )}
                           >
-                            {Math.round(citation.confidence * 100)}%
-                            confidence
+                            {Math.round(citation.confidence * 100)}% confidence
                           </Badge>
                         </div>
                       </CardHeader>
