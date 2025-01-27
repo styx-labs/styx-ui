@@ -105,7 +105,7 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                                   <p className="text-xs text-gray-500">
                                     Sources:
                                   </p>
-                                  <div className="mt-1 space-y-1">
+                                  <div className="mt-1 space-y-1 w-[500px]">
                                     {exp.summarized_job_description.sources.map(
                                       (source, idx) => (
                                         <a
@@ -113,7 +113,7 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                                           href={source}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="block text-xs text-purple-600 hover:text-purple-800 hover:underline truncate"
+                                          className="block text-xs text-purple-600 hover:text-purple-800 hover:underline truncate text-nowrap w-full"
                                         >
                                           {source}
                                         </a>
