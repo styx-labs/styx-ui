@@ -55,14 +55,73 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                           <p className="text-sm text-muted-foreground">
                             {exp.description}
                           </p>
-                          {exp.ai_description && (
-                            <div className="mt-3 p-3 bg-purple-50/50 rounded-md border border-purple-100/50">
-                              <p className="text-sm font-medium text-purple-900 mb-2">
-                                AI Analysis
+                          {exp.summarized_job_description && (
+                            <div className="mt-3 p-3 bg-purple-50 rounded-md">
+                              <p className="text-sm text-gray-700 font-medium">
+                                Generated Job Description
                               </p>
-                              <p className="text-sm text-purple-700">
-                                {exp.ai_description}
-                              </p>
+                              <div className="space-y-4">
+                                <div>
+                                  <h4 className="font-medium text-xs">
+                                    Role Summary:
+                                  </h4>
+                                  <p className="text-gray-600 text-xs">
+                                    {
+                                      exp.summarized_job_description
+                                        .role_summary
+                                    }
+                                  </p>
+                                </div>
+
+                                <div>
+                                  <h4 className="font-medium text-xs">
+                                    Skills:
+                                  </h4>
+                                  <ul className="list-disc list-inside text-gray-600 text-xs pl-2 space-y-1">
+                                    {exp.summarized_job_description?.skills?.map(
+                                      (skill, idx) => (
+                                        <li key={idx}>{skill}</li>
+                                      )
+                                    )}
+                                  </ul>
+                                </div>
+
+                                <div>
+                                  <h4 className="font-medium text-xs">
+                                    Requirements:
+                                  </h4>
+                                  <ul className="list-disc list-inside text-gray-600 text-xs pl-2 space-y-1">
+                                    {exp.summarized_job_description?.requirements?.map(
+                                      (req, idx) => (
+                                        <li key={idx}>{req}</li>
+                                      )
+                                    )}
+                                  </ul>
+                                </div>
+                              </div>
+                              {exp.summarized_job_description.sources.length >
+                                0 && (
+                                <div className="mt-2 pt-2 border-t border-purple-100">
+                                  <p className="text-xs text-gray-500">
+                                    Sources:
+                                  </p>
+                                  <div className="mt-1 space-y-1">
+                                    {exp.summarized_job_description.sources.map(
+                                      (source, idx) => (
+                                        <a
+                                          key={idx}
+                                          href={source}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="block text-xs text-purple-600 hover:text-purple-800 hover:underline truncate"
+                                        >
+                                          {source}
+                                        </a>
+                                      )
+                                    )}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>

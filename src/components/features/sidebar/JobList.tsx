@@ -67,31 +67,33 @@ export function JobList({
             className="group/item px-2 py-3 first:pt-4 last:pb-4 hover:bg-muted/50"
           >
             {isCollapsed ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <SidebarMenuButton
-                    onClick={() => onJobSelect(job)}
-                    isActive={selectedJobId === job.id}
-                    className="relative transition-colors hover:bg-transparent"
+              <TooltipProvider delayDuration={100}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <SidebarMenuButton
+                      onClick={() => onJobSelect(job)}
+                      isActive={selectedJobId === job.id}
+                      className="relative transition-colors hover:bg-transparent"
+                    >
+                      <div className="flex-1 overflow-hidden">
+                        <p className="font-medium truncate text-center">
+                          {job.company_name.charAt(0)}
+                        </p>
+                      </div>
+                    </SidebarMenuButton>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    align="center"
+                    className="bg-white text-violet-600 shadow-md"
                   >
-                    <div className="flex-1 overflow-hidden">
-                      <p className="font-medium truncate text-center">
-                        {job.company_name.charAt(0)}
-                      </p>
-                    </div>
-                  </SidebarMenuButton>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="right"
-                  align="center"
-                  className="bg-zinc-950 text-zinc-50"
-                >
-                  <p className="font-medium">{job.company_name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {job.job_title}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
+                    <p className="text-sm font-medium">{job.company_name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {job.job_title}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             ) : (
               <SidebarMenuButton
                 onClick={() => onJobSelect(job)}

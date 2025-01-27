@@ -84,7 +84,7 @@ export const EditKeyTraits: React.FC<EditKeyTraitsProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 overflow-y-auto">
+    <div className="fixed inset-[-24px] bg-black/50 z-50 overflow-y-auto">
       <div className="min-h-full flex items-center justify-center p-4">
         <div
           ref={modalRef}

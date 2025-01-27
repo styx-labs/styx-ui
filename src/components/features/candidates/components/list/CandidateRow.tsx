@@ -4,44 +4,55 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Candidate } from "@/types/index";
 import { CandidateActions } from "./CandidateActions";
-import { getFitScoreLabel } from "../../utils/traitHelpers";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Check, X, Star } from "lucide-react";
+import {
+  getFitScoreLabel,
+  getTotalRequiredTraits,
+  getTotalOptionalTraits,
+  getRequiredTraitsMet,
+} from "../../utils/traitHelpers";
 
 interface CandidateRowProps {
   candidate: Candidate;
   loadingStates: { [key: string]: { email: boolean; message: boolean } };
-  onSelect: (candidate: Candidate) => void;
-  onLinkedIn: (url: string) => void;
-  onEmail: (url: string, id: string) => Promise<void>;
-  onReachout: (id: string, format: string) => Promise<void>;
-  onDelete: (e: React.MouseEvent, id: string) => Promise<void>;
+  handleEmail: (url: string, id: string) => Promise<void>;
+  handleReachout: (id: string, format: string) => Promise<void>;
+  handleDelete: (e: React.MouseEvent, id: string) => Promise<void>;
+  setSelectedCandidate: (candidate: Candidate) => void;
 }
 
 export const CandidateRow: React.FC<CandidateRowProps> = ({
   candidate,
   loadingStates,
-  onSelect,
-  onLinkedIn,
-  onEmail,
-  onReachout,
-  onDelete,
+  handleEmail,
+  handleReachout,
+  handleDelete,
+  setSelectedCandidate,
 }) => {
   return (
     <TableRow
-      className="cursor-pointer hover:bg-purple-50/50"
-      onClick={() => onSelect(candidate)}
+      key={candidate.id}
+      className="cursor-pointer hover:bg-muted/50"
+      onClick={() => setSelectedCandidate(candidate)}
     >
       <TableCell className="font-medium">
         <div className="flex items-center gap-2">
-          <span className="text-purple-900">{candidate.name}</span>
+          <span>{candidate.name}</span>
         </div>
       </TableCell>
       <TableCell className="max-w-[200px]">
         <div className="flex flex-col truncate">
-          <span className="font-medium text-purple-800 truncate">
+          <span className="font-medium truncate">
             {candidate.profile?.occupation}
           </span>
           {candidate.profile?.experiences?.[0]?.company && (
-            <span className="text-sm text-purple-600/75 truncate">
+            <span className="text-sm text-muted-foreground truncate">
               {candidate.profile.experiences[0].company}
             </span>
           )}
@@ -53,69 +64,125 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
             const { variant, label } = getFitScoreLabel(candidate.fit);
 
             return (
-              <Badge
-                variant={variant}
-                className={cn(
-                  "font-medium hover:bg-inherit",
-                  candidate.fit !== undefined &&
-                    candidate.fit >= 3 &&
-                    "bg-green-100 text-green-700 hover:bg-green-100",
-                  candidate.fit !== undefined &&
-                    candidate.fit === 2 &&
-                    "bg-yellow-100 text-yellow-700 hover:bg-yellow-100",
-                  candidate.fit !== undefined &&
-                    candidate.fit <= 1 &&
-                    "bg-red-100 text-red-700 hover:bg-red-100"
-                )}
-              >
-                {label}
-              </Badge>
+              <TooltipProvider delayDuration={100}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="cursor-help inline-flex">
+                      <Badge
+                        variant={variant}
+                        className={cn(
+                          "font-medium hover:bg-inherit",
+                          candidate.fit !== undefined &&
+                            candidate.fit === 4 &&
+                            candidate.fit === 4 &&
+                            "bg-green-100 text-green-700 hover:bg-green-100 border-green-200",
+                          candidate.fit === 3 &&
+                            "bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200",
+                          candidate.fit === 2 &&
+                            "bg-yellow-100 text-yellow-700 hover:bg-yellow-100 border-yellow-200",
+                          candidate.fit !== undefined &&
+                            candidate.fit <= 1 &&
+                            "bg-red-100 text-red-700 hover:bg-red-100 border-red-200"
+                        )}
+                      >
+                        {label}
+                      </Badge>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[300px] bg-white text-muted-foreground shadow-md">
+                    <p className="text-sm">{candidate.summary}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             );
           })()}
       </TableCell>
       <TableCell className="text-center">
         <div className="flex flex-col items-center gap-1">
-          <Badge
-            variant={
-              candidate.required_met === candidate.required_total
-                ? "secondary"
-                : "outline"
-            }
-            className="mb-1"
-          >
-            {candidate.required_met}/{candidate.required_total} Required
-          </Badge>
-          <Badge variant="outline" className="text-muted-foreground">
-            {candidate.optional_met}/{candidate.optional_total} Optional
-          </Badge>
+          {getTotalRequiredTraits(candidate) > 0 && (
+            <Badge
+              variant={
+                candidate.required_met === getTotalRequiredTraits(candidate)
+                  ? "secondary"
+                  : "outline"
+              }
+              className={cn(
+                "mb-1 bg-purple-100 hover:bg-purple-100",
+                getRequiredTraitsMet(candidate) ===
+                  getTotalRequiredTraits(candidate)
+                  ? "text-purple-700 border-purple-200"
+                  : "text-purple-600 border-purple-200"
+              )}
+            >
+              {candidate.required_met}/{getTotalRequiredTraits(candidate)}{" "}
+              Required
+            </Badge>
+          )}
+          {getTotalOptionalTraits(candidate) > 0 && (
+            <Badge
+              variant="outline"
+              className="text-purple-600 border-purple-200"
+            >
+              {candidate.optional_met}/{getTotalOptionalTraits(candidate)}{" "}
+              Optional
+            </Badge>
+          )}
         </div>
       </TableCell>
       <TableCell>
         <div className="flex flex-wrap gap-1.5">
-          {candidate.sections?.map((section) => (
-            <div
-              key={section.section}
-              className={cn(
-                "px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1.5",
-                section.value === true
-                  ? "bg-green-50 text-green-700 border border-green-200"
-                  : "bg-red-50 text-red-700 border border-red-200",
-                section.required ? "shadow-sm" : "opacity-75"
-              )}
-            >
-              <span>{section.section}</span>
-            </div>
-          ))}
+          <TooltipProvider delayDuration={100}>
+            {candidate.sections
+              ?.sort((a, b) => {
+                // Sort by required first, then alphabetically
+                if (a.required !== b.required) {
+                  return a.required ? -1 : 1;
+                }
+                return a.section.localeCompare(b.section);
+              })
+              .map((section) => (
+                <Tooltip key={section.section}>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={cn(
+                        "px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 cursor-help",
+                        section.value === true
+                          ? "bg-green-50 text-green-700 border border-green-200"
+                          : "bg-red-50 text-red-700 border border-red-200",
+                        section.required ? "shadow-sm" : "opacity-75"
+                      )}
+                    >
+                      {section.value === true ? (
+                        <Check className="h-3 w-3" />
+                      ) : (
+                        <X className="h-3 w-3" />
+                      )}
+                      <span className="flex items-center gap-1">
+                        {section.section}
+                        {section.required ? (
+                          <Star className="h-3 w-3 fill-current opacity-75" />
+                        ) : null}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[300px] bg-white text-muted-foreground shadow-md">
+                    <div className="space-y-1">
+                      <p className="text-sm">{section.content}</p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+          </TooltipProvider>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="text-right">
         <CandidateActions
           candidate={candidate}
           loadingStates={loadingStates}
-          onLinkedIn={onLinkedIn}
-          onEmail={onEmail}
-          onReachout={onReachout}
-          onDelete={onDelete}
+          handleEmail={handleEmail}
+          handleReachout={handleReachout}
+          handleDelete={handleDelete}
+          setSelectedCandidate={setSelectedCandidate}
         />
       </TableCell>
     </TableRow>

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { getFitScoreLabel } from "../../utils/traitHelpers";
 
 interface CandidateSidebarProps {
   candidate: Candidate | null;
@@ -57,6 +58,16 @@ export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
     };
 
     const handleClickOutside = (event: MouseEvent) => {
+      // Ignore clicks on dropdown menus and their content. This is for the generate reachout menu.
+      const target = event.target as HTMLElement;
+      if (
+        target.closest('[role="menu"]') ||
+        target.closest('[role="menuitem"]') ||
+        target.closest('[role="dialog"]')
+      ) {
+        return;
+      }
+
       if (
         sidebarRef.current &&
         !sidebarRef.current.contains(event.target as Node)
@@ -76,10 +87,12 @@ export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
 
   if (!candidate) return null;
 
+  const { variant, label } = getFitScoreLabel(candidate.fit);
+
   return (
     <div
       ref={sidebarRef}
-      className="fixed inset-y-0 right-0 w-[600px] border-l bg-background shadow-xl animate-in slide-in-from-right duration-300"
+      className="fixed inset-y-0 right-0 w-[600px] border-l bg-background shadow-2xl animate-in slide-in-from-right duration-300 rounded-l-xl"
     >
       <div className="h-full flex flex-col">
         <CandidateHeader
@@ -90,7 +103,6 @@ export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
           onNext={onNext}
           hasPrevious={hasPrevious}
           hasNext={hasNext}
-          onLinkedIn={(url) => window.open(url, "_blank")}
           onEmail={onGetEmail!}
           onReachout={onReachout!}
           onDelete={onDelete!}
@@ -106,7 +118,32 @@ export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
             {/* Summary Section */}
             {candidate.summary && (
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-purple-900">Summary</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-purple-900">
+                    Summary
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant={variant}
+                      className={cn(
+                        "font-medium hover:bg-inherit",
+                        candidate.fit !== undefined &&
+                          candidate.fit === 4 &&
+                          candidate.fit === 4 &&
+                          "bg-green-100 text-green-700 hover:bg-green-100 border-green-200",
+                        candidate.fit === 3 &&
+                          "bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200",
+                        candidate.fit === 2 &&
+                          "bg-yellow-100 text-yellow-700 hover:bg-yellow-100 border-yellow-200",
+                        candidate.fit !== undefined &&
+                          candidate.fit <= 1 &&
+                          "bg-red-100 text-red-700 hover:bg-red-100 border-red-200"
+                      )}
+                    >
+                      {label}
+                    </Badge>
+                  </div>
+                </div>
                 <Card className="border-purple-100/50">
                   <div className="p-4">
                     <p className="text-sm text-muted-foreground leading-relaxed">

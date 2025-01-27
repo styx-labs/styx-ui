@@ -1,4 +1,4 @@
-import { Candidate } from "@/types";
+import type { Candidate } from "@/types/index";
 
 export const getTraitsMet = (candidate: Candidate) => {
   if (!candidate.sections) return 0;
@@ -16,15 +16,15 @@ export const getRequiredTraitsMet = (candidate: Candidate) => {
   ).length;
 };
 
-export const getTotalRequiredTraits = (candidate: Candidate) => {
-  return candidate.sections?.filter((section) => section.required).length || 0;
-};
-
 export const getOptionalTraitsMet = (candidate: Candidate) => {
   if (!candidate.sections) return 0;
   return candidate.sections.filter(
     (section) => section.value === true && !section.required
   ).length;
+};
+
+export const getTotalRequiredTraits = (candidate: Candidate) => {
+  return candidate.sections?.filter((section) => section.required).length || 0;
 };
 
 export const getTotalOptionalTraits = (candidate: Candidate) => {

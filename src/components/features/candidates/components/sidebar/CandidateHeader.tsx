@@ -13,7 +13,6 @@ interface CandidateHeaderProps {
   onNext: () => void;
   hasPrevious: boolean;
   hasNext: boolean;
-  onLinkedIn: (url: string) => void;
   onEmail: (url: string, id: string) => Promise<void>;
   onReachout: (id: string, format: string) => Promise<void>;
   onDelete: (e: React.MouseEvent, id: string) => Promise<void>;
@@ -27,7 +26,6 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
   onNext,
   hasPrevious,
   hasNext,
-  onLinkedIn,
   onEmail,
   onReachout,
   onDelete,
@@ -58,10 +56,9 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
           <CandidateActions
             candidate={candidate}
             loadingStates={loadingStates}
-            onLinkedIn={onLinkedIn}
-            onEmail={onEmail}
-            onReachout={onReachout}
-            onDelete={onDelete}
+            handleEmail={onEmail}
+            handleReachout={onReachout}
+            handleDelete={onDelete}
           />
 
           <Separator orientation="vertical" className="h-4 mx-2" />

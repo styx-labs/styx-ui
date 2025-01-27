@@ -16,7 +16,12 @@ import {
   Check,
   X,
 } from "lucide-react";
-import { getTraitsMet, getTotalTraits } from "../../utils/traitHelpers";
+import {
+  getRequiredTraitsMet,
+  getOptionalTraitsMet,
+  getTotalRequiredTraits,
+  getTotalOptionalTraits,
+} from "../../utils/traitHelpers";
 
 interface CandidateTraitsProps {
   candidate: Candidate;
@@ -48,25 +53,40 @@ export const CandidateTraits: React.FC<CandidateTraitsProps> = ({
     });
   };
 
+  const totalRequiredTraits = getTotalRequiredTraits(candidate);
+  const totalOptionalTraits = getTotalOptionalTraits(candidate);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-purple-900">Trait Match</h3>
-        <Badge
-          variant={
-            getTraitsMet(candidate) === getTotalTraits(candidate)
-              ? "secondary"
-              : "outline"
-          }
-          className={cn(
-            "bg-purple-100 hover:bg-purple-100",
-            getTraitsMet(candidate) === getTotalTraits(candidate)
-              ? "text-purple-700 border-purple-200"
-              : "text-purple-600 border-purple-200"
+        <div className="flex items-center gap-2">
+          {totalRequiredTraits > 0 && (
+            <Badge
+              variant={
+                getRequiredTraitsMet(candidate) === totalRequiredTraits
+                  ? "secondary"
+                  : "outline"
+              }
+              className={cn(
+                "bg-purple-100 hover:bg-purple-100",
+                getRequiredTraitsMet(candidate) === totalRequiredTraits
+                  ? "text-purple-700 border-purple-200"
+                  : "text-purple-600 border-purple-200"
+              )}
+            >
+              {getRequiredTraitsMet(candidate)}/{totalRequiredTraits} Required
+            </Badge>
           )}
-        >
-          {getTraitsMet(candidate)}/{getTotalTraits(candidate)}
-        </Badge>
+          {totalOptionalTraits > 0 && (
+            <Badge
+              variant="outline"
+              className="text-purple-600 border-purple-200"
+            >
+              {getOptionalTraitsMet(candidate)}/{totalOptionalTraits} Optional
+            </Badge>
+          )}
+        </div>
       </div>
       <Card className="border-purple-100/50">
         <div className="p-4 space-y-3">

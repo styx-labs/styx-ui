@@ -1,37 +1,28 @@
 import React, { useState } from "react";
 import {
   Upload,
-  UserPlus,
   RefreshCw,
   Search,
-  Edit2,
-  Star,
   ChevronDown,
+  Star,
+  Edit2,
+  UserPlus,
+  Loader2,
 } from "lucide-react";
 import { Candidate, Job } from "@/types/index";
-import { CandidateList } from "./CandidateList";
-import { CandidateForm } from "./CandidateForm";
+import { CandidateList } from "./components/list/CandidateList";
 import { toast } from "react-hot-toast";
 import Papa from "papaparse";
 import { EditKeyTraits } from "./components/EditKeyTraits";
 import { CandidateTraitFilter } from "./components/CandidateTraitFilter";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHead,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
@@ -39,6 +30,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface TalentEvaluationProps {
   job: Job;
@@ -61,6 +56,26 @@ interface TalentEvaluationProps {
   onTraitFilterChange: (traits: string[]) => void;
 }
 
+const LoadingTable = () => (
+  <div className="animate-pulse p-4">
+    <div className="h-8 bg-muted rounded-md w-full mb-4" />
+    {[...Array(3)].map((_, i) => (
+      <div key={i} className="space-y-3 py-4">
+        <div className="h-5 bg-muted rounded-md w-full" />
+        <div className="space-y-3">
+          <div className="grid grid-cols-5 gap-4">
+            <div className="h-4 bg-muted rounded-md col-span-1" />
+            <div className="h-4 bg-muted rounded-md col-span-1" />
+            <div className="h-4 bg-muted rounded-md col-span-1" />
+            <div className="h-4 bg-muted rounded-md col-span-1" />
+            <div className="h-4 bg-muted rounded-md col-span-1" />
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   job,
   candidates,
@@ -74,6 +89,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   onTraitFilterChange,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
   const [searchMode, setSearchMode] = useState(true);
   const [showEditTraits, setShowEditTraits] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
@@ -81,7 +97,8 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
     "complete"
   );
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-
+  const [searchQuery, setSearchQuery] = useState("");
+  const [url, setUrl] = useState("");
   const filteredCandidates = candidates.filter(
     (candidate) => candidate.status === statusFilter
   );
@@ -127,7 +144,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
 
       {/* Key Traits Card */}
       <Card className="border-purple-100">
-        <div className="p-6">
+        <div className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <h2 className="text-lg font-medium text-purple-900">
@@ -166,27 +183,34 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                 })
                 .map((trait, index) => (
                   <div key={index} className="group relative">
-                    <Badge
-                      variant={trait.required ? "default" : "secondary"}
-                      className={cn(
-                        trait.required
-                          ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
-                          : "hover:bg-purple-100",
-                        "cursor-help"
-                      )}
-                    >
-                      {trait.trait}
-                      {trait.required && (
-                        <Star className="h-3 w-3 ml-1 fill-current opacity-75 inline-block" />
-                      )}
-                    </Badge>
-                    {trait.description && (
-                      <div className="absolute left-0 w-80 p-3 rounded-md border bg-white shadow-md mt-2 invisible group-hover:visible z-10">
-                        <p className="text-sm text-muted-foreground">
-                          {trait.description}
-                        </p>
-                      </div>
-                    )}
+                    <TooltipProvider delayDuration={100}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="cursor-help inline-flex">
+                            <Badge
+                              variant={trait.required ? "default" : "secondary"}
+                              className={cn(
+                                trait.required
+                                  ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
+                                  : "hover:bg-purple-100",
+                                "cursor-help"
+                              )}
+                            >
+                              {trait.trait}
+                              {trait.required && (
+                                <Star className="h-3 w-3 ml-1 fill-current opacity-75 inline-block" />
+                              )}
+                            </Badge>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="bottom"
+                          className="max-w-[300px] bg-white text-muted-foreground shadow-md"
+                        >
+                          <p className="text-sm">{trait.description}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 ))}
             </div>
@@ -196,125 +220,75 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
 
       {/* Actions Bar */}
       <Card className="p-4 border-purple-100">
-        <div className="flex items-center gap-3 flex-wrap">
-          <CandidateTraitFilter
-            job={job}
-            onFilterChange={onTraitFilterChange}
-          />
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex items-center gap-6 flex-1">
+            <div className="flex items-center gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={searchMode}
+                      onCheckedChange={setSearchMode}
+                      id="search-mode"
+                    />
+                    <Label
+                      htmlFor="search-mode"
+                      className="text-sm cursor-pointer select-none"
+                    >
+                      Search Mode
+                    </Label>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="w-64">
+                  When enabled, searches through candidate profiles and their
+                  previous jobs for better matches, but takes longer to process
+                </TooltipContent>
+              </Tooltip>
+            </div>
 
-          <Separator orientation="vertical" className="h-8" />
-
-          <Tooltip>
-            <TooltipTrigger>
+            <div className="flex gap-3 flex-1 min-w-0 items-center">
+              <Input
+                type="url"
+                placeholder="LinkedIn URL"
+                className="flex-1 min-w-0"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+              />
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSearchMode(!searchMode)}
-                className={cn(
-                  "gap-2",
-                  searchMode && "bg-purple-50 text-purple-700 border-purple-200"
-                )}
-              >
-                <Search className="h-4 w-4" />
-                {searchMode ? "Detailed Search" : "Quick Search"}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="w-64">
-              Detailed searches on candidates take longer
-            </TooltipContent>
-          </Tooltip>
-
-          <Button variant="default" size="sm" className="gap-2">
-            <UserPlus className="h-4 w-4" />
-            Add Candidate
-          </Button>
-
-          <CandidateForm
-            onSubmit={(name, context, url) =>
-              onCandidateCreate(name, context, url, searchMode)
-            }
-          />
-
-          <div className="flex items-center gap-2">
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept=".csv"
-              className="hidden"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setIsUploading(true);
+                onClick={async () => {
+                  setIsEvaluating(true);
                   try {
-                    interface CsvRow {
-                      url: string;
-                      [key: string]: string;
-                    }
-
-                    const results = await new Promise<CsvRow[]>(
-                      (resolve, reject) => {
-                        Papa.parse(file, {
-                          header: true,
-                          skipEmptyLines: true,
-                          complete: (results) => {
-                            if (!results.meta.fields?.includes("url")) {
-                              reject(
-                                new Error(
-                                  "The CSV file must have a column labeled 'url' containing LinkedIn URLs"
-                                )
-                              );
-                              return;
-                            }
-
-                            const rows = results.data as CsvRow[];
-                            resolve(rows);
-                          },
-                          error: (error) => {
-                            reject(error);
-                          },
-                        });
-                      }
+                    await onCandidateCreate(
+                      undefined,
+                      undefined,
+                      url,
+                      searchMode
                     );
-
-                    const urls = results
-                      .map((row) => row.url)
-                      .filter(
-                        (url): url is string =>
-                          typeof url === "string" && url.trim() !== ""
-                      );
-
-                    if (urls.length === 0) {
-                      throw new Error(
-                        "No valid LinkedIn URLs found in the 'url' column"
-                      );
-                    }
-
-                    await onCandidatesBatch(urls, searchMode);
-                    toast.success(
-                      `Found ${urls.length} LinkedIn URLs to process`
-                    );
-                  } catch (error) {
-                    console.error("Error processing CSV:", error);
-                    toast.error(
-                      error instanceof Error
-                        ? error.message
-                        : "Failed to process CSV file"
-                    );
+                    setUrl("");
                   } finally {
-                    setIsUploading(false);
-                    if (fileInputRef.current) {
-                      fileInputRef.current.value = "";
-                    }
+                    setIsEvaluating(false);
                   }
-                }
-              }}
-            />
+                }}
+                size="sm"
+                disabled={isEvaluating || !url}
+              >
+                {isEvaluating ? (
+                  <Loader2 size={14} className="mr-1.5 animate-spin" />
+                ) : (
+                  <UserPlus size={14} className="mr-1.5" />
+                )}
+                {isEvaluating ? "Evaluating..." : "Evaluate"}
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="sm"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="gap-2"
+              className="gap-2 whitespace-nowrap"
             >
               <Upload className="h-4 w-4" />
               {isUploading ? "Uploading..." : "Upload CSV"}
@@ -331,100 +305,147 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
             </Button>
           </div>
 
-          <Separator orientation="vertical" className="h-8" />
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept=".csv"
+            className="hidden"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setIsUploading(true);
+                try {
+                  interface CsvRow {
+                    url: string;
+                    [key: string]: string;
+                  }
 
-          <div className="flex items-center bg-gray-100 rounded-lg p-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setStatusFilter("complete")}
-              className={cn(
-                "rounded",
-                statusFilter === "complete" && "bg-white shadow-sm"
-              )}
-            >
-              Completed
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setStatusFilter("processing")}
-              className={cn(
-                "rounded",
-                statusFilter === "processing" && "bg-white shadow-sm"
-              )}
-            >
-              Processing
-            </Button>
+                  const results = await new Promise<CsvRow[]>(
+                    (resolve, reject) => {
+                      Papa.parse(file, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (results) => {
+                          if (!results.meta.fields?.includes("url")) {
+                            reject(
+                              new Error(
+                                "The CSV file must have a column labeled 'url' containing LinkedIn URLs"
+                              )
+                            );
+                            return;
+                          }
+                          const rows = results.data as CsvRow[];
+                          resolve(rows);
+                        },
+                        error: (error) => {
+                          reject(error);
+                        },
+                      });
+                    }
+                  );
+
+                  const urls = results
+                    .map((row) => row.url)
+                    .filter(
+                      (url): url is string =>
+                        typeof url === "string" && url.trim() !== ""
+                    );
+
+                  if (urls.length === 0) {
+                    throw new Error(
+                      "No valid LinkedIn URLs found in the 'url' column"
+                    );
+                  }
+
+                  await onCandidatesBatch(urls, searchMode);
+                  toast.success(
+                    `Found ${urls.length} LinkedIn URLs to process`
+                  );
+                } catch (error) {
+                  console.error("Error processing CSV:", error);
+                  toast.error(
+                    error instanceof Error
+                      ? error.message
+                      : "Failed to process CSV file"
+                  );
+                } finally {
+                  setIsUploading(false);
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = "";
+                  }
+                }
+              }
+            }}
+          />
+        </div>
+      </Card>
+
+      {/* Search and Filters */}
+      <Card className="border-purple-100">
+        <div className="p-4">
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground">
+              {filteredCandidates.length} candidate
+              {filteredCandidates.length === 1 ? "" : "s"} found
+            </span>
+
+            <CandidateTraitFilter
+              job={job}
+              onFilterChange={onTraitFilterChange}
+            />
+
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search candidates..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setStatusFilter("complete")}
+                className={cn(
+                  "rounded",
+                  statusFilter === "complete" && "bg-white shadow-sm"
+                )}
+              >
+                Completed
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setStatusFilter("processing")}
+                className={cn(
+                  "rounded",
+                  statusFilter === "processing" && "bg-white shadow-sm"
+                )}
+              >
+                Processing
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
 
-      {/* Candidates List */}
-      {isLoading ? (
-        <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead className="w-[200px]">Current Position</TableHead>
-                <TableHead className="text-center">AI Evaluation</TableHead>
-                <TableHead className="text-center">Traits Met</TableHead>
-                <TableHead>Trait Breakdown</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {[...Array(3)].map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[120px]" />
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-[140px]" />
-                      <Skeleton className="h-3 w-[100px]" />
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Skeleton className="h-5 w-[100px] mx-auto" />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col items-center gap-1">
-                      <Skeleton className="h-5 w-[120px]" />
-                      <Skeleton className="h-5 w-[100px]" />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      {[...Array(3)].map((_, j) => (
-                        <Skeleton key={j} className="h-6 w-[80px]" />
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-2">
-                      {[...Array(4)].map((_, j) => (
-                        <Skeleton key={j} className="h-8 w-8" />
-                      ))}
-                      <Skeleton className="h-8 w-[60px]" />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
-      ) : (
-        <Card>
+      {/* Candidates Table */}
+      <Card className="border-purple-100">
+        {isLoading ? (
+          <LoadingTable />
+        ) : (
           <CandidateList
             candidates={filteredCandidates}
             onDelete={async (id) => onCandidateDelete(id)}
             onReachout={onCandidateReachout}
             onGetEmail={onGetEmail}
+            searchQuery={searchQuery}
           />
-        </Card>
-      )}
+        )}
+      </Card>
 
       {showEditTraits && (
         <EditKeyTraits
