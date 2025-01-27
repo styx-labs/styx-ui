@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
-import { Job, Candidate } from "../types";
+import { Job, Candidate } from "../types/index";
 import { User, getIdToken } from "firebase/auth";
 
 interface ExtendedWindow extends Window {
@@ -117,11 +117,13 @@ export const apiService = {
   getCandidates: (jobId: string, filterTraits?: string[]) =>
     api.get<{ candidates: Candidate[] }>(`/jobs/${jobId}/candidates`, {
       paramsSerializer: {
-        indexes: null // This will ensure no [] in the parameter names
+        indexes: null, // This will ensure no [] in the parameter names
       },
-      params: filterTraits?.length ? {
-        filter_traits: filterTraits
-      } : undefined,
+      params: filterTraits?.length
+        ? {
+            filter_traits: filterTraits,
+          }
+        : undefined,
     }),
 
   getCandidate: (jobId: string, candidateId: string) =>
@@ -177,7 +179,7 @@ export const apiService = {
     });
   },
 
-  editKeyTraits: (jobId: string, key_traits: Job['key_traits']) => {
+  editKeyTraits: (jobId: string, key_traits: Job["key_traits"]) => {
     return api.patch<{ success: boolean }>(`/jobs/${jobId}/edit-key-traits`, {
       key_traits,
     });

@@ -36,6 +36,7 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
   const handleIdealProfilesSubmit = async (urls: string[]) => {
     try {
       const response = await apiService.getKeyTraits(state.description, urls);
+      console.log(response.data.key_traits);
       const formattedTraits = Array.isArray(response.data.key_traits)
         ? response.data.key_traits.map(
             (
@@ -53,13 +54,13 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
                 return {
                   trait,
                   description: "",
-                  trait_type: TraitType.BOOLEAN,
+                  trait_type: "boolean",
                   required: false,
                 };
               }
               return {
                 ...trait,
-                trait_type: TraitType.BOOLEAN,
+                trait_type: "boolean",
                 required: trait.required ?? false,
               };
             }
