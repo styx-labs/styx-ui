@@ -63,13 +63,13 @@ export const Welcome: React.FC<WelcomeProps> = ({ onCreateClick }) => {
 
       {/* Demo Video */}
       <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-12">
-        <div className="h-full">
+        <div className="relative w-full pb-[56.25%]">
           <iframe
             src="https://www.youtube.com/embed/HbRXibt4wKA"
             title="Styx Demo Video"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            className="w-full aspect-video rounded-lg shadow-lg"
+            className="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg"
           ></iframe>
         </div>
       </div>

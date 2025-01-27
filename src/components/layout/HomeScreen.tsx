@@ -137,9 +137,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 Watch how to get the most out of Styx
               </p>
             </div>
-            <div className="flex-1 relative">
+            <div className="relative w-full pb-[56.25%]">
               <iframe
-                className="absolute inset-0 w-full h-full"
+                className="absolute top-0 left-0 w-full h-full"
                 src="https://www.youtube.com/embed/HbRXibt4wKA"
                 frameBorder="0"
                 allowFullScreen
