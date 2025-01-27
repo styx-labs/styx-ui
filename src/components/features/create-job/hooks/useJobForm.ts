@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { apiService } from "@/api";
-import { TraitType } from "@/types";
-import { JobFormState, KeyTrait } from "../types";
+import type { TraitType } from "@/types/index";
+import type { JobFormState, KeyTrait } from "../types";
 
 interface UseJobFormProps {
   onSubmit: (

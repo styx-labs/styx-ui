@@ -66,6 +66,7 @@ export interface Candidate {
   search_mode?: boolean;
   required_met?: number;
   optional_met?: number;
+  fit?: number;
 }
 
 export interface Reachout {
