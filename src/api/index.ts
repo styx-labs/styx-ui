@@ -184,4 +184,34 @@ export const apiService = {
       key_traits,
     });
   },
+
+  // Templates
+  getTemplates: () => api.get<UserTemplates>("/settings/templates"),
+
+  updateTemplates: (templates: TemplateUpdateRequest) =>
+    api.put<UserTemplates>("/settings/templates", templates),
+
+  // Custom Evaluation Instructions
+  getEvaluationInstructions: () =>
+    api.get<CustomInstructions>("/settings/evaluation-instructions"),
+
+  updateEvaluationInstructions: (instructions: CustomInstructions) =>
+    api.put<CustomInstructions>(
+      "/settings/evaluation-instructions",
+      instructions
+    ),
 };
+
+export interface TemplateUpdateRequest {
+  linkedin_template?: string;
+  email_template?: string;
+}
+
+export interface UserTemplates {
+  linkedin_template?: string;
+  email_template?: string;
+}
+
+export interface CustomInstructions {
+  evaluation_instructions: string;
+}
