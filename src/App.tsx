@@ -13,7 +13,6 @@ import { Login } from "./components/auth/Login";
 import { setAuthUser, apiService } from "./api";
 import { UnauthorizedError } from "./api";
 import { useEffect, useState } from "react";
-import { Welcome } from "./components/layout/Welcome";
 import { HomeScreen } from "./components/layout/HomeScreen";
 import { User } from "firebase/auth";
 import { LoadingSpinner } from "./components/common/LoadingSpinner";
@@ -329,16 +328,6 @@ function App() {
                   <HomeScreen
                     jobs={jobs}
                     onCreateJob={() => {
-                      navigate("/create");
-                    }}
-                  />
-                }
-              />
-              <Route
-                path="/welcome"
-                element={
-                  <Welcome
-                    onCreateClick={() => {
                       navigate("/create");
                     }}
                   />
