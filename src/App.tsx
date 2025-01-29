@@ -21,6 +21,8 @@ import { PaymentStatus } from "./components/features/payment/PaymentStatus";
 import PricingPage from "./components/features/payment/PricingPage";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TalentEvaluation } from "./components/features/candidates/TalentEvaluation";
+import { SettingsPage } from "./components/features/settings/SettingsPage";
+import { Toaster as ShadcnToaster } from "./components/ui/toaster";
 import { WelcomePopup } from "./components/features/welcome/WelcomePopup";
 
 // Extend Window interface
@@ -188,7 +190,6 @@ function JobDetail() {
 
 function App() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const { jobs, isLoading, createJob, deleteJob, error, retry } = useJobs();
   const { user, loading, logout } = useAuth();
@@ -324,12 +325,7 @@ function App() {
 
           <main className="flex-1 relative bg-gray-50 p-8">
             <Routes>
-              <Route
-                path="/"
-                element={
-                  <HomeScreen/>
-                }
-              />
+              <Route path="/" element={<HomeScreen />} />
               <Route
                 path="/create"
                 element={<JobForm onSubmit={handleCreateJob} />}
@@ -340,9 +336,11 @@ function App() {
                 path="/payment-status"
                 element={<PaymentStatus status="success" />}
               />
+              <Route path="/settings" element={<SettingsPage />} />
             </Routes>
           </main>
         </SidebarProvider>
+        <ShadcnToaster />
       </ErrorBoundary>
     </div>
   );

@@ -1,6 +1,6 @@
 import type * as React from "react";
 import type { User } from "firebase/auth";
-import { Chrome, CreditCard, LogOut } from "lucide-react";
+import { Chrome, CreditCard, LogOut, Settings } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,6 +75,13 @@ export function UserNav({ user, onLogout, renderAvatar }: UserNavProps) {
             <Chrome className="mr-2 h-4 w-4" />
             Chrome Extension
           </a>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => navigate("/settings")}
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          Settings
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer"

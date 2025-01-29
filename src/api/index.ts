@@ -95,6 +95,23 @@ api.interceptors.response.use(
   }
 );
 
+export interface CandidateContext {
+  name: string;
+  sections: Array<{
+    section: string;
+    content: string;
+  }>;
+}
+
+export interface ReachoutPayload {
+  format: string;
+}
+
+export interface TestTemplateResponse {
+  reachout: string;
+  candidate_context: CandidateContext;
+}
+
 export const apiService = {
   // Jobs
   getJobs: () => api.get<{ jobs: Job[] }>("/jobs"),
@@ -192,4 +209,42 @@ export const apiService = {
       key_traits,
     });
   },
+
+  // Templates
+  getTemplates: () => api.get<UserTemplates>("/settings/templates"),
+
+  updateTemplates: (templates: TemplateUpdateRequest) =>
+    api.put<UserTemplates>("/settings/templates", templates),
+
+  // Custom Evaluation Instructions
+  getEvaluationInstructions: () =>
+    api.get<CustomInstructions>("/settings/evaluation-instructions"),
+
+  updateEvaluationInstructions: (instructions: CustomInstructions) =>
+    api.put<CustomInstructions>(
+      "/settings/evaluation-instructions",
+      instructions
+    ),
+
+  // Test template
+  testTemplate: (format: "linkedin" | "email", template_content: string) => {
+    return api.post<TestTemplateResponse>("/test-reachout-template", {
+      format,
+      template_content,
+    });
+  },
 };
+
+export interface TemplateUpdateRequest {
+  linkedin_template?: string;
+  email_template?: string;
+}
+
+export interface UserTemplates {
+  linkedin_template?: string;
+  email_template?: string;
+}
+
+export interface CustomInstructions {
+  evaluation_instructions: string;
+}
