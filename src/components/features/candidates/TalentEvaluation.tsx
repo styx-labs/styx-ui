@@ -4,10 +4,12 @@ import {
   RefreshCw,
   Search,
   ChevronDown,
+  ChevronUp,
   Star,
   GaugeCircle,
   UserPlus,
   Loader2,
+  Download,
 } from "lucide-react";
 import { Candidate, Job } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
@@ -34,6 +36,13 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TalentEvaluationProps {
   job: Job;
@@ -100,9 +109,40 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [url, setUrl] = useState("");
   const [showActionBar, setShowActionBar] = useState(false);
+  const [showExportBar, setShowExportBar] = useState(false);
+  const [exportMode, setExportMode] = useState<"all" | "limited">("all");
+  const [exportLimit, setExportLimit] = useState("10");
+  const [exportFormat, setExportFormat] = useState("csv");
   const filteredCandidates = candidates.filter(
     (candidate) => candidate.status === statusFilter
   );
+
+  const handleExport = () => {
+    if (exportFormat === "csv") {
+      const candidates_to_export = exportMode === "all" 
+        ? filteredCandidates 
+        : filteredCandidates.slice(0, parseInt(exportLimit));
+
+      const csvContent = [
+        ["name", "url", "occupation", "company"],
+        ...candidates_to_export.map(candidate => [
+          candidate.name || "",
+          candidate.url || "",
+          candidate.profile?.occupation?.toLowerCase() || "",
+          candidate.profile?.experiences?.[0]?.company?.toLowerCase() || "",
+        ])
+      ].map(row => row.join(",")).join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `candidates_export_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -219,7 +259,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
         </div>
       </Card>
 
-      {/* Search and Filters */}
+      {/* Action Bar */}
       <Card className="border-purple-100">
         <div className="p-4">
           <div className="flex items-center gap-4">
@@ -242,9 +282,15 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               variant="outline"
               size="sm"
               onClick={() => setShowActionBar(!showActionBar)}
-              className="gap-2"
+              className={cn("gap-2", 
+                showActionBar && "bg-purple-100 hover:bg-purple-200 text-purple-700"
+              )}
             >
-              <UserPlus className="h-4 w-4" />
+              {showActionBar ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <UserPlus className="h-4 w-4" />
+              )}
               Manually Add Candidates
             </Button>
 
@@ -256,6 +302,22 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
             >
               <RefreshCw className="h-4 w-4" />
               Refresh
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowExportBar(!showExportBar)}
+              className={cn("gap-2",
+                showExportBar && "bg-purple-100 hover:bg-purple-200 text-purple-700"
+              )}
+            >
+              {showExportBar ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              Export
             </Button>
 
             <div className="flex items-center bg-gray-100 rounded-lg p-1">
@@ -292,7 +354,84 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
         </div>
       </Card>
 
-      {/* Action Bar - Now conditionally rendered */}
+      {/* Export Settings Bar */}
+      {showExportBar && (
+        <Card className="p-4 border-purple-100">
+          <div className="flex items-center gap-6">
+            <Select
+              value={exportFormat}
+              onValueChange={setExportFormat}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select format" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="csv">Export to CSV</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExportMode("all")}
+                className={cn(
+                  "rounded",
+                  exportMode === "all" && "bg-white shadow-sm"
+                )}
+              >
+                Export All
+              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setExportMode("limited")}
+                      className={cn(
+                        "rounded",
+                        exportMode === "limited" && "bg-white shadow-sm"
+                      )}
+                    >
+                      Export Top #
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p className="text-sm">Export the top N candidates from the current list</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+
+            {exportMode === "limited" && (
+              <div className="flex items-center gap-2">
+                <Label className="text-sm text-muted-foreground mr-2">Export top</Label>
+                <Input
+                  type="number"
+                  value={exportLimit}
+                  onChange={(e) => setExportLimit(e.target.value)}
+                  className="w-24"
+                  min="1"
+                  max={filteredCandidates.length}
+                />
+                <span className="text-sm text-muted-foreground">candidates from the list</span>
+              </div>
+            )}
+
+            <Button
+              onClick={handleExport}
+              size="sm"
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Start Export
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {/* Add Candidates Bar - Now conditionally rendered */}
       {showActionBar && (
         <Card className="p-4 border-purple-100">
           <div className="flex items-center justify-between gap-6">
