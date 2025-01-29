@@ -173,6 +173,14 @@ export const apiService = {
     return api.post<{ search_credits: number }>("/get-search-credits");
   },
 
+  getShowPopup: () => {
+    return api.get<{ show_popup: boolean }>("/show-popup");
+  },
+
+  setShowPopup: () => {
+    return api.post<{ success: boolean }>("/set-popup-shown");
+  },
+
   getCheckoutSession: (planId: string) => {
     return api.post<{ url: string }>("/payments/create-checkout-session", {
       planId,

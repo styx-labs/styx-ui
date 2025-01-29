@@ -21,6 +21,7 @@ import { PaymentStatus } from "./components/features/payment/PaymentStatus";
 import PricingPage from "./components/features/payment/PricingPage";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TalentEvaluation } from "./components/features/candidates/TalentEvaluation";
+import { WelcomePopup } from "./components/features/welcome/WelcomePopup";
 
 // Extend Window interface
 interface ExtendedWindow extends Window {
@@ -295,8 +296,9 @@ function App() {
   }
 
   return (
-    <>
-      <Toaster position="top-right" />
+    <div className="h-screen">
+      <Toaster position="top-center" />
+      <WelcomePopup />
       <ErrorBoundary>
         <SidebarProvider>
           <AppSidebar
@@ -325,12 +327,7 @@ function App() {
               <Route
                 path="/"
                 element={
-                  <HomeScreen
-                    jobs={jobs}
-                    onCreateJob={() => {
-                      navigate("/create");
-                    }}
-                  />
+                  <HomeScreen/>
                 }
               />
               <Route
@@ -347,7 +344,7 @@ function App() {
           </main>
         </SidebarProvider>
       </ErrorBoundary>
-    </>
+    </div>
   );
 }
 

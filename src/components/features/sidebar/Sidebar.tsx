@@ -77,7 +77,7 @@ export function AppSidebar({
   const { state, setOpen } = useSidebar();
   const isCollapsed = state === "collapsed";
   
-  const showTooltip = jobs.length === 0 && location.pathname === "/";
+  const showTooltip = !isLoading && jobs.length === 0 && location.pathname === "/";
 
   const filteredJobs = React.useMemo(
     () =>
@@ -140,7 +140,7 @@ export function AppSidebar({
                 <TooltipContent 
                   side="right" 
                   className={cn(
-                    "bg-white text-slate-900 px-4 py-3 text-lg font-medium border-2 border-slate-300 shadow-[0_0_15px_rgba(147,51,234,0.3)]",
+                    "bg-white/80 backdrop-blur-sm text-slate-900 px-4 py-3 text-lg font-medium border-2 border-slate-300 shadow-[0_0_15px_rgba(147,51,234,0.3)] z-10",
                     showTooltip && "tooltip-animate"
                   )}
                 >
