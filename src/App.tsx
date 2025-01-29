@@ -356,9 +356,9 @@ function App() {
               />
               <Route path="/settings" element={<SettingsPage />} />
             </Routes>
-            <ShadcnToaster />
           </main>
         </SidebarProvider>
+        <ShadcnToaster />
       </ErrorBoundary>
     </>
   );

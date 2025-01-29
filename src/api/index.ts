@@ -95,6 +95,23 @@ api.interceptors.response.use(
   }
 );
 
+export interface CandidateContext {
+  name: string;
+  sections: Array<{
+    section: string;
+    content: string;
+  }>;
+}
+
+export interface ReachoutPayload {
+  format: string;
+}
+
+export interface TestTemplateResponse {
+  reachout: string;
+  candidate_context: CandidateContext;
+}
+
 export const apiService = {
   // Jobs
   getJobs: () => api.get<{ jobs: Job[] }>("/jobs"),
@@ -200,6 +217,14 @@ export const apiService = {
       "/settings/evaluation-instructions",
       instructions
     ),
+
+  // Test template
+  testTemplate: (format: "linkedin" | "email", template_content: string) => {
+    return api.post<TestTemplateResponse>("/test-reachout-template", {
+      format,
+      template_content,
+    });
+  },
 };
 
 export interface TemplateUpdateRequest {
