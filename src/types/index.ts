@@ -56,7 +56,7 @@ export interface Candidate {
   id?: string;
   name?: string;
   context?: string;
-  status?: string;
+  status?: "processing" | "complete";
   url?: string;
   summary?: string;
   sections?: TraitEvaluation[];
@@ -67,6 +67,12 @@ export interface Candidate {
   required_met?: number;
   optional_met?: number;
   fit?: number;
+  evaluation?: {
+    score: number;
+    traits_met: number;
+    total_traits: number;
+    trait_scores: number[];
+  };
 }
 
 export interface Reachout {

@@ -12,6 +12,7 @@ import { toast } from "react-hot-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CandidateRow } from "./CandidateRow";
 import { CandidateSidebar } from "../sidebar/CandidateSidebar";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CandidateListProps {
   candidates: Candidate[];
@@ -19,9 +20,14 @@ interface CandidateListProps {
   onReachout?: (id: string, format: string) => Promise<string | undefined>;
   onDelete?: (id: string) => Promise<void>;
   searchQuery: string;
+  showSelection?: boolean;
+  selectedCandidates?: string[];
+  onSelectionChange?: (selectedIds: string[]) => void;
 }
 
-const ProcessingCandidateRow: React.FC<{ candidate: Candidate }> = ({
+const ProcessingCandidateRow: React.FC<{ 
+  candidate: Candidate;
+}> = ({
   candidate,
 }) => (
   <TableRow className="cursor-default">
@@ -68,6 +74,9 @@ export const CandidateList: React.FC<CandidateListProps> = ({
   onReachout,
   onDelete,
   searchQuery,
+  showSelection = false,
+  selectedCandidates = [],
+  onSelectionChange,
 }) => {
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
     null
@@ -170,12 +179,42 @@ export const CandidateList: React.FC<CandidateListProps> = ({
     }
   };
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = filteredCandidates
+        .filter(c => c.status !== "processing" && c.id)
+        .map(c => c.id!)
+      onSelectionChange?.(allIds);
+    } else {
+      onSelectionChange?.([]);
+    }
+  };
+
+  const handleSelectCandidate = (candidateId: string, checked: boolean) => {
+    if (checked) {
+      onSelectionChange?.([...selectedCandidates, candidateId]);
+    } else {
+      onSelectionChange?.(selectedCandidates.filter(id => id !== candidateId));
+    }
+  };
+
+  const selectableCandidatesCount = filteredCandidates.filter(c => c.status !== "processing").length;
+
   return (
     <>
       <div className="rounded-md border p-4">
         <Table>
           <TableHeader>
             <TableRow>
+              {showSelection && (
+                <TableHead className="w-[50px]">
+                  <Checkbox
+                    checked={selectedCandidates.length === selectableCandidatesCount}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all candidates"
+                  />
+                </TableHead>
+              )}
               <TableHead>Name</TableHead>
               <TableHead className="w-[200px]">Current Position</TableHead>
               <TableHead className="text-center">AI Evaluation</TableHead>
@@ -200,6 +239,9 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                   handleReachout={handleReachout}
                   handleDelete={handleDelete}
                   setSelectedCandidate={setSelectedCandidate}
+                  showSelection={showSelection}
+                  isSelected={candidate.id ? selectedCandidates.includes(candidate.id) : false}
+                  onSelectionChange={(checked: boolean) => candidate.id && handleSelectCandidate(candidate.id, checked)}
                 />
               )
             )}

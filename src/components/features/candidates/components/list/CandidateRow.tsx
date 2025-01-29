@@ -17,14 +17,20 @@ import {
   getTotalOptionalTraits,
   getRequiredTraitsMet,
 } from "../../utils/traitHelpers";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CandidateRowProps {
   candidate: Candidate;
-  loadingStates: { [key: string]: { email: boolean; message: boolean } };
-  handleEmail: (url: string, id: string) => Promise<void>;
-  handleReachout: (id: string, format: string) => Promise<void>;
-  handleDelete: (e: React.MouseEvent, id: string) => Promise<void>;
+  loadingStates: {
+    [key: string]: { email: boolean; message: boolean };
+  };
+  handleEmail: (url: string, candidateId: string) => Promise<void>;
+  handleReachout: (candidateId: string, format: string) => Promise<void>;
+  handleDelete: (e: React.MouseEvent, candidateId: string) => Promise<void>;
   setSelectedCandidate: (candidate: Candidate) => void;
+  showSelection?: boolean;
+  isSelected?: boolean;
+  onSelectionChange?: (checked: boolean) => void;
 }
 
 export const CandidateRow: React.FC<CandidateRowProps> = ({
@@ -34,13 +40,24 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
   handleReachout,
   handleDelete,
   setSelectedCandidate,
+  showSelection,
+  isSelected,
+  onSelectionChange,
 }) => {
   return (
     <TableRow
-      key={candidate.id}
       className="cursor-pointer hover:bg-muted/50"
       onClick={() => setSelectedCandidate(candidate)}
     >
+      {showSelection && (
+        <TableCell onClick={(e) => e.stopPropagation()}>
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={onSelectionChange}
+            aria-label={`Select ${candidate.name}`}
+          />
+        </TableCell>
+      )}
       <TableCell className="font-medium">
         <div className="flex items-center gap-2">
           <span>{candidate.name}</span>
@@ -73,7 +90,6 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
                         className={cn(
                           "font-medium hover:bg-inherit",
                           candidate.fit !== undefined &&
-                            candidate.fit === 4 &&
                             candidate.fit === 4 &&
                             "bg-green-100 text-green-700 hover:bg-green-100 border-green-200",
                           candidate.fit === 3 &&
