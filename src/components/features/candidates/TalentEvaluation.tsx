@@ -465,7 +465,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
         <EditKeyTraits
           job={job}
           onClose={() => setShowEditTraits(false)}
-          onSuccess={onRefresh}
+          onSuccess={() => window.location.reload()}
         />
       )}
     </div>
