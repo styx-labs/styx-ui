@@ -5,7 +5,7 @@ import {
   Search,
   ChevronDown,
   Star,
-  Edit2,
+  GaugeCircle,
   UserPlus,
   Loader2,
 } from "lucide-react";
@@ -99,6 +99,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [url, setUrl] = useState("");
+  const [showActionBar, setShowActionBar] = useState(false);
   const filteredCandidates = candidates.filter(
     (candidate) => candidate.status === statusFilter
   );
@@ -166,8 +167,8 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                 onClick={() => setShowEditTraits(true)}
                 className="gap-2"
               >
-                <Edit2 className="h-4 w-4" />
-                Edit Traits
+                <GaugeCircle className="h-4 w-4" />
+                Re-Calibrate Traits
               </Button>
             </div>
           </div>
@@ -218,177 +219,10 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
         </div>
       </Card>
 
-      {/* Actions Bar */}
-      <Card className="p-4 border-purple-100">
-        <div className="flex items-center justify-between gap-6">
-          <div className="flex items-center gap-6 flex-1">
-            <div className="flex items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={searchMode}
-                      onCheckedChange={setSearchMode}
-                      id="search-mode"
-                    />
-                    <Label
-                      htmlFor="search-mode"
-                      className="text-sm cursor-pointer select-none"
-                    >
-                      Search Mode
-                    </Label>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent className="w-64">
-                  When enabled, searches through candidate profiles and their
-                  previous jobs for better matches, but takes longer to process
-                </TooltipContent>
-              </Tooltip>
-            </div>
-
-            <div className="flex gap-3 flex-1 min-w-0 items-center">
-              <Input
-                type="url"
-                placeholder="LinkedIn URL"
-                className="flex-1 min-w-0"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-              />
-              <Button
-                onClick={async () => {
-                  setIsEvaluating(true);
-                  try {
-                    await onCandidateCreate(
-                      undefined,
-                      undefined,
-                      url,
-                      searchMode
-                    );
-                    setUrl("");
-                  } finally {
-                    setIsEvaluating(false);
-                  }
-                }}
-                size="sm"
-                disabled={isEvaluating || !url}
-              >
-                {isEvaluating ? (
-                  <Loader2 size={14} className="mr-1.5 animate-spin" />
-                ) : (
-                  <UserPlus size={14} className="mr-1.5" />
-                )}
-                {isEvaluating ? "Evaluating..." : "Evaluate"}
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              className="gap-2 whitespace-nowrap"
-            >
-              <Upload className="h-4 w-4" />
-              {isUploading ? "Uploading..." : "Upload CSV"}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onRefresh}
-              className="gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Refresh
-            </Button>
-          </div>
-
-          <input
-            type="file"
-            ref={fileInputRef}
-            accept=".csv"
-            className="hidden"
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setIsUploading(true);
-                try {
-                  interface CsvRow {
-                    url: string;
-                    [key: string]: string;
-                  }
-
-                  const results = await new Promise<CsvRow[]>(
-                    (resolve, reject) => {
-                      Papa.parse(file, {
-                        header: true,
-                        skipEmptyLines: true,
-                        complete: (results) => {
-                          if (!results.meta.fields?.includes("url")) {
-                            reject(
-                              new Error(
-                                "The CSV file must have a column labeled 'url' containing LinkedIn URLs"
-                              )
-                            );
-                            return;
-                          }
-                          const rows = results.data as CsvRow[];
-                          resolve(rows);
-                        },
-                        error: (error) => {
-                          reject(error);
-                        },
-                      });
-                    }
-                  );
-
-                  const urls = results
-                    .map((row) => row.url)
-                    .filter(
-                      (url): url is string =>
-                        typeof url === "string" && url.trim() !== ""
-                    );
-
-                  if (urls.length === 0) {
-                    throw new Error(
-                      "No valid LinkedIn URLs found in the 'url' column"
-                    );
-                  }
-
-                  await onCandidatesBatch(urls, searchMode);
-                  toast.success(
-                    `Found ${urls.length} LinkedIn URLs to process`
-                  );
-                } catch (error) {
-                  console.error("Error processing CSV:", error);
-                  toast.error(
-                    error instanceof Error
-                      ? error.message
-                      : "Failed to process CSV file"
-                  );
-                } finally {
-                  setIsUploading(false);
-                  if (fileInputRef.current) {
-                    fileInputRef.current.value = "";
-                  }
-                }
-              }
-            }}
-          />
-        </div>
-      </Card>
-
       {/* Search and Filters */}
       <Card className="border-purple-100">
         <div className="p-4">
           <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
-              {filteredCandidates.length} candidate
-              {filteredCandidates.length === 1 ? "" : "s"} found
-            </span>
-
             <CandidateTraitFilter
               job={job}
               onFilterChange={onTraitFilterChange}
@@ -403,6 +237,26 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                 className="pl-8"
               />
             </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowActionBar(!showActionBar)}
+              className="gap-2"
+            >
+              <UserPlus className="h-4 w-4" />
+              Manually Add Candidates
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRefresh}
+              className="gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </Button>
 
             <div className="flex items-center bg-gray-100 rounded-lg p-1">
               <Button
@@ -429,8 +283,168 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               </Button>
             </div>
           </div>
+          <div className="mt-3">
+            <span className="text-sm text-muted-foreground">
+              {filteredCandidates.length} candidate
+              {filteredCandidates.length === 1 ? "" : "s"} found
+            </span>
+          </div>
         </div>
       </Card>
+
+      {/* Action Bar - Now conditionally rendered */}
+      {showActionBar && (
+        <Card className="p-4 border-purple-100">
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex items-center gap-6 flex-1">
+              <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={searchMode}
+                        onCheckedChange={setSearchMode}
+                        id="search-mode"
+                      />
+                      <Label
+                        htmlFor="search-mode"
+                        className="text-sm cursor-pointer select-none"
+                      >
+                        Search Mode
+                      </Label>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="w-64">
+                    When enabled, searches through candidate profiles and their
+                    previous jobs for better matches, but takes longer to process
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+
+              <div className="flex gap-3 flex-1 min-w-0 items-center">
+                <Input
+                  type="url"
+                  placeholder="LinkedIn URL"
+                  className="flex-1 min-w-0"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                />
+                <Button
+                  onClick={async () => {
+                    setIsEvaluating(true);
+                    try {
+                      await onCandidateCreate(
+                        undefined,
+                        undefined,
+                        url,
+                        searchMode
+                      );
+                      setUrl("");
+                    } finally {
+                      setIsEvaluating(false);
+                    }
+                  }}
+                  size="sm"
+                  disabled={isEvaluating || !url}
+                >
+                  {isEvaluating ? (
+                    <Loader2 size={14} className="mr-1.5 animate-spin" />
+                  ) : (
+                    <UserPlus size={14} className="mr-1.5" />
+                  )}
+                  {isEvaluating ? "Evaluating..." : "Evaluate"}
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="gap-2 whitespace-nowrap"
+              >
+                <Upload className="h-4 w-4" />
+                {isUploading ? "Uploading..." : "Upload CSV"}
+              </Button>
+            </div>
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".csv"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setIsUploading(true);
+                  try {
+                    interface CsvRow {
+                      url: string;
+                      [key: string]: string;
+                    }
+
+                    const results = await new Promise<CsvRow[]>(
+                      (resolve, reject) => {
+                        Papa.parse(file, {
+                          header: true,
+                          skipEmptyLines: true,
+                          complete: (results) => {
+                            if (!results.meta.fields?.includes("url")) {
+                              reject(
+                                new Error(
+                                  "The CSV file must have a column labeled 'url' containing LinkedIn URLs"
+                                )
+                              );
+                              return;
+                            }
+                            const rows = results.data as CsvRow[];
+                            resolve(rows);
+                          },
+                          error: (error) => {
+                            reject(error);
+                          },
+                        });
+                      }
+                    );
+
+                    const urls = results
+                      .map((row) => row.url)
+                      .filter(
+                        (url): url is string =>
+                          typeof url === "string" && url.trim() !== ""
+                      );
+
+                    if (urls.length === 0) {
+                      throw new Error(
+                        "No valid LinkedIn URLs found in the 'url' column"
+                      );
+                    }
+
+                    await onCandidatesBatch(urls, searchMode);
+                    toast.success(
+                      `Found ${urls.length} LinkedIn URLs to process`
+                    );
+                  } catch (error) {
+                    console.error("Error processing CSV:", error);
+                    toast.error(
+                      error instanceof Error
+                        ? error.message
+                        : "Failed to process CSV file"
+                    );
+                  } finally {
+                    setIsUploading(false);
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = "";
+                    }
+                  }
+                }
+              }}
+            />
+          </div>
+        </Card>
+      )}
 
       {/* Candidates Table */}
       <Card className="border-purple-100">

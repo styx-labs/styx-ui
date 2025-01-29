@@ -13,7 +13,6 @@ import { Login } from "./components/auth/Login";
 import { setAuthUser, apiService } from "./api";
 import { UnauthorizedError } from "./api";
 import { useEffect, useState } from "react";
-import { Welcome } from "./components/layout/Welcome";
 import { HomeScreen } from "./components/layout/HomeScreen";
 import { User } from "firebase/auth";
 import { LoadingSpinner } from "./components/common/LoadingSpinner";
@@ -24,6 +23,8 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { TalentEvaluation } from "./components/features/candidates/TalentEvaluation";
 import { SettingsPage } from "./components/features/settings/SettingsPage";
 import { Toaster as ShadcnToaster } from "./components/ui/toaster";
+import { WelcomePopup } from "./components/features/welcome/WelcomePopup";
+
 // Extend Window interface
 interface ExtendedWindow extends Window {
   currentUser?: User | null;
@@ -296,8 +297,9 @@ function App() {
   }
 
   return (
-    <>
-      <Toaster position="top-right" />
+    <div className="h-screen">
+      <Toaster position="top-center" />
+      <WelcomePopup />
       <ErrorBoundary>
         <SidebarProvider>
           <AppSidebar
@@ -323,27 +325,7 @@ function App() {
 
           <main className="flex-1 relative bg-gray-50 p-8">
             <Routes>
-              <Route
-                path="/"
-                element={
-                  <HomeScreen
-                    jobs={jobs}
-                    onCreateJob={() => {
-                      navigate("/create");
-                    }}
-                  />
-                }
-              />
-              <Route
-                path="/welcome"
-                element={
-                  <Welcome
-                    onCreateClick={() => {
-                      navigate("/create");
-                    }}
-                  />
-                }
-              />
+              <Route path="/" element={<HomeScreen />} />
               <Route
                 path="/create"
                 element={<JobForm onSubmit={handleCreateJob} />}
@@ -360,7 +342,7 @@ function App() {
         </SidebarProvider>
         <ShadcnToaster />
       </ErrorBoundary>
-    </>
+    </div>
   );
 }
 

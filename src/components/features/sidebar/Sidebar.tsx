@@ -20,7 +20,31 @@ import styxLogo from "@/assets/styx_name_logo_transparent.png";
 import styxIcon from "@/assets/styx.svg";
 import { JobList } from "./JobList";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+// Add the keyframe animation
+const tooltipAnimation = `
+@keyframes sideToSide {
+  0% { transform: translateX(0px); }
+  50% { transform: translateX(20px); }
+  100% { transform: translateX(0px); }
+}
+
+.tooltip-animate {
+  animation: sideToSide 1s ease-in-out infinite;
+}
+` as const;
+
+// Add the style element
+const StyleSheet = () => (
+  <style>{tooltipAnimation}</style>
+);
 
 interface SidebarProps {
   jobs: Job[];
@@ -46,11 +70,14 @@ export function AppSidebar({
   onLogout,
 }: SidebarProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isSearching, setIsSearching] = React.useState(false);
 
   const { state, setOpen } = useSidebar();
   const isCollapsed = state === "collapsed";
+  
+  const showTooltip = !isLoading && jobs.length === 0 && location.pathname === "/";
 
   const filteredJobs = React.useMemo(
     () =>
@@ -64,6 +91,7 @@ export function AppSidebar({
 
   return (
     <Sidebar collapsible="icon">
+      <StyleSheet />
       <SidebarHeader className={cn("border-b", !isCollapsed && "p-4")}>
         <div
           className={cn(
@@ -92,19 +120,34 @@ export function AppSidebar({
       <SidebarContent>
         <SidebarGroup className={cn("border-b", !isCollapsed && "p-4")}>
           <div className="flex flex-col gap-2">
-            <Button
-              variant="default"
-              className={cn(
-                "w-full transition-colors flex items-center",
-                isCollapsed
-                  ? "justify-center h-8 w-8 p-0"
-                  : "justify-center h-8"
-              )}
-              onClick={onCreateClick}
-            >
-              <Plus className={cn("h-4 w-4", !isCollapsed && "mr-2")} />
-              {!isCollapsed && "Add Job"}
-            </Button>
+            <TooltipProvider delayDuration={0}>
+              <Tooltip open={showTooltip}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="default"
+                    className={cn(
+                      "w-full transition-colors flex items-center",
+                      isCollapsed
+                        ? "justify-center h-8 w-8 p-0"
+                        : "justify-center h-8"
+                    )}
+                    onClick={onCreateClick}
+                  >
+                    <Plus className={cn("h-4 w-4", !isCollapsed && "mr-2")} />
+                    {!isCollapsed && "Add Job"}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent 
+                  side="right" 
+                  className={cn(
+                    "bg-white/80 backdrop-blur-sm text-slate-900 px-4 py-3 text-lg font-medium border-2 border-slate-300 shadow-[0_0_15px_rgba(147,51,234,0.3)] z-10",
+                    showTooltip && "tooltip-animate"
+                  )}
+                >
+                  <p>Start by creating your first job!</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button
               variant="outline"
               className={cn(
