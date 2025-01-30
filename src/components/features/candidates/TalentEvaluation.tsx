@@ -117,6 +117,8 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
     (candidate) => candidate.status === statusFilter
   );
 
+  console.log(filteredCandidates);
+
   const handleExport = () => {
     if (exportFormat === "csv") {
       const candidates_to_export = exportMode === "all" 

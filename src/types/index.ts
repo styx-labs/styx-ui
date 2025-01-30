@@ -39,6 +39,27 @@ export interface ProfileEducation {
   ends_at: string | null;
 }
 
+export interface ExperienceStageMetrics {
+  company_name: string;
+  funding_stage: string;
+  company_tier: string;
+  joined_at: string;
+  left_at: string | null;
+  duration_months: number;
+}
+
+export interface CareerMetrics {
+  total_experience_months: number;
+  total_experience_years: number;
+  average_tenure_months: number;
+  average_tenure_years: number;
+  current_tenure_months: number;
+  current_tenure_years: number;
+  tech_stacks?: string[];
+  career_tags?: string[];
+  experience_by_stage: ExperienceStageMetrics[];
+}
+
 export interface Profile {
   full_name: string;
   headline: string;
@@ -50,6 +71,7 @@ export interface Profile {
   url: string;
   experiences?: ProfileExperience[];
   education?: ProfileEducation[];
+  career_metrics?: CareerMetrics;
 }
 
 export interface Candidate {

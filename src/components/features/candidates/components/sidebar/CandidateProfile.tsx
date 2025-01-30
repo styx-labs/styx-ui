@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { BriefcaseIcon, GraduationCap } from "lucide-react";
 import type { Candidate } from "@/types/index";
 import { formatDate, calculateTenure } from "../../utils/dateFormatters";
+import { CareerMetrics } from "./CareerMetrics";
 
 interface CandidateProfileProps {
   candidate: Candidate;
@@ -18,6 +19,11 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
     <div className="space-y-6">
       <h3 className="text-lg font-medium text-purple-900">Profile</h3>
       <div className="space-y-8">
+        {/* Career Metrics */}
+        {candidate.profile.career_metrics && (
+          <CareerMetrics metrics={candidate.profile.career_metrics} />
+        )}
+
         {/* Experience */}
         {candidate.profile.experiences &&
           candidate.profile.experiences.length > 0 && (
