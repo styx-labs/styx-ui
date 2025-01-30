@@ -44,6 +44,29 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
   isSelected,
   onSelectionChange,
 }) => {
+  const renderTraitContent = (content: string) => {
+    const parts = content.split(/(\[\d+\]\([^)]+\))/g);
+    return parts.map((part, i) => {
+      const match = part.match(/\[(\d+)\]\(([^)]+)\)/);
+      if (match) {
+        const [_, index, url] = match;
+        return (
+          <a
+            key={i}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-purple-600 hover:text-purple-800 font-medium"
+          >
+            [{index}]
+          </a>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+  
   return (
     <TableRow
       className="cursor-pointer hover:bg-muted/50"
@@ -183,7 +206,7 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[300px] bg-white text-muted-foreground shadow-md">
                     <div className="space-y-1">
-                      <p className="text-sm">{section.content}</p>
+                      <p className="text-sm">{renderTraitContent(section.content)}</p>
                     </div>
                   </TooltipContent>
                 </Tooltip>
