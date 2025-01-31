@@ -88,7 +88,7 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                             {exp.company}
                           </p>
                         )}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-between">
                           <p className="text-xs text-purple-600/75">
                             {formatDate(exp.starts_at)} -{" "}
                             {exp.ends_at ? formatDate(exp.ends_at) : "Present"}
