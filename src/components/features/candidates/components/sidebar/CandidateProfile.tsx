@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BriefcaseIcon, GraduationCap } from "lucide-react";
+import { BriefcaseIcon, GraduationCap, ExternalLink } from "lucide-react";
 import type { Candidate } from "@/types/index";
 import { formatDate, calculateTenure } from "../../utils/dateFormatters";
 import { CareerMetrics } from "./CareerMetrics";
@@ -73,9 +73,21 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                             {calculateTenure(exp.starts_at, exp.ends_at)}
                           </Badge>
                         </div>
-                        <p className="text-sm text-purple-700/90">
-                          {exp.company}
-                        </p>
+                        {exp.company_linkedin_profile_url ? (
+                          <a
+                            href={exp.company_linkedin_profile_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-purple-700/90 hover:text-purple-900 hover:underline inline-flex items-center gap-1"
+                          >
+                            {exp.company}
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        ) : (
+                          <p className="text-sm text-purple-700/90">
+                            {exp.company}
+                          </p>
+                        )}
                         <div className="flex items-center gap-2">
                           <p className="text-xs text-purple-600/75">
                             {formatDate(exp.starts_at)} -{" "}

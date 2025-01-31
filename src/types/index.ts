@@ -28,6 +28,7 @@ export interface ProfileExperience {
   starts_at: string;
   ends_at: string;
   location: string;
+  company_linkedin_profile_url?: string;
   summarized_job_description: AILinkedinJobDescription | null;
   funding_stages_during_tenure?: string[];
 }
