@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Building2, Timer, Code2 } from "lucide-react";
+import { TrendingUp, Building2, Timer, Code2, Tags } from "lucide-react";
 import type { CareerMetrics as CareerMetricsType } from "@/types/index";
 
 interface CareerMetricsProps {
@@ -27,6 +27,44 @@ export const CareerMetrics: React.FC<CareerMetricsProps> = ({ metrics }) => {
     }`;
   };
 
+  // Helper function to get career tag color
+  const getCareerTagStyle = (tag: string): string => {
+    switch (tag) {
+      // Career Progression Tags
+      case "High Average Tenure":
+        return "bg-blue-50 text-blue-700 border-blue-200";
+      case "Low Average Tenure":
+        return "bg-amber-50 text-amber-700 border-amber-200";
+      case "Single Promotion":
+        return "bg-indigo-50 text-indigo-700 border-indigo-200";
+      case "Multiple Promotions":
+        return "bg-green-50 text-green-700 border-green-200";
+      case "Diverse Company Experience":
+        return "bg-violet-50 text-violet-700 border-violet-200";
+      case "Single Company Focus":
+        return "bg-teal-50 text-teal-700 border-teal-200";
+
+      // Company Type Tags
+      case "Worked at Big Tech":
+        return "bg-sky-50 text-sky-700 border-sky-200";
+      case "Worked at Unicorn":
+        return "bg-pink-50 text-pink-700 border-pink-200";
+      case "Worked at Quant Fund":
+        return "bg-purple-50 text-purple-700 border-purple-200";
+
+      // Company Stage Tags
+      case "Startup Experience":
+        return "bg-orange-50 text-orange-700 border-orange-200";
+      case "Growth Company Experience":
+        return "bg-cyan-50 text-cyan-700 border-cyan-200";
+      case "Public Company Experience":
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
+
+      default:
+        return "bg-gray-50 text-gray-700 border-gray-200";
+    }
+  };
+
   return (
     <div className="space-y-4">
       <h4 className="text-base font-medium text-purple-800/90 flex items-center gap-2">
@@ -35,6 +73,46 @@ export const CareerMetrics: React.FC<CareerMetricsProps> = ({ metrics }) => {
       </h4>
       <Card className="border-purple-100/50">
         <div className="p-4 space-y-4">
+          {/* Career Tags */}
+          {metrics.career_tags && metrics.career_tags.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5 text-sm text-purple-800">
+                <Tags className="h-4 w-4" />
+                <span>Career Insights</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {metrics.career_tags.map((tag, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className={getCareerTagStyle(tag)}
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          {metrics.experience_tags && metrics.experience_tags.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5 text-sm text-purple-800">
+                <Tags className="h-4 w-4" />
+                <span>Experience Insights</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {metrics.experience_tags.map((tag, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className={getCareerTagStyle(tag)}
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Key Metrics */}
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
@@ -86,48 +164,6 @@ export const CareerMetrics: React.FC<CareerMetricsProps> = ({ metrics }) => {
               </div>
             </div>
           )}
-
-          {/* Experience by Stage */}
-          {metrics.experience_by_stage &&
-            metrics.experience_by_stage.length > 0 && (
-              <div className="space-y-2 pt-3 border-t border-purple-100">
-                <div className="flex items-center gap-1.5 text-sm text-purple-800">
-                  <Building2 className="h-4 w-4" />
-                  <span>Company Experience</span>
-                </div>
-                <div className="space-y-2">
-                  {metrics.experience_by_stage.map((exp, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between text-sm"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant="outline"
-                          className="text-xs border-purple-200"
-                        >
-                          {exp.company_tier}
-                        </Badge>
-                        <span className="text-purple-800">
-                          {exp.company_name}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant="secondary"
-                          className="text-xs bg-purple-50 text-purple-700 border-purple-200"
-                        >
-                          {exp.funding_stage}
-                        </Badge>
-                        <span className="text-purple-600 text-xs">
-                          {formatDuration(exp.duration_months)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
         </div>
       </Card>
     </div>

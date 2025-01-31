@@ -13,6 +13,31 @@ interface CandidateProfileProps {
 export const CandidateProfile: React.FC<CandidateProfileProps> = ({
   candidate,
 }) => {
+  const formatFundingStages = (stages?: string[]) => {
+    if (!stages) return null;
+
+    // Filter out Unknown stages and get unique stages
+    const validStages = [
+      ...new Set(stages.filter((stage) => stage !== "Unknown")),
+    ];
+
+    if (validStages.length === 0) return null;
+
+    // Skip if the only stage was IPO
+    if (validStages.length === 1 && validStages[0] === "IPO") return null;
+
+    if (validStages.length === 1) {
+      return `Worked during ${validStages[0]}`;
+    }
+
+    const firstStage = validStages[0];
+    const lastStage = validStages[validStages.length - 1];
+
+    return firstStage === lastStage
+      ? `Worked during ${firstStage}`
+      : `Worked during ${firstStage} to ${lastStage}`;
+  };
+
   if (!candidate.profile) return null;
 
   return (
@@ -51,10 +76,25 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                         <p className="text-sm text-purple-700/90">
                           {exp.company}
                         </p>
-                        <p className="text-xs text-purple-600/75">
-                          {formatDate(exp.starts_at)} -{" "}
-                          {exp.ends_at ? formatDate(exp.ends_at) : "Present"}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-purple-600/75">
+                            {formatDate(exp.starts_at)} -{" "}
+                            {exp.ends_at ? formatDate(exp.ends_at) : "Present"}
+                          </p>
+                          {exp.funding_stages_during_tenure &&
+                            formatFundingStages(
+                              exp.funding_stages_during_tenure
+                            ) && (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200"
+                              >
+                                {formatFundingStages(
+                                  exp.funding_stages_during_tenure
+                                )}
+                              </Badge>
+                            )}
+                        </div>
                       </div>
                       {exp.description && (
                         <div className="space-y-3 pt-2 border-t border-purple-100/50">

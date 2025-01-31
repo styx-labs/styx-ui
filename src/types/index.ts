@@ -29,6 +29,7 @@ export interface ProfileExperience {
   ends_at: string;
   location: string;
   summarized_job_description: AILinkedinJobDescription | null;
+  funding_stages_during_tenure?: string[];
 }
 
 export interface ProfileEducation {
@@ -50,14 +51,11 @@ export interface ExperienceStageMetrics {
 
 export interface CareerMetrics {
   total_experience_months: number;
-  total_experience_years: number;
   average_tenure_months: number;
-  average_tenure_years: number;
   current_tenure_months: number;
-  current_tenure_years: number;
   tech_stacks?: string[];
   career_tags?: string[];
-  experience_by_stage: ExperienceStageMetrics[];
+  experience_tags?: string[];
 }
 
 export interface Profile {
