@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Upload,
   RefreshCw,
@@ -43,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CareerTagFilter } from "./components/CareerTagFilter";
 
 interface TalentEvaluationProps {
   job: Job;
@@ -113,33 +114,73 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const [exportMode, setExportMode] = useState<"all" | "limited">("all");
   const [exportLimit, setExportLimit] = useState("10");
   const [exportFormat, setExportFormat] = useState("csv");
-  const filteredCandidates = candidates.filter(
-    (candidate) => candidate.status === statusFilter
-  );
+  const [selectedCareerTags, setSelectedCareerTags] = useState<string[]>([]);
+
+  const filteredCandidates = useMemo(() => {
+    let filtered = candidates.filter(
+      (candidate) => candidate.status === statusFilter
+    );
+
+    // Filter by career tags if any are selected
+    if (selectedCareerTags.length > 0) {
+      filtered = filtered.filter((candidate) => {
+        const careerTags = candidate.profile?.career_metrics?.career_tags || [];
+        const experienceTags =
+          candidate.profile?.career_metrics?.experience_tags || [];
+        const allTags = [...careerTags, ...experienceTags];
+        return selectedCareerTags.every((tag) => allTags.includes(tag));
+      });
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((candidate) => {
+        const name = candidate.name?.toLowerCase() || "";
+        const occupation = candidate.profile?.occupation?.toLowerCase() || "";
+        const company =
+          candidate.profile?.experiences?.[0]?.company?.toLowerCase() || "";
+
+        return (
+          name.includes(query) ||
+          occupation.includes(query) ||
+          company.includes(query)
+        );
+      });
+    }
+
+    return filtered;
+  }, [candidates, statusFilter, selectedCareerTags, searchQuery]);
 
   console.log(filteredCandidates);
 
   const handleExport = () => {
     if (exportFormat === "csv") {
-      const candidates_to_export = exportMode === "all" 
-        ? filteredCandidates 
-        : filteredCandidates.slice(0, parseInt(exportLimit));
+      const candidates_to_export =
+        exportMode === "all"
+          ? filteredCandidates
+          : filteredCandidates.slice(0, parseInt(exportLimit));
 
       const csvContent = [
         ["name", "url", "occupation", "company"],
-        ...candidates_to_export.map(candidate => [
+        ...candidates_to_export.map((candidate) => [
           candidate.name || "",
           candidate.url || "",
           candidate.profile?.occupation?.toLowerCase() || "",
           candidate.profile?.experiences?.[0]?.company?.toLowerCase() || "",
-        ])
-      ].map(row => row.join(",")).join("\n");
+        ]),
+      ]
+        .map((row) => row.join(","))
+        .join("\n");
 
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
-      link.setAttribute("download", `candidates_export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute(
+        "download",
+        `candidates_export_${new Date().toISOString().split("T")[0]}.csv`
+      );
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -270,6 +311,8 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               onFilterChange={onTraitFilterChange}
             />
 
+            <CareerTagFilter onFilterChange={setSelectedCareerTags} />
+
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -284,8 +327,10 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               variant="outline"
               size="sm"
               onClick={() => setShowActionBar(!showActionBar)}
-              className={cn("gap-2", 
-                showActionBar && "bg-purple-100 hover:bg-purple-200 text-purple-700"
+              className={cn(
+                "gap-2",
+                showActionBar &&
+                  "bg-purple-100 hover:bg-purple-200 text-purple-700"
               )}
             >
               {showActionBar ? (
@@ -310,8 +355,10 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               variant="outline"
               size="sm"
               onClick={() => setShowExportBar(!showExportBar)}
-              className={cn("gap-2",
-                showExportBar && "bg-purple-100 hover:bg-purple-200 text-purple-700"
+              className={cn(
+                "gap-2",
+                showExportBar &&
+                  "bg-purple-100 hover:bg-purple-200 text-purple-700"
               )}
             >
               {showExportBar ? (
@@ -360,10 +407,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
       {showExportBar && (
         <Card className="p-4 border-purple-100">
           <div className="flex items-center gap-6">
-            <Select
-              value={exportFormat}
-              onValueChange={setExportFormat}
-            >
+            <Select value={exportFormat} onValueChange={setExportFormat}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select format" />
               </SelectTrigger>
@@ -400,7 +444,9 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom">
-                    <p className="text-sm">Export the top N candidates from the current list</p>
+                    <p className="text-sm">
+                      Export the top N candidates from the current list
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -408,7 +454,9 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
 
             {exportMode === "limited" && (
               <div className="flex items-center gap-2">
-                <Label className="text-sm text-muted-foreground mr-2">Export top</Label>
+                <Label className="text-sm text-muted-foreground mr-2">
+                  Export top
+                </Label>
                 <Input
                   type="number"
                   value={exportLimit}
@@ -417,15 +465,13 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                   min="1"
                   max={filteredCandidates.length}
                 />
-                <span className="text-sm text-muted-foreground">candidates from the list</span>
+                <span className="text-sm text-muted-foreground">
+                  candidates from the list
+                </span>
               </div>
             )}
 
-            <Button
-              onClick={handleExport}
-              size="sm"
-              className="gap-2"
-            >
+            <Button onClick={handleExport} size="sm" className="gap-2">
               <Download className="h-4 w-4" />
               Start Export
             </Button>
@@ -457,7 +503,8 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                   </TooltipTrigger>
                   <TooltipContent className="w-64">
                     When enabled, searches through candidate profiles and their
-                    previous jobs for better matches, but takes longer to process
+                    previous jobs for better matches, but takes longer to
+                    process
                   </TooltipContent>
                 </Tooltip>
               </div>
