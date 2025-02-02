@@ -207,7 +207,7 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                         {edu.school}
                       </p>
                       <p className="text-sm text-purple-700/90">
-                        {edu.degree_name} in {edu.field_of_study}
+                        {edu.degree_name && edu.field_of_study ? `${edu.degree_name} in ${edu.field_of_study}` : edu.degree_name || edu.field_of_study}
                       </p>
                       {edu.starts_at && edu.ends_at && (
                         <p className="text-xs text-purple-600/75">
