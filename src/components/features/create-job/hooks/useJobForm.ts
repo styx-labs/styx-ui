@@ -79,12 +79,12 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
     }
   };
 
-  const handleTraitsConfirm = (
+  const handleTraitsConfirm = async (
     traits: KeyTrait[],
     title: string,
     company: string
-  ) => {
-    onSubmit(state.description, traits, title, company, state.idealProfiles);
+  ): Promise<void> => {
+    return onSubmit(state.description, traits, title, company, state.idealProfiles);
   };
 
   const goToPreviousStep = () => {

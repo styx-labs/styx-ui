@@ -17,14 +17,20 @@ import {
   getTotalOptionalTraits,
   getRequiredTraitsMet,
 } from "../../utils/traitHelpers";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CandidateRowProps {
   candidate: Candidate;
-  loadingStates: { [key: string]: { email: boolean; message: boolean } };
-  handleEmail: (url: string, id: string) => Promise<void>;
-  handleReachout: (id: string, format: string) => Promise<void>;
-  handleDelete: (e: React.MouseEvent, id: string) => Promise<void>;
+  loadingStates: {
+    [key: string]: { email: boolean; message: boolean };
+  };
+  handleEmail: (url: string, candidateId: string) => Promise<void>;
+  handleReachout: (candidateId: string, format: string) => Promise<void>;
+  handleDelete: (e: React.MouseEvent, candidateId: string) => Promise<void>;
   setSelectedCandidate: (candidate: Candidate) => void;
+  showSelection?: boolean;
+  isSelected?: boolean;
+  onSelectionChange?: (checked: boolean) => void;
 }
 
 export const CandidateRow: React.FC<CandidateRowProps> = ({
@@ -34,13 +40,47 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
   handleReachout,
   handleDelete,
   setSelectedCandidate,
+  showSelection,
+  isSelected,
+  onSelectionChange,
 }) => {
+  const renderTraitContent = (content: string) => {
+    const parts = content.split(/(\[\d+\]\([^)]+\))/g);
+    return parts.map((part, i) => {
+      const match = part.match(/\[(\d+)\]\(([^)]+)\)/);
+      if (match) {
+        const [_, index, url] = match;
+        return (
+          <a
+            key={i}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-purple-600 hover:text-purple-800 font-medium"
+          >
+            [{index}]
+          </a>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+  
   return (
     <TableRow
-      key={candidate.id}
       className="cursor-pointer hover:bg-muted/50"
       onClick={() => setSelectedCandidate(candidate)}
     >
+      {showSelection && (
+        <TableCell onClick={(e) => e.stopPropagation()}>
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={onSelectionChange}
+            aria-label={`Select ${candidate.name}`}
+          />
+        </TableCell>
+      )}
       <TableCell className="font-medium">
         <div className="flex items-center gap-2">
           <span>{candidate.name}</span>
@@ -73,7 +113,6 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
                         className={cn(
                           "font-medium hover:bg-inherit",
                           candidate.fit !== undefined &&
-                            candidate.fit === 4 &&
                             candidate.fit === 4 &&
                             "bg-green-100 text-green-700 hover:bg-green-100 border-green-200",
                           candidate.fit === 3 &&
@@ -167,7 +206,7 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[300px] bg-white text-muted-foreground shadow-md">
                     <div className="space-y-1">
-                      <p className="text-sm">{section.content}</p>
+                      <p className="text-sm">{renderTraitContent(section.content)}</p>
                     </div>
                   </TooltipContent>
                 </Tooltip>

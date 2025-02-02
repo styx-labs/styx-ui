@@ -111,9 +111,12 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const [url, setUrl] = useState("");
   const [showActionBar, setShowActionBar] = useState(false);
   const [showExportBar, setShowExportBar] = useState(false);
-  const [exportMode, setExportMode] = useState<"all" | "limited">("all");
+  const [exportMode, setExportMode] = useState<"all" | "limited" | "selected">(
+    "all"
+  );
   const [exportLimit, setExportLimit] = useState("10");
   const [exportFormat, setExportFormat] = useState("csv");
+  const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [selectedCareerTags, setSelectedCareerTags] = useState<string[]>([]);
 
   const filteredCandidates = useMemo(() => {
@@ -156,18 +159,39 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
 
   const handleExport = () => {
     if (exportFormat === "csv") {
-      const candidates_to_export =
-        exportMode === "all"
-          ? filteredCandidates
-          : filteredCandidates.slice(0, parseInt(exportLimit));
+      let candidates_to_export = filteredCandidates;
+
+      if (exportMode === "limited") {
+        candidates_to_export = filteredCandidates.slice(
+          0,
+          parseInt(exportLimit)
+        );
+      } else if (exportMode === "selected") {
+        candidates_to_export = filteredCandidates.filter(
+          (c) => c.id && selectedCandidates.includes(c.id)
+        );
+      }
 
       const csvContent = [
-        ["name", "url", "occupation", "company"],
+        [
+          "name",
+          "url",
+          "occupation",
+          "company",
+          "evaluation_score",
+          "traits_met",
+          "total_traits",
+        ],
         ...candidates_to_export.map((candidate) => [
           candidate.name || "",
           candidate.url || "",
-          candidate.profile?.occupation?.toLowerCase() || "",
-          candidate.profile?.experiences?.[0]?.company?.toLowerCase() || "",
+          candidate.profile?.occupation || "",
+          candidate.profile?.experiences?.[0]?.company || "",
+          candidate.evaluation?.score
+            ? (candidate.evaluation.score * 100).toFixed(0) + "%"
+            : "",
+          candidate.evaluation?.traits_met || "0",
+          candidate.evaluation?.total_traits || "0",
         ]),
       ]
         .map((row) => row.join(","))
@@ -184,6 +208,15 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    }
+  };
+
+  // Reset selection state when export bar is toggled off
+  const handleExportBarToggle = (show: boolean) => {
+    setShowExportBar(show);
+    if (!show) {
+      setExportMode("all");
+      setSelectedCandidates([]);
     }
   };
 
@@ -354,7 +387,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowExportBar(!showExportBar)}
+              onClick={() => handleExportBarToggle(!showExportBar)}
               className={cn(
                 "gap-2",
                 showExportBar &&
@@ -375,7 +408,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                 size="sm"
                 onClick={() => setStatusFilter("complete")}
                 className={cn(
-                  "rounded",
+                  "rounded hover:bg-purple-100 hover:text-purple-700 transition-colors",
                   statusFilter === "complete" && "bg-white shadow-sm"
                 )}
               >
@@ -386,7 +419,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                 size="sm"
                 onClick={() => setStatusFilter("processing")}
                 className={cn(
-                  "rounded",
+                  "rounded hover:bg-purple-100 hover:text-purple-700 transition-colors",
                   statusFilter === "processing" && "bg-white shadow-sm"
                 )}
               >
@@ -420,9 +453,12 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setExportMode("all")}
+                onClick={() => {
+                  setExportMode("all");
+                  setSelectedCandidates([]);
+                }}
                 className={cn(
-                  "rounded",
+                  "rounded hover:bg-purple-100 hover:text-purple-700 transition-colors",
                   exportMode === "all" && "bg-white shadow-sm"
                 )}
               >
@@ -434,9 +470,12 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setExportMode("limited")}
+                      onClick={() => {
+                        setExportMode("limited");
+                        setSelectedCandidates([]);
+                      }}
                       className={cn(
-                        "rounded",
+                        "rounded hover:bg-purple-100 hover:text-purple-700 transition-colors",
                         exportMode === "limited" && "bg-white shadow-sm"
                       )}
                     >
@@ -450,6 +489,17 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExportMode("selected")}
+                className={cn(
+                  "rounded hover:bg-purple-100 hover:text-purple-700 transition-colors",
+                  exportMode === "selected" && "bg-white shadow-sm"
+                )}
+              >
+                Export Selected
+              </Button>
             </div>
 
             {exportMode === "limited" && (
@@ -471,7 +521,21 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               </div>
             )}
 
-            <Button onClick={handleExport} size="sm" className="gap-2">
+            {exportMode === "selected" && (
+              <div className="text-sm text-muted-foreground">
+                {selectedCandidates.length} candidate
+                {selectedCandidates.length === 1 ? "" : "s"} selected
+              </div>
+            )}
+
+            <Button
+              onClick={handleExport}
+              size="sm"
+              className="gap-2"
+              disabled={
+                exportMode === "selected" && selectedCandidates.length === 0
+              }
+            >
               <Download className="h-4 w-4" />
               Start Export
             </Button>
@@ -645,6 +709,9 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
             onReachout={onCandidateReachout}
             onGetEmail={onGetEmail}
             searchQuery={searchQuery}
+            showSelection={showExportBar && exportMode === "selected"}
+            selectedCandidates={selectedCandidates}
+            onSelectionChange={setSelectedCandidates}
           />
         )}
       </Card>

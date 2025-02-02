@@ -74,10 +74,17 @@ export const JobTraitsForm: React.FC<JobTraitsFormProps> = ({
     setTraits(newTraits);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+    if (isSubmitting) return;
+    
     setIsSubmitting(true);
     try {
       await onConfirm(traits, jobTitle, companyName);
+    } catch (error) {
+      console.error('Error creating job:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -156,9 +163,11 @@ export const JobTraitsForm: React.FC<JobTraitsFormProps> = ({
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
           <Button
+            type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
             className="flex items-center"
+            aria-disabled={isSubmitting}
           >
             {isSubmitting ? (
               <>
