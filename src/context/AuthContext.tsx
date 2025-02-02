@@ -6,7 +6,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth } from "../config/firebase";
-import { toast } from "react-hot-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
@@ -32,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
+  const { toast } = useToast();
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
@@ -46,10 +46,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      toast.success("Successfully signed in!");
+      toast({
+        title: "Successfully signed in!",
+      });
       navigate("/");
     } catch (error) {
-      toast.error("Failed to sign in with Google");
+      toast({
+        title: "Failed to sign in with Google",
+        variant: "destructive",
+      });
       console.error("Error signing in with Google:", error);
     }
   };
@@ -57,9 +62,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = async () => {
     try {
       await signOut(auth);
-      toast.success("Successfully signed out!");
+      toast({
+        title: "Successfully signed out!",
+      });
     } catch (error) {
-      toast.error("Failed to sign out");
+      toast({
+        title: "Failed to sign out",
+        variant: "destructive",
+      });
       console.error("Error signing out:", error);
     }
   };

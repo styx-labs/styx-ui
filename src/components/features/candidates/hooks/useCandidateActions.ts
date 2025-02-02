@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { toast } from "react-hot-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface LoadingStates {
   [key: string]: { email: boolean; message: boolean };
@@ -17,7 +17,7 @@ export const useCandidateActions = ({
   onDelete,
 }: UseCandidateActionsProps) => {
   const [loadingStates, setLoadingStates] = useState<LoadingStates>({});
-
+  const { toast } = useToast(); 
   const handleEmail = async (url: string, candidateId: string) => {
     if (!onGetEmail) return;
     setLoadingStates((prev) => ({
@@ -28,15 +28,26 @@ export const useCandidateActions = ({
       const email = await onGetEmail(url);
       if (email) {
         await navigator.clipboard.writeText(email);
-        toast.success("Email copied to clipboard");
+        toast({
+          title: "Email copied to clipboard",
+        });
       } else {
-        toast.error("Failed to get email");
+        toast({
+          title: "Failed to get email",
+          variant: "destructive",
+        });
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        toast.error(error.message);
+        toast({
+          title: "Failed to get email",
+          variant: "destructive",
+        });
       } else {
-        toast.error("Failed to get email");
+        toast({
+          title: "Failed to get email",
+          variant: "destructive",
+        });
       }
     } finally {
       setLoadingStates((prev) => ({
@@ -56,13 +67,21 @@ export const useCandidateActions = ({
       const message = await onReachout(candidateId, format);
       if (message !== undefined) {
         await navigator.clipboard.writeText(message);
-        toast.success("Reachout copied to clipboard");
+        toast({
+          title: "Reachout copied to clipboard",
+        });
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        toast.error(error.message);
+        toast({
+          title: "Failed to generate message",
+          variant: "destructive",
+        });
       } else {
-        toast.error("Failed to generate message");
+        toast({
+          title: "Failed to generate message",
+          variant: "destructive",
+        });
       }
     } finally {
       setLoadingStates((prev) => ({
@@ -77,12 +96,20 @@ export const useCandidateActions = ({
     if (!onDelete) return;
     try {
       await onDelete(candidateId);
-      toast.success("Candidate deleted successfully");
+      toast({
+        title: "Candidate deleted successfully",
+      });
     } catch (error: unknown) {
       if (error instanceof Error) {
-        toast.error(error.message);
+        toast({
+          title: "Failed to delete candidate",
+          variant: "destructive",
+        });
       } else {
-        toast.error("Failed to delete candidate");
+        toast({
+          title: "Failed to delete candidate",
+          variant: "destructive",
+        });
       }
     }
   };

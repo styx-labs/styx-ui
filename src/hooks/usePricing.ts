@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
-import { toast } from "react-hot-toast";
+import { useToast } from "@/hooks/use-toast";
 import { paymentService } from "../api/payment";
 
 export const usePricing = () => {
   const [isLoading, setIsLoading] = useState(false);
-
+  const { toast } = useToast();
   const handleSelectPlan = useCallback(async (planId: string) => {
     try {
       setIsLoading(true);
@@ -12,7 +12,10 @@ export const usePricing = () => {
       window.location.href = checkoutUrl;
     } catch (error) {
       console.error("Error creating checkout session:", error);
-      toast.error("Failed to initiate checkout. Please try again.");
+      toast({
+        title: "Failed to initiate checkout. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
