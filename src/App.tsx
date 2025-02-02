@@ -22,6 +22,7 @@ import { TalentEvaluation } from "./components/features/candidates/TalentEvaluat
 import { SettingsPage } from "./components/features/settings/SettingsPage";
 import { Toaster } from "./components/ui/toaster";
 import { WelcomePopup } from "./components/features/welcome/WelcomePopup";
+import { useToast } from "@/hooks/use-toast";
 
 // Extend Window interface
 interface ExtendedWindow extends Window {
@@ -32,6 +33,7 @@ declare const window: ExtendedWindow;
 function JobDetail() {
   const { jobId } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { jobs, isLoading: jobsLoading, error, retry } = useJobs();
   const {
     candidates,
@@ -164,6 +166,10 @@ function JobDetail() {
       return response.data.email;
     } catch (error) {
       console.error("Error getting email:", error);
+      toast({
+        title: "Failed to get email",
+        variant: "destructive",
+      });
       return undefined;
     }
   };
