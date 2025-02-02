@@ -133,12 +133,12 @@ export const CandidateList: React.FC<CandidateListProps> = ({
         });
       }
     } catch (error) {
-      console.error(error);
       toast({
         title: "Error",
         description: "Failed to get email",
         variant: "destructive",
       });
+      console.error(error);
     } finally {
       setLoadingStates((prev) => ({
         ...prev,
