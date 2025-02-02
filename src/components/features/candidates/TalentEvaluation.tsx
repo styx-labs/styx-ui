@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { Candidate, Job } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
-import { toast } from "react-hot-toast";
 import Papa from "papaparse";
 import { EditKeyTraits } from "./components/EditKeyTraits";
 import { CandidateTraitFilter } from "./components/CandidateTraitFilter";
@@ -43,7 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CareerTagFilter } from "./components/CareerTagFilter";
+import { useToast } from "@/hooks/use-toast";
 
 interface TalentEvaluationProps {
   job: Job;
@@ -98,6 +97,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   onRefresh,
   onTraitFilterChange,
 }) => {
+  const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [searchMode, setSearchMode] = useState(true);
@@ -154,8 +154,6 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
 
     return filtered;
   }, [candidates, statusFilter, selectedCareerTags, searchQuery]);
-
-  console.log(filteredCandidates);
 
   const handleExport = () => {
     if (exportFormat === "csv") {
@@ -344,7 +342,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               onFilterChange={onTraitFilterChange}
             />
 
-            <CareerTagFilter onFilterChange={setSelectedCareerTags} />
+            {/* <CareerTagFilter onFilterChange={setSelectedCareerTags} /> */}
 
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -427,12 +425,14 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               </Button>
             </div>
           </div>
-          <div className="mt-3">
-            <span className="text-sm text-muted-foreground">
-              {filteredCandidates.length} candidate
-              {filteredCandidates.length === 1 ? "" : "s"} found
-            </span>
-          </div>
+          {statusFilter !== "processing" && (
+            <div className="mt-3">
+              <span className="text-sm text-muted-foreground">
+                {filteredCandidates.length} candidate
+                {filteredCandidates.length === 1 ? "" : "s"} found
+              </span>
+            </div>
+          )}
         </div>
       </Card>
 
@@ -675,16 +675,19 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                     }
 
                     await onCandidatesBatch(urls, searchMode);
-                    toast.success(
-                      `Found ${urls.length} LinkedIn URLs to process`
-                    );
+                    toast({
+                      title: "Success",
+                      description: `Found ${urls.length} LinkedIn URLs to process`,
+                    });
                   } catch (error) {
                     console.error("Error processing CSV:", error);
-                    toast.error(
-                      error instanceof Error
-                        ? error.message
-                        : "Failed to process CSV file"
-                    );
+                    toast({
+                      title: "Error",
+                      description:
+                        error instanceof Error
+                          ? error.message
+                          : "Failed to process CSV file",
+                    });
                   } finally {
                     setIsUploading(false);
                     if (fileInputRef.current) {

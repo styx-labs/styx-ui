@@ -203,11 +203,26 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                 {candidate.profile.education.map((edu, index) => (
                   <Card key={index} className="border-purple-100/50">
                     <div className="p-4 space-y-2">
-                      <p className="font-medium text-purple-900">
-                        {edu.school}
-                      </p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-medium text-purple-900">
+                          {edu.school}
+                        </p>
+                        {edu.university_tier &&
+                          edu.university_tier !== "other" && (
+                            <Badge
+                              variant="secondary"
+                              className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+                            >
+                              {edu.university_tier
+                                .replace("_", " ")
+                                .toUpperCase()}
+                            </Badge>
+                          )}
+                      </div>
                       <p className="text-sm text-purple-700/90">
-                        {edu.degree_name && edu.field_of_study ? `${edu.degree_name} in ${edu.field_of_study}` : edu.degree_name || edu.field_of_study}
+                        {edu.degree_name && edu.field_of_study
+                          ? `${edu.degree_name} in ${edu.field_of_study}`
+                          : edu.degree_name || edu.field_of_study}
                       </p>
                       {edu.starts_at && edu.ends_at && (
                         <p className="text-xs text-purple-600/75">

@@ -8,12 +8,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { toast } from "react-hot-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CandidateRow } from "./CandidateRow";
 import { CandidateSidebar } from "../sidebar/CandidateSidebar";
 import { Checkbox } from "@/components/ui/checkbox";
-
+import { useToast } from "@/hooks/use-toast";
 interface CandidateListProps {
   candidates: Candidate[];
   onGetEmail?: (url: string) => Promise<string | undefined>;
@@ -25,11 +24,9 @@ interface CandidateListProps {
   onSelectionChange?: (selectedIds: string[]) => void;
 }
 
-const ProcessingCandidateRow: React.FC<{ 
+const ProcessingCandidateRow: React.FC<{
   candidate: Candidate;
-}> = ({
-  candidate,
-}) => (
+}> = ({ candidate }) => (
   <TableRow className="cursor-default">
     <TableCell className="font-medium">
       <div className="flex items-center gap-2">
@@ -78,6 +75,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
   selectedCandidates = [],
   onSelectionChange,
 }) => {
+  const { toast } = useToast();
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
     null
   );
@@ -129,10 +127,18 @@ export const CandidateList: React.FC<CandidateListProps> = ({
       const email = await onGetEmail(url);
       if (email) {
         await navigator.clipboard.writeText(email);
-        toast.success("Email copied to clipboard");
-      } else {
-        toast.error("Failed to get email");
+        toast({
+          title: "Success",
+          description: `${email} copied to clipboard`,
+        });
       }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Failed to get email",
+        variant: "destructive",
+      });
     } finally {
       setLoadingStates((prev) => ({
         ...prev,
@@ -151,8 +157,18 @@ export const CandidateList: React.FC<CandidateListProps> = ({
       const message = await onReachout(candidateId, format);
       if (message !== undefined) {
         await navigator.clipboard.writeText(message);
-        toast.success("Reachout copied to clipboard");
+        toast({
+          title: "Message copied to clipboard",
+          description: message,
+        });
       }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Failed to generate reachout",
+        variant: "destructive",
+      });
     } finally {
       setLoadingStates((prev) => ({
         ...prev,
@@ -166,24 +182,28 @@ export const CandidateList: React.FC<CandidateListProps> = ({
     if (!onDelete) return;
     try {
       await onDelete(candidateId);
-      toast.success("Candidate deleted successfully");
       if (selectedCandidate?.id === candidateId) {
         setSelectedCandidate(null);
       }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("Failed to delete candidate");
-      }
+      toast({
+        title: "Success",
+        description: "Candidate deleted successfully",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Failed to delete candidate",
+        variant: "destructive",
+      });
     }
   };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       const allIds = filteredCandidates
-        .filter(c => c.status !== "processing" && c.id)
-        .map(c => c.id!)
+        .filter((c) => c.status !== "processing" && c.id)
+        .map((c) => c.id!);
       onSelectionChange?.(allIds);
     } else {
       onSelectionChange?.([]);
@@ -194,11 +214,15 @@ export const CandidateList: React.FC<CandidateListProps> = ({
     if (checked) {
       onSelectionChange?.([...selectedCandidates, candidateId]);
     } else {
-      onSelectionChange?.(selectedCandidates.filter(id => id !== candidateId));
+      onSelectionChange?.(
+        selectedCandidates.filter((id) => id !== candidateId)
+      );
     }
   };
 
-  const selectableCandidatesCount = filteredCandidates.filter(c => c.status !== "processing").length;
+  const selectableCandidatesCount = filteredCandidates.filter(
+    (c) => c.status !== "processing"
+  ).length;
 
   return (
     <>
@@ -209,7 +233,9 @@ export const CandidateList: React.FC<CandidateListProps> = ({
               {showSelection && (
                 <TableHead className="w-[50px]">
                   <Checkbox
-                    checked={selectedCandidates.length === selectableCandidatesCount}
+                    checked={
+                      selectedCandidates.length === selectableCandidatesCount
+                    }
                     onCheckedChange={handleSelectAll}
                     aria-label="Select all candidates"
                   />
@@ -240,8 +266,14 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                   handleDelete={handleDelete}
                   setSelectedCandidate={setSelectedCandidate}
                   showSelection={showSelection}
-                  isSelected={candidate.id ? selectedCandidates.includes(candidate.id) : false}
-                  onSelectionChange={(checked: boolean) => candidate.id && handleSelectCandidate(candidate.id, checked)}
+                  isSelected={
+                    candidate.id
+                      ? selectedCandidates.includes(candidate.id)
+                      : false
+                  }
+                  onSelectionChange={(checked: boolean) =>
+                    candidate.id && handleSelectCandidate(candidate.id, checked)
+                  }
                 />
               )
             )}
@@ -263,6 +295,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
         onReachout={async (id: string, format: string) => {
           await handleReachout(id, format);
         }}
+        onDelete={handleDelete}
       />
     </>
   );

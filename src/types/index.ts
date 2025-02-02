@@ -39,6 +39,7 @@ export interface ProfileEducation {
   school: string;
   starts_at: string | null;
   ends_at: string | null;
+  university_tier?: "top_5" | "top_10" | "top_20" | "top_50" | "other" | null;
 }
 
 export interface ExperienceStageMetrics {
