@@ -1,6 +1,4 @@
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
-import toast from "react-hot-toast";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { useJobs } from "./hooks/useJobs";
 import { useCandidates } from "./hooks/useCandidates";
 import { AppSidebar } from "./components/features/sidebar/Sidebar";
@@ -22,8 +20,9 @@ import PricingPage from "./components/features/payment/PricingPage";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TalentEvaluation } from "./components/features/candidates/TalentEvaluation";
 import { SettingsPage } from "./components/features/settings/SettingsPage";
-import { Toaster as ShadcnToaster } from "./components/ui/toaster";
+import { Toaster } from "./components/ui/toaster";
 import { WelcomePopup } from "./components/features/welcome/WelcomePopup";
+import { useToast } from "@/hooks/use-toast";
 
 // Extend Window interface
 interface ExtendedWindow extends Window {
@@ -34,6 +33,7 @@ declare const window: ExtendedWindow;
 function JobDetail() {
   const { jobId } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { jobs, isLoading: jobsLoading, error, retry } = useJobs();
   const {
     candidates,
@@ -156,7 +156,6 @@ function JobDetail() {
       return response.data.reachout;
     } catch (error) {
       console.error("Error getting reachout:", error);
-      toast.error("Failed to generate reachout message");
       return undefined;
     }
   };
@@ -167,7 +166,10 @@ function JobDetail() {
       return response.data.email;
     } catch (error) {
       console.error("Error getting email:", error);
-      toast.error("Failed to get email");
+      toast({
+        title: "Failed to get email",
+        variant: "destructive",
+      });
       return undefined;
     }
   };
@@ -298,7 +300,7 @@ function App() {
 
   return (
     <div className="h-screen">
-      <Toaster position="top-center" />
+      <Toaster />
       <WelcomePopup />
       <ErrorBoundary>
         <SidebarProvider>
@@ -340,7 +342,6 @@ function App() {
             </Routes>
           </main>
         </SidebarProvider>
-        <ShadcnToaster />
       </ErrorBoundary>
     </div>
   );

@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { toast } from "react-hot-toast";
-import { Candidate } from "../types";
+import { Candidate } from "@/types/index";
 import { apiService } from "../api";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
-
+import { useToast } from "@/hooks/use-toast";
 const POLLING_INTERVAL = 2000;
 
 export function useCandidates(jobId: string | undefined) {
@@ -15,6 +14,7 @@ export function useCandidates(jobId: string | undefined) {
   const [traitFilters, setTraitFilters] = useState<string[]>([]);
   const { user, loading: authLoading } = useAuth();
   const pollingTimeoutRef = useRef<NodeJS.Timeout>();
+  const { toast } = useToast();
 
   // Clear candidates when jobId changes
   useEffect(() => {
@@ -57,7 +57,11 @@ export function useCandidates(jobId: string | undefined) {
       setError(
         error instanceof Error ? error : new Error("Failed to load candidates")
       );
-      toast.error("Failed to load candidates");
+      toast({
+        title: "Error",
+        description: "Failed to load candidates",
+        variant: "destructive",
+      });
     } finally {
       if (!isPollingUpdate) {
         setIsLoading(false);
@@ -80,7 +84,11 @@ export function useCandidates(jobId: string | undefined) {
       const response = await apiService.getCandidate(jobId, candidateId);
       return response.data.candidate;
     } catch (error) {
-      toast.error("Failed to load candidate");
+      console.error("Error getting candidate:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load candidate",
+      });
     }
   };
 
@@ -99,7 +107,10 @@ export function useCandidates(jobId: string | undefined) {
         url: url || "",
         search_mode,
       });
-      toast.success("Candidate added successfully");
+      toast({
+        title: "Success",
+        description: "Candidate added successfully",
+      });
       setError(null);
       loadCandidates();
     } catch (error) {
@@ -108,14 +119,20 @@ export function useCandidates(jobId: string | undefined) {
       if (axios.isAxiosError(error) && error.response?.status === 402) {
         const errorMessage = "Out of search credits";
         setError(new Error(errorMessage));
-        toast.error(errorMessage);
+        toast({
+          title: "Error",
+          description: errorMessage,
+        });
         return;
       }
 
       setError(
         error instanceof Error ? error : new Error("Failed to add candidate")
       );
-      toast.error("Failed to add candidate");
+      toast({
+        title: "Error",
+        description: "Failed to add candidate",
+      });
     }
   };
 
@@ -127,17 +144,26 @@ export function useCandidates(jobId: string | undefined) {
 
     try {
       await apiService.createCandidatesBatch(jobId, urls, search_mode);
-      toast.success("Candidates added successfully");
+      toast({
+        title: "Success",
+        description: "Candidates added successfully",
+      });
       loadCandidates();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 402) {
         setError(new Error("Out of search credits"));
-        toast.error("Out of search credits");
+        toast({
+          title: "Error",
+          description: "Out of search credits",
+        });
       } else {
         setError(
           error instanceof Error ? error : new Error("Failed to add candidates")
         );
-        toast.error("Failed to add candidates");
+        toast({
+          title: "Error",
+          description: "Failed to add candidates",
+        });
       }
     }
   };
@@ -147,7 +173,6 @@ export function useCandidates(jobId: string | undefined) {
 
     try {
       await apiService.deleteCandidate(jobId, candidateId);
-      toast.success("Candidate deleted successfully");
       setError(null);
       loadCandidates();
     } catch (error) {
@@ -155,7 +180,6 @@ export function useCandidates(jobId: string | undefined) {
       setError(
         error instanceof Error ? error : new Error("Failed to delete candidate")
       );
-      toast.error("Failed to delete candidate");
     }
   };
 
@@ -170,7 +194,7 @@ export function useCandidates(jobId: string | undefined) {
       );
       return response.data.reachout;
     } catch (error) {
-      toast.error("Failed to generate reachout");
+      console.error("Error getting candidate reachout:", error);
     }
   };
 
@@ -181,7 +205,7 @@ export function useCandidates(jobId: string | undefined) {
       const response = await apiService.getEmail(linkedinUrl);
       return response.data.email;
     } catch (error) {
-      toast.error("Could not find email");
+      console.error("Error getting email:", error);
     }
   };
 

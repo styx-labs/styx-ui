@@ -6,7 +6,7 @@ import {
   ListChecks,
   ArrowRight,
 } from "lucide-react";
-import type { TraitType } from "@/types/index";
+import { TraitType } from "@/types/index";
 import { TraitCard } from "../components/TraitCard";
 import { JobDetailsForm } from "./JobDetailsForm";
 import { TraitTips } from "../components/TraitTips";
@@ -79,12 +79,12 @@ export const JobTraitsForm: React.FC<JobTraitsFormProps> = ({
       e.preventDefault();
     }
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
     try {
       await onConfirm(traits, jobTitle, companyName);
     } catch (error) {
-      console.error('Error creating job:', error);
+      console.error("Error creating job:", error);
     } finally {
       setIsSubmitting(false);
     }

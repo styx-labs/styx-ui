@@ -1,9 +1,10 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BriefcaseIcon, GraduationCap } from "lucide-react";
+import { BriefcaseIcon, GraduationCap, ExternalLink } from "lucide-react";
 import type { Candidate } from "@/types/index";
 import { formatDate, calculateTenure } from "../../utils/dateFormatters";
+import { CareerMetrics } from "./CareerMetrics";
 
 interface CandidateProfileProps {
   candidate: Candidate;
@@ -12,12 +13,42 @@ interface CandidateProfileProps {
 export const CandidateProfile: React.FC<CandidateProfileProps> = ({
   candidate,
 }) => {
+  const formatFundingStages = (stages?: string[]) => {
+    if (!stages) return null;
+
+    // Filter out Unknown stages and get unique stages
+    const validStages = [
+      ...new Set(stages.filter((stage) => stage !== "Unknown")),
+    ];
+
+    if (validStages.length === 0) return null;
+
+    // Skip if the only stage was IPO
+    if (validStages.length === 1 && validStages[0] === "IPO") return null;
+
+    if (validStages.length === 1) {
+      return `Worked during ${validStages[0]}`;
+    }
+
+    const firstStage = validStages[0];
+    const lastStage = validStages[validStages.length - 1];
+
+    return firstStage === lastStage
+      ? `Worked during ${firstStage}`
+      : `Worked during ${firstStage} to ${lastStage}`;
+  };
+
   if (!candidate.profile) return null;
 
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium text-purple-900">Profile</h3>
       <div className="space-y-8">
+        {/* Career Metrics */}
+        {candidate.profile.career_metrics && (
+          <CareerMetrics metrics={candidate.profile.career_metrics} />
+        )}
+
         {/* Experience */}
         {candidate.profile.experiences &&
           candidate.profile.experiences.length > 0 && (
@@ -42,13 +73,40 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                             {calculateTenure(exp.starts_at, exp.ends_at)}
                           </Badge>
                         </div>
-                        <p className="text-sm text-purple-700/90">
-                          {exp.company}
-                        </p>
-                        <p className="text-xs text-purple-600/75">
-                          {formatDate(exp.starts_at)} -{" "}
-                          {exp.ends_at ? formatDate(exp.ends_at) : "Present"}
-                        </p>
+                        {exp.company_linkedin_profile_url ? (
+                          <a
+                            href={exp.company_linkedin_profile_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-purple-700/90 hover:text-purple-900 hover:underline inline-flex items-center gap-1"
+                          >
+                            {exp.company}
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        ) : (
+                          <p className="text-sm text-purple-700/90">
+                            {exp.company}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-purple-600/75">
+                            {formatDate(exp.starts_at)} -{" "}
+                            {exp.ends_at ? formatDate(exp.ends_at) : "Present"}
+                          </p>
+                          {exp.funding_stages_during_tenure &&
+                            formatFundingStages(
+                              exp.funding_stages_during_tenure
+                            ) && (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200"
+                              >
+                                {formatFundingStages(
+                                  exp.funding_stages_during_tenure
+                                )}
+                              </Badge>
+                            )}
+                        </div>
                       </div>
                       {exp.description && (
                         <div className="space-y-3 pt-2 border-t border-purple-100/50">
@@ -145,11 +203,26 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                 {candidate.profile.education.map((edu, index) => (
                   <Card key={index} className="border-purple-100/50">
                     <div className="p-4 space-y-2">
-                      <p className="font-medium text-purple-900">
-                        {edu.school}
-                      </p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-medium text-purple-900">
+                          {edu.school}
+                        </p>
+                        {edu.university_tier &&
+                          edu.university_tier !== "other" && (
+                            <Badge
+                              variant="secondary"
+                              className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+                            >
+                              {edu.university_tier
+                                .replace("_", " ")
+                                .toUpperCase()}
+                            </Badge>
+                          )}
+                      </div>
                       <p className="text-sm text-purple-700/90">
-                        {edu.degree_name} in {edu.field_of_study}
+                        {edu.degree_name && edu.field_of_study
+                          ? `${edu.degree_name} in ${edu.field_of_study}`
+                          : edu.degree_name || edu.field_of_study}
                       </p>
                       {edu.starts_at && edu.ends_at && (
                         <p className="text-xs text-purple-600/75">

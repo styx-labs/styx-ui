@@ -28,7 +28,9 @@ export interface ProfileExperience {
   starts_at: string;
   ends_at: string;
   location: string;
+  company_linkedin_profile_url?: string;
   summarized_job_description: AILinkedinJobDescription | null;
+  funding_stages_during_tenure?: string[];
 }
 
 export interface ProfileEducation {
@@ -37,6 +39,25 @@ export interface ProfileEducation {
   school: string;
   starts_at: string | null;
   ends_at: string | null;
+  university_tier?: "top_5" | "top_10" | "top_20" | "top_50" | "other" | null;
+}
+
+export interface ExperienceStageMetrics {
+  company_name: string;
+  funding_stage: string;
+  company_tier: string;
+  joined_at: string;
+  left_at: string | null;
+  duration_months: number;
+}
+
+export interface CareerMetrics {
+  total_experience_months: number;
+  average_tenure_months: number;
+  current_tenure_months: number;
+  tech_stacks?: string[];
+  career_tags?: string[];
+  experience_tags?: string[];
 }
 
 export interface Profile {
@@ -50,6 +71,7 @@ export interface Profile {
   url: string;
   experiences?: ProfileExperience[];
   education?: ProfileEducation[];
+  career_metrics?: CareerMetrics;
 }
 
 export interface Candidate {

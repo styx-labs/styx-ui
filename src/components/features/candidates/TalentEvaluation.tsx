@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Upload,
   RefreshCw,
@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { Candidate, Job } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
-import { toast } from "react-hot-toast";
 import Papa from "papaparse";
 import { EditKeyTraits } from "./components/EditKeyTraits";
 import { CandidateTraitFilter } from "./components/CandidateTraitFilter";
@@ -43,6 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 interface TalentEvaluationProps {
   job: Job;
@@ -97,54 +97,112 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   onRefresh,
   onTraitFilterChange,
 }) => {
+  const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [searchMode, setSearchMode] = useState(true);
   const [showEditTraits, setShowEditTraits] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<"processing" | "complete">("complete");
+  const [statusFilter, setStatusFilter] = useState<"processing" | "complete">(
+    "complete"
+  );
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [url, setUrl] = useState("");
   const [showActionBar, setShowActionBar] = useState(false);
   const [showExportBar, setShowExportBar] = useState(false);
-  const [exportMode, setExportMode] = useState<"all" | "limited" | "selected">("all");
+  const [exportMode, setExportMode] = useState<"all" | "limited" | "selected">(
+    "all"
+  );
   const [exportLimit, setExportLimit] = useState("10");
   const [exportFormat, setExportFormat] = useState("csv");
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
+  const [selectedCareerTags, setSelectedCareerTags] = useState<string[]>([]);
 
-  const filteredCandidates = candidates.filter(
-    (candidate) => candidate.status === statusFilter
-  );
+  const filteredCandidates = useMemo(() => {
+    let filtered = candidates.filter(
+      (candidate) => candidate.status === statusFilter
+    );
+
+    // Filter by career tags if any are selected
+    if (selectedCareerTags.length > 0) {
+      filtered = filtered.filter((candidate) => {
+        const careerTags = candidate.profile?.career_metrics?.career_tags || [];
+        const experienceTags =
+          candidate.profile?.career_metrics?.experience_tags || [];
+        const allTags = [...careerTags, ...experienceTags];
+        return selectedCareerTags.every((tag) => allTags.includes(tag));
+      });
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((candidate) => {
+        const name = candidate.name?.toLowerCase() || "";
+        const occupation = candidate.profile?.occupation?.toLowerCase() || "";
+        const company =
+          candidate.profile?.experiences?.[0]?.company?.toLowerCase() || "";
+
+        return (
+          name.includes(query) ||
+          occupation.includes(query) ||
+          company.includes(query)
+        );
+      });
+    }
+
+    return filtered;
+  }, [candidates, statusFilter, selectedCareerTags, searchQuery]);
 
   const handleExport = () => {
     if (exportFormat === "csv") {
       let candidates_to_export = filteredCandidates;
-      
+
       if (exportMode === "limited") {
-        candidates_to_export = filteredCandidates.slice(0, parseInt(exportLimit));
+        candidates_to_export = filteredCandidates.slice(
+          0,
+          parseInt(exportLimit)
+        );
       } else if (exportMode === "selected") {
-        candidates_to_export = filteredCandidates.filter(c => c.id && selectedCandidates.includes(c.id));
+        candidates_to_export = filteredCandidates.filter(
+          (c) => c.id && selectedCandidates.includes(c.id)
+        );
       }
 
       const csvContent = [
-        ["name", "url", "occupation", "company", "evaluation_score", "traits_met", "total_traits"],
-        ...candidates_to_export.map(candidate => [
+        [
+          "name",
+          "url",
+          "occupation",
+          "company",
+          "evaluation_score",
+          "traits_met",
+          "total_traits",
+        ],
+        ...candidates_to_export.map((candidate) => [
           candidate.name || "",
           candidate.url || "",
           candidate.profile?.occupation || "",
           candidate.profile?.experiences?.[0]?.company || "",
-          candidate.evaluation?.score ? (candidate.evaluation.score * 100).toFixed(0) + "%" : "",
+          candidate.evaluation?.score
+            ? (candidate.evaluation.score * 100).toFixed(0) + "%"
+            : "",
           candidate.evaluation?.traits_met || "0",
           candidate.evaluation?.total_traits || "0",
-        ])
-      ].map(row => row.join(",")).join("\n");
+        ]),
+      ]
+        .map((row) => row.join(","))
+        .join("\n");
 
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
-      link.setAttribute("download", `candidates_export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute(
+        "download",
+        `candidates_export_${new Date().toISOString().split("T")[0]}.csv`
+      );
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -284,6 +342,8 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               onFilterChange={onTraitFilterChange}
             />
 
+            {/* <CareerTagFilter onFilterChange={setSelectedCareerTags} /> */}
+
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -298,8 +358,10 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               variant="outline"
               size="sm"
               onClick={() => setShowActionBar(!showActionBar)}
-              className={cn("gap-2", 
-                showActionBar && "bg-purple-100 hover:bg-purple-200 text-purple-700"
+              className={cn(
+                "gap-2",
+                showActionBar &&
+                  "bg-purple-100 hover:bg-purple-200 text-purple-700"
               )}
             >
               {showActionBar ? (
@@ -324,8 +386,10 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               variant="outline"
               size="sm"
               onClick={() => handleExportBarToggle(!showExportBar)}
-              className={cn("gap-2",
-                showExportBar && "bg-purple-100 hover:bg-purple-200 text-purple-700"
+              className={cn(
+                "gap-2",
+                showExportBar &&
+                  "bg-purple-100 hover:bg-purple-200 text-purple-700"
               )}
             >
               {showExportBar ? (
@@ -361,12 +425,14 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               </Button>
             </div>
           </div>
-          <div className="mt-3">
-            <span className="text-sm text-muted-foreground">
-              {filteredCandidates.length} candidate
-              {filteredCandidates.length === 1 ? "" : "s"} found
-            </span>
-          </div>
+          {statusFilter !== "processing" && (
+            <div className="mt-3">
+              <span className="text-sm text-muted-foreground">
+                {filteredCandidates.length} candidate
+                {filteredCandidates.length === 1 ? "" : "s"} found
+              </span>
+            </div>
+          )}
         </div>
       </Card>
 
@@ -374,10 +440,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
       {showExportBar && (
         <Card className="p-4 border-purple-100">
           <div className="flex items-center gap-6">
-            <Select
-              value={exportFormat}
-              onValueChange={setExportFormat}
-            >
+            <Select value={exportFormat} onValueChange={setExportFormat}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select format" />
               </SelectTrigger>
@@ -420,7 +483,9 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom">
-                    <p className="text-sm">Export the top N candidates from the current list</p>
+                    <p className="text-sm">
+                      Export the top N candidates from the current list
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -439,7 +504,9 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
 
             {exportMode === "limited" && (
               <div className="flex items-center gap-2">
-                <Label className="text-sm text-muted-foreground mr-2">Export top</Label>
+                <Label className="text-sm text-muted-foreground mr-2">
+                  Export top
+                </Label>
                 <Input
                   type="number"
                   value={exportLimit}
@@ -448,13 +515,16 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                   min="1"
                   max={filteredCandidates.length}
                 />
-                <span className="text-sm text-muted-foreground">candidates from the list</span>
+                <span className="text-sm text-muted-foreground">
+                  candidates from the list
+                </span>
               </div>
             )}
 
             {exportMode === "selected" && (
               <div className="text-sm text-muted-foreground">
-                {selectedCandidates.length} candidate{selectedCandidates.length === 1 ? "" : "s"} selected
+                {selectedCandidates.length} candidate
+                {selectedCandidates.length === 1 ? "" : "s"} selected
               </div>
             )}
 
@@ -462,7 +532,9 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               onClick={handleExport}
               size="sm"
               className="gap-2"
-              disabled={exportMode === "selected" && selectedCandidates.length === 0}
+              disabled={
+                exportMode === "selected" && selectedCandidates.length === 0
+              }
             >
               <Download className="h-4 w-4" />
               Start Export
@@ -495,7 +567,8 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                   </TooltipTrigger>
                   <TooltipContent className="w-64">
                     When enabled, searches through candidate profiles and their
-                    previous jobs for better matches, but takes longer to process
+                    previous jobs for better matches, but takes longer to
+                    process
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -602,16 +675,19 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                     }
 
                     await onCandidatesBatch(urls, searchMode);
-                    toast.success(
-                      `Found ${urls.length} LinkedIn URLs to process`
-                    );
+                    toast({
+                      title: "Success",
+                      description: `Found ${urls.length} LinkedIn URLs to process`,
+                    });
                   } catch (error) {
                     console.error("Error processing CSV:", error);
-                    toast.error(
-                      error instanceof Error
-                        ? error.message
-                        : "Failed to process CSV file"
-                    );
+                    toast({
+                      title: "Error",
+                      description:
+                        error instanceof Error
+                          ? error.message
+                          : "Failed to process CSV file",
+                    });
                   } finally {
                     setIsUploading(false);
                     if (fileInputRef.current) {

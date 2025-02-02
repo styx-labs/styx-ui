@@ -51,7 +51,7 @@ export function JobList({
   }
 
   if (jobs.length === 0) {
-    return (
+    return isCollapsed ? null : (
       <div className="p-4 text-center text-sm text-muted-foreground">
         No jobs found
       </div>
@@ -59,7 +59,7 @@ export function JobList({
   }
 
   const content = (
-    <SidebarMenu>
+    <SidebarMenu className="max-w-[255px]">
       <div className="divide-y divide-border">
         {jobs.map((job) => (
           <SidebarMenuItem

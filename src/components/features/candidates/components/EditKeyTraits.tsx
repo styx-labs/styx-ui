@@ -2,11 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { TraitType } from "@/types/index";
 import type { Job } from "@/types/index";
 import { apiService } from "../../../../api";
-import { toast } from "react-hot-toast";
 import { TraitCard } from "../../create-job/components/TraitCard";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-
+import { useToast } from "@/hooks/use-toast";
 interface EditKeyTraitsProps {
   job: Job;
   onClose: () => void;
@@ -21,7 +20,7 @@ export const EditKeyTraits: React.FC<EditKeyTraitsProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [traits, setTraits] = useState<Job["key_traits"]>(job.key_traits);
   const modalRef = useRef<HTMLDivElement>(null);
-
+  const { toast } = useToast();
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -40,19 +39,27 @@ export const EditKeyTraits: React.FC<EditKeyTraitsProps> = ({
 
   const handleSubmit = async () => {
     if (!traits.length) {
-      toast.error("At least one trait is required");
+      toast({
+        title: "At least one trait is required",
+        variant: "destructive",
+      });
       return;
     }
 
     setIsSubmitting(true);
     try {
       await apiService.editKeyTraits(job.id!, traits);
-      toast.success("Key traits updated successfully");
+      toast({
+        title: "Key traits updated successfully",
+      });
       onSuccess();
       onClose();
     } catch (error) {
       console.error("Error updating key traits:", error);
-      toast.error("Failed to update key traits");
+      toast({
+        title: "Failed to update key traits",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { toast } from "react-hot-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Job, TraitType } from "../types";
 import { apiService } from "../api";
 import { useAuth } from "../context/AuthContext";
@@ -17,7 +17,7 @@ export function useJobs() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { user, loading: authLoading } = useAuth();
-
+  const { toast } = useToast();
   const loadJobs = async () => {
     setIsLoading(true);
     setError(null);
@@ -29,9 +29,10 @@ export function useJobs() {
       setError(
         error instanceof Error ? error : new Error("Failed to load jobs")
       );
-      toast.error(
-        error instanceof Error ? error.message : "Failed to load jobs"
-      );
+      toast({
+        title: "Failed to load jobs",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +73,9 @@ export function useJobs() {
       });
 
       if (jobResponse.data.job_id) {
-        toast.success("Job created successfully");
+        toast({
+          title: "Job created successfully",
+        });
         await loadJobs();
         return jobResponse.data.job_id;
       }
@@ -87,16 +90,19 @@ export function useJobs() {
     try {
       const response = await apiService.deleteJob(jobId);
       if (response.data.success) {
-        toast.success("Job deleted successfully");
+        toast({
+          title: "Job deleted successfully",
+        });
         await loadJobs();
         return true;
       }
       return false;
     } catch (error) {
       console.error("Error deleting job:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete job"
-      );
+      toast({
+        title: "Failed to delete job",
+        variant: "destructive",
+      });
       return false;
     }
   };

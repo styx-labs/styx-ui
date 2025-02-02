@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { toast } from "react-hot-toast";
+import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/api";
 import type { TraitType } from "@/types/index";
 import type { JobFormState, KeyTrait } from "../types";
@@ -15,6 +15,7 @@ interface UseJobFormProps {
 }
 
 export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
+  const { toast } = useToast();
   const [state, setState] = useState<JobFormState>({
     description: "",
     jobTitle: "",
@@ -74,7 +75,10 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
         currentStep: 3,
       });
     } catch (error) {
-      toast.error("Failed to get key traits");
+      toast({
+        title: "Failed to get key traits",
+        variant: "destructive",
+      });
       console.error("Error getting key traits:", error);
     }
   };

@@ -1,4 +1,4 @@
-import { Filter, X } from "lucide-react";
+import { Filter, X, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -29,8 +29,6 @@ export function CandidateTraitFilter({
     onFilterChange([]);
   }, [job.id, onFilterChange]);
 
-  const availableTraits = job.key_traits.map((trait) => trait.trait);
-
   const handleTraitToggle = (trait: string) => {
     setSelectedTraits((prev) => {
       const newTraits = prev.includes(trait)
@@ -47,6 +45,20 @@ export function CandidateTraitFilter({
   };
 
   const hasFilters = selectedTraits.length > 0;
+
+  // Group traits by required/optional
+  const traitGroups = {
+    "Required Traits": job.key_traits.filter((trait) => trait.required),
+    "Optional Traits": job.key_traits.filter((trait) => !trait.required),
+  };
+
+  // Get trait style based on whether it's required
+  const getTraitStyle = (trait: string) => {
+    const traitInfo = job.key_traits.find((t) => t.trait === trait);
+    return traitInfo?.required
+      ? "bg-purple-100 text-purple-700 border-purple-200"
+      : "bg-gray-100 text-gray-700 border-gray-200";
+  };
 
   return (
     <div className="flex items-center gap-2">
@@ -84,9 +96,16 @@ export function CandidateTraitFilter({
                       <Badge
                         variant="secondary"
                         key={trait}
-                        className="rounded-sm px-1 font-normal"
+                        className={cn(
+                          "rounded-sm px-1 font-normal",
+                          getTraitStyle(trait)
+                        )}
                       >
                         {trait}
+                        {job.key_traits.find((t) => t.trait === trait)
+                          ?.required && (
+                          <Star className="h-3 w-3 ml-1 fill-current opacity-75 inline-block" />
+                        )}
                       </Badge>
                     ))
                   )}
@@ -95,7 +114,7 @@ export function CandidateTraitFilter({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-[400px] p-0" align="start">
           <div className="p-2 flex items-center justify-between">
             <p className="text-sm font-medium">Filter by traits</p>
             {hasFilters && (
@@ -109,24 +128,36 @@ export function CandidateTraitFilter({
             )}
           </div>
           <Separator />
-          <ScrollArea className="h-[300px]">
-            <div className="grid gap-1 p-2">
-              {availableTraits.map((trait) => {
-                const isSelected = selectedTraits.includes(trait);
-                return (
-                  <Button
-                    key={trait}
-                    variant={isSelected ? "secondary" : "ghost"}
-                    className={cn(
-                      "justify-start font-normal",
-                      isSelected && "bg-purple-100 text-purple-700"
-                    )}
-                    onClick={() => handleTraitToggle(trait)}
-                  >
-                    {trait}
-                  </Button>
-                );
-              })}
+          <ScrollArea className="h-[400px]">
+            <div className="p-4 space-y-4">
+              {Object.entries(traitGroups).map(([group, traits]) => (
+                <div key={group} className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-700">{group}</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {traits.map((trait) => {
+                      const isSelected = selectedTraits.includes(trait.trait);
+                      return (
+                        <Badge
+                          key={trait.trait}
+                          variant="secondary"
+                          className={cn(
+                            "cursor-pointer transition-colors",
+                            isSelected
+                              ? getTraitStyle(trait.trait)
+                              : "hover:bg-gray-100"
+                          )}
+                          onClick={() => handleTraitToggle(trait.trait)}
+                        >
+                          {trait.trait}
+                          {trait.required && (
+                            <Star className="h-3 w-3 ml-1 fill-current opacity-75 inline-block" />
+                          )}
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           </ScrollArea>
         </PopoverContent>
