@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Upload,
   RefreshCw,
@@ -43,6 +43,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useSearchParams } from "react-router-dom";
 
 interface TalentEvaluationProps {
   job: Job;
@@ -98,6 +99,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   onTraitFilterChange,
 }) => {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [isUploading, setIsUploading] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [searchMode, setSearchMode] = useState(true);
@@ -118,6 +120,13 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const [exportFormat, setExportFormat] = useState("csv");
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [selectedCareerTags, setSelectedCareerTags] = useState<string[]>([]);
+
+  // Handle openEditTraits query parameter
+  useEffect(() => {
+    if (searchParams.get("openEditTraits") === "true") {
+      setShowEditTraits(true);
+    }
+  }, [searchParams]);
 
   const filteredCandidates = useMemo(() => {
     let filtered = candidates.filter(
