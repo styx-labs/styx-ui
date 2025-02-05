@@ -89,6 +89,7 @@ export interface Candidate {
   required_met?: number;
   optional_met?: number;
   fit?: number;
+  favorite?: boolean;
   evaluation?: {
     score: number;
     traits_met: number;

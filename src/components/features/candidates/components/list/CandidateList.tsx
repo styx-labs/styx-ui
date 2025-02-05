@@ -22,6 +22,7 @@ interface CandidateListProps {
   showSelection?: boolean;
   selectedCandidates?: string[];
   onSelectionChange?: (selectedIds: string[]) => void;
+  onFavorite?: (id: string) => Promise<boolean>;
 }
 
 const ProcessingCandidateRow: React.FC<{
@@ -74,6 +75,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
   showSelection = false,
   selectedCandidates = [],
   onSelectionChange,
+  onFavorite,
 }) => {
   const { toast } = useToast();
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
@@ -224,6 +226,22 @@ export const CandidateList: React.FC<CandidateListProps> = ({
     (c) => c.status !== "processing"
   ).length;
 
+  const handleFavorite = async (candidateId: string) => {
+    if (!onFavorite) return;
+    try {
+      const newFavoriteStatus = await onFavorite(candidateId);
+      // The API response will update the candidate's favorite status
+      // and trigger a re-render through the parent's state management
+    } catch (error) {
+      console.error("Error toggling favorite status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update favorite status",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <>
       <div className="rounded-md border p-4">
@@ -264,6 +282,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                   handleEmail={handleEmail}
                   handleReachout={handleReachout}
                   handleDelete={handleDelete}
+                  handleFavorite={handleFavorite}
                   setSelectedCandidate={setSelectedCandidate}
                   showSelection={showSelection}
                   isSelected={
@@ -296,6 +315,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
           await handleReachout(id, format);
         }}
         onDelete={handleDelete}
+        onFavorite={handleFavorite}
       />
     </>
   );

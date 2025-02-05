@@ -64,6 +64,7 @@ interface TalentEvaluationProps {
   onGetEmail: (linkedinUrl: string) => Promise<string | undefined>;
   onRefresh: () => void;
   onTraitFilterChange: (traits: string[]) => void;
+  onCandidateFavorite?: (id: string) => Promise<boolean>;
 }
 
 const LoadingTable = () => (
@@ -97,6 +98,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   onGetEmail,
   onRefresh,
   onTraitFilterChange,
+  onCandidateFavorite,
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -224,6 +226,20 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
     if (!show) {
       setExportMode("all");
       setSelectedCandidates([]);
+    }
+  };
+
+  const handleFavorite = async (candidateId: string) => {
+    if (!onCandidateFavorite) return;
+    try {
+      await onCandidateFavorite(candidateId);
+    } catch (error) {
+      console.error("Error toggling favorite status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update favorite status",
+        variant: "destructive",
+      });
     }
   };
 
@@ -720,6 +736,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
             onDelete={async (id) => onCandidateDelete(id)}
             onReachout={onCandidateReachout}
             onGetEmail={onGetEmail}
+            onFavorite={handleFavorite}
             searchQuery={searchQuery}
             showSelection={showExportBar && exportMode === "selected"}
             selectedCandidates={selectedCandidates}

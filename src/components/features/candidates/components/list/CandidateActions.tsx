@@ -20,6 +20,7 @@ import {
   Loader2,
   Trash2,
   ChevronRight,
+  Star,
 } from "lucide-react";
 import type { Candidate } from "@/types/index";
 
@@ -29,6 +30,7 @@ interface CandidateActionsProps {
   handleEmail: (url: string, id: string) => Promise<void>;
   handleReachout: (id: string, format: string) => Promise<void>;
   handleDelete: (e: React.MouseEvent, id: string) => Promise<void>;
+  handleFavorite?: (id: string) => Promise<void>;
   setSelectedCandidate?: (candidate: Candidate) => void;
 }
 
@@ -38,6 +40,7 @@ export const CandidateActions: React.FC<CandidateActionsProps> = ({
   handleEmail,
   handleReachout,
   handleDelete,
+  handleFavorite,
   setSelectedCandidate,
 }) => {
   return (
@@ -67,6 +70,39 @@ export const CandidateActions: React.FC<CandidateActionsProps> = ({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+
+      {handleFavorite && (
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (candidate.id) {
+                    await handleFavorite(candidate.id);
+                  }
+                }}
+              >
+                <Star
+                  className={`h-4 w-4 ${
+                    candidate.favorite
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-400"
+                  }`}
+                />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {candidate.favorite
+                ? "Remove from Favorites"
+                : "Add to Favorites"}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
 
       <TooltipProvider delayDuration={100}>
         <Tooltip>

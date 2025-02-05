@@ -27,6 +27,7 @@ interface CandidateRowProps {
   handleEmail: (url: string, candidateId: string) => Promise<void>;
   handleReachout: (candidateId: string, format: string) => Promise<void>;
   handleDelete: (e: React.MouseEvent, candidateId: string) => Promise<void>;
+  handleFavorite?: (id: string) => Promise<void>;
   setSelectedCandidate: (candidate: Candidate) => void;
   showSelection?: boolean;
   isSelected?: boolean;
@@ -39,6 +40,7 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
   handleEmail,
   handleReachout,
   handleDelete,
+  handleFavorite,
   setSelectedCandidate,
   showSelection,
   isSelected,
@@ -221,6 +223,7 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
           handleEmail={handleEmail}
           handleReachout={handleReachout}
           handleDelete={handleDelete}
+          handleFavorite={handleFavorite}
           setSelectedCandidate={setSelectedCandidate}
         />
       </TableCell>

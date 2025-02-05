@@ -44,6 +44,7 @@ function JobDetail() {
     setTraitFilters,
     error: candidatesError,
     isLoading: candidatesLoading,
+    toggleCandidateFavorite,
   } = useCandidates(jobId);
 
   const selectedJob = jobs.find((job) => job.id === jobId);
@@ -174,6 +175,21 @@ function JobDetail() {
     }
   };
 
+  const handleCandidateFavorite = async (candidateId: string) => {
+    if (!toggleCandidateFavorite) return;
+    try {
+      return await toggleCandidateFavorite(candidateId);
+    } catch (error) {
+      console.error("Error toggling favorite status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update favorite status",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   return selectedJob ? (
     <TalentEvaluation
       job={selectedJob}
@@ -186,6 +202,7 @@ function JobDetail() {
       onGetEmail={handleGetEmail}
       onRefresh={loadCandidates}
       onTraitFilterChange={setTraitFilters}
+      onCandidateFavorite={handleCandidateFavorite}
     />
   ) : null;
 }

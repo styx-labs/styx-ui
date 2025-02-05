@@ -233,6 +233,16 @@ export const apiService = {
       template_content,
     });
   },
+
+  toggleCandidateFavorite: async (
+    jobId: string,
+    candidateId: string
+  ): Promise<boolean> => {
+    const response = await api.post<{ favorite: boolean }>(
+      `/jobs/${jobId}/candidates/${candidateId}/favorite`
+    );
+    return response.data.favorite;
+  },
 };
 
 export interface TemplateUpdateRequest {

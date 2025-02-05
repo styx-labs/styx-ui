@@ -16,6 +16,7 @@ interface CandidateHeaderProps {
   onEmail: (url: string, id: string) => Promise<void>;
   onReachout: (id: string, format: string) => Promise<void>;
   onDelete: (e: React.MouseEvent, id: string) => Promise<void>;
+  onFavorite?: (id: string) => Promise<void>;
 }
 
 export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
@@ -29,6 +30,7 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
   onEmail,
   onReachout,
   onDelete,
+  onFavorite,
 }) => {
   return (
     <div className="sticky top-0 z-10 p-6 border-b bg-background/80 backdrop-blur-sm">
@@ -59,6 +61,7 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
             handleEmail={onEmail}
             handleReachout={onReachout}
             handleDelete={onDelete}
+            handleFavorite={onFavorite}
           />
 
           <Separator orientation="vertical" className="h-4 mx-2" />
