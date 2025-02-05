@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import type { Candidate } from "@/types/index";
 import {
   Table,
@@ -13,6 +13,7 @@ import { CandidateRow } from "./CandidateRow";
 import { CandidateSidebar } from "../sidebar/CandidateSidebar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+
 interface CandidateListProps {
   candidates: Candidate[];
   onGetEmail?: (url: string) => Promise<string | undefined>;
@@ -229,7 +230,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
   const handleFavorite = async (candidateId: string) => {
     if (!onFavorite) return;
     try {
-      const newFavoriteStatus = await onFavorite(candidateId);
+      await onFavorite(candidateId);
       // The API response will update the candidate's favorite status
       // and trigger a re-render through the parent's state management
     } catch (error) {
@@ -241,6 +242,15 @@ export const CandidateList: React.FC<CandidateListProps> = ({
       });
     }
   };
+
+  useEffect(() => {
+    if (selectedCandidate) {
+      const updatedCandidate = candidates.find(c => c.id === selectedCandidate.id);
+      if (updatedCandidate && JSON.stringify(updatedCandidate) !== JSON.stringify(selectedCandidate)) {
+        setSelectedCandidate(updatedCandidate);
+      }
+    }
+  }, [candidates, selectedCandidate]);
 
   return (
     <>

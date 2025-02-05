@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "react-router-dom";
+import { CareerTagFilter } from "./components/CareerTagFilter";
 
 interface TalentEvaluationProps {
   job: Job;
@@ -122,6 +123,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const [exportFormat, setExportFormat] = useState("csv");
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [selectedCareerTags, setSelectedCareerTags] = useState<string[]>([]);
+  const [showFavorites, setShowFavorites] = useState(false);
 
   // Handle openEditTraits query parameter
   useEffect(() => {
@@ -134,6 +136,11 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
     let filtered = candidates.filter(
       (candidate) => candidate.status === statusFilter
     );
+
+    // Filter by favorites if enabled
+    if (showFavorites) {
+      filtered = filtered.filter((candidate) => candidate.favorite);
+    }
 
     // Filter by career tags if any are selected
     if (selectedCareerTags.length > 0) {
@@ -164,7 +171,13 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
     }
 
     return filtered;
-  }, [candidates, statusFilter, selectedCareerTags, searchQuery]);
+  }, [
+    candidates,
+    statusFilter,
+    selectedCareerTags,
+    searchQuery,
+    showFavorites,
+  ]);
 
   const handleExport = () => {
     if (exportFormat === "csv") {
@@ -366,9 +379,22 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               job={job}
               onFilterChange={onTraitFilterChange}
             />
-
-            {/* <CareerTagFilter onFilterChange={setSelectedCareerTags} /> */}
-
+            <CareerTagFilter onFilterChange={setSelectedCareerTags} />
+            <Button
+              variant={showFavorites ? "secondary" : "ghost"}
+              size="sm"
+              className={cn(
+                "h-8 gap-2",
+                showFavorites &&
+                  "bg-yellow-50 text-yellow-700 hover:bg-yellow-100"
+              )}
+              onClick={() => setShowFavorites(!showFavorites)}
+            >
+              <Star
+                className={cn("h-4 w-4", showFavorites && "fill-yellow-400")}
+              />
+              Favorites
+            </Button>
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -455,6 +481,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               <span className="text-sm text-muted-foreground">
                 {filteredCandidates.length} candidate
                 {filteredCandidates.length === 1 ? "" : "s"} found
+                {showFavorites && <> (favorited)</>}
               </span>
             </div>
           )}

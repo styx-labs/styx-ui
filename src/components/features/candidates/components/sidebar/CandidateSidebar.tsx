@@ -94,14 +94,9 @@ export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
   return (
     <div
       ref={sidebarRef}
-      className={cn(
-        "fixed inset-y-0 right-0 w-[600px] border-l bg-background/80 backdrop-blur-sm",
-        "transform transition-transform duration-300 ease-in-out",
-        candidate ? "translate-x-0" : "translate-x-full"
-      )}
-    >
-      {candidate && (
-        <>
+      className="fixed inset-y-0 right-0 w-[600px] border-l bg-background shadow-2xl animate-in slide-in-from-right duration-300 rounded-l-xl"
+      >
+        <div className="h-full flex flex-col">
           <CandidateHeader
             candidate={candidate}
             loadingStates={loadingStates}
@@ -223,9 +218,8 @@ export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
                 </div>
               )}
             </div>
-          </ScrollArea>
-        </>
-      )}
+        </ScrollArea>
+      </div>
     </div>
   );
 };
