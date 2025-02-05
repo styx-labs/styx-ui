@@ -209,6 +209,35 @@ export function useCandidates(jobId: string | undefined) {
     }
   };
 
+  const toggleCandidateFavorite = async (
+    candidateId: string
+  ): Promise<boolean> => {
+    if (!jobId || !user) throw new Error("No job ID or user");
+
+    try {
+      // Find the candidate and update optimistically
+      const updatedCandidates = candidates.map((candidate) =>
+        candidate.id === candidateId
+          ? { ...candidate, favorite: !candidate.favorite }
+          : candidate
+      );
+      // Update UI immediately
+      setCandidates(updatedCandidates);
+
+      // Make API call
+      const response = await apiService.toggleCandidateFavorite(
+        jobId,
+        candidateId
+      );
+      return response;
+    } catch (error) {
+      console.error("Error toggling favorite status:", error);
+      // Revert the optimistic update on error by reloading the candidates
+      loadCandidates(false);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     // Only load candidates when auth is ready and we have a user
     if (!authLoading && user && jobId) {
@@ -235,5 +264,6 @@ export function useCandidates(jobId: string | undefined) {
     error,
     isLoading: (isLoading && !isPolling) || authLoading,
     setTraitFilters,
+    toggleCandidateFavorite,
   };
 }

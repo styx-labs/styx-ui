@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Upload,
   RefreshCw,
@@ -10,6 +10,8 @@ import {
   UserPlus,
   Loader2,
   Download,
+  Check,
+  X,
 } from "lucide-react";
 import { Candidate, Job } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
@@ -43,6 +45,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useSearchParams } from "react-router-dom";
+import { CareerTagFilter } from "./components/CareerTagFilter";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface TalentEvaluationProps {
   job: Job;
@@ -63,6 +74,7 @@ interface TalentEvaluationProps {
   onGetEmail: (linkedinUrl: string) => Promise<string | undefined>;
   onRefresh: () => void;
   onTraitFilterChange: (traits: string[]) => void;
+  onCandidateFavorite?: (id: string) => Promise<boolean>;
 }
 
 const LoadingTable = () => (
@@ -96,8 +108,10 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   onGetEmail,
   onRefresh,
   onTraitFilterChange,
+  onCandidateFavorite,
 }) => {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [isUploading, setIsUploading] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [searchMode, setSearchMode] = useState(true);
@@ -118,11 +132,32 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const [exportFormat, setExportFormat] = useState("csv");
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [selectedCareerTags, setSelectedCareerTags] = useState<string[]>([]);
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [selectedFitScores, setSelectedFitScores] = useState<number[]>([]);
+
+  // Handle openEditTraits query parameter
+  useEffect(() => {
+    if (searchParams.get("openEditTraits") === "true") {
+      setShowEditTraits(true);
+    }
+  }, [searchParams]);
 
   const filteredCandidates = useMemo(() => {
     let filtered = candidates.filter(
       (candidate) => candidate.status === statusFilter
     );
+
+    // Filter by favorites if enabled
+    if (showFavorites) {
+      filtered = filtered.filter((candidate) => candidate.favorite);
+    }
+
+    // Filter by fit scores if any are selected
+    if (selectedFitScores.length > 0) {
+      filtered = filtered.filter((candidate) => 
+        candidate.fit !== undefined && selectedFitScores.includes(candidate.fit)
+      );
+    }
 
     // Filter by career tags if any are selected
     if (selectedCareerTags.length > 0) {
@@ -153,7 +188,14 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
     }
 
     return filtered;
-  }, [candidates, statusFilter, selectedCareerTags, searchQuery]);
+  }, [
+    candidates,
+    statusFilter,
+    selectedCareerTags,
+    searchQuery,
+    showFavorites,
+    selectedFitScores,
+  ]);
 
   const handleExport = () => {
     if (exportFormat === "csv") {
@@ -215,6 +257,20 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
     if (!show) {
       setExportMode("all");
       setSelectedCandidates([]);
+    }
+  };
+
+  const handleFavorite = async (candidateId: string) => {
+    if (!onCandidateFavorite) return;
+    try {
+      await onCandidateFavorite(candidateId);
+    } catch (error) {
+      console.error("Error toggling favorite status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update favorite status",
+        variant: "destructive",
+      });
     }
   };
 
@@ -341,9 +397,91 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               job={job}
               onFilterChange={onTraitFilterChange}
             />
-
-            {/* <CareerTagFilter onFilterChange={setSelectedCareerTags} /> */}
-
+            <CareerTagFilter onFilterChange={setSelectedCareerTags} />
+            <Button
+              variant={showFavorites ? "secondary" : "ghost"}
+              size="sm"
+              className={cn(
+                "h-8 gap-2",
+                showFavorites &&
+                  "bg-yellow-50 text-yellow-700 hover:bg-yellow-100"
+              )}
+              onClick={() => setShowFavorites(!showFavorites)}
+            >
+              <Star
+                className={cn("h-4 w-4", showFavorites && "fill-yellow-400")}
+              />
+              Favorites
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant={selectedFitScores.length > 0 ? "secondary" : "ghost"}
+                  size="sm"
+                  className={cn(
+                    "h-8 gap-2",
+                    selectedFitScores.length > 0 &&
+                      "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                  )}
+                >
+                  <GaugeCircle className="h-4 w-4" />
+                  {selectedFitScores.length > 0
+                    ? selectedFitScores.length === 1
+                      ? `Fit: ${selectedFitScores[0]}`
+                      : `${selectedFitScores.length} Fit Scores`
+                    : "Fit Scores"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuLabel>Filter by Fit Scores</DropdownMenuLabel>
+                {[4, 3, 2, 1, 0].map((score) => (
+                  <DropdownMenuItem
+                    key={score}
+                    onClick={() =>
+                      setSelectedFitScores(
+                        selectedFitScores.includes(score)
+                          ? selectedFitScores.filter((s) => s !== score)
+                          : [...selectedFitScores, score].sort((a, b) => b - a)
+                      )
+                    }
+                    className="gap-2"
+                  >
+                    <div
+                      className={cn(
+                        "h-2 w-2 rounded-full",
+                        score === 4 && "bg-green-500",
+                        score === 3 && "bg-blue-500",
+                        score === 2 && "bg-yellow-500",
+                        score === 1 && "bg-orange-500",
+                        score === 0 && "bg-red-500"
+                      )}
+                    />
+                    <span className="flex-1">
+                      {score === 4 && "Ideal Fit"}
+                      {score === 3 && "Good Fit"}
+                      {score === 2 && "Potential Fit"}
+                      {score === 1 && "Likely Not Fit"}
+                      {score === 0 && "Not Fit"}
+                    </span>
+                    {selectedFitScores.includes(score) && (
+                      <Check className="h-4 w-4" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+                {selectedFitScores.length > 0 && (
+                  <>
+                    <Separator className="my-2" />
+                    <DropdownMenuItem
+                      onClick={() => setSelectedFitScores([])}
+                      className="gap-2 text-muted-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                      Clear Filters
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -430,6 +568,19 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               <span className="text-sm text-muted-foreground">
                 {filteredCandidates.length} candidate
                 {filteredCandidates.length === 1 ? "" : "s"} found
+                {showFavorites && <> (favorited)</>}
+                {selectedFitScores.length > 0 && (
+                  <> (fit scores: {selectedFitScores.map(score => {
+                    switch (score) {
+                      case 4: return "Ideal";
+                      case 3: return "Good";
+                      case 2: return "Potential";
+                      case 1: return "Likely Not";
+                      case 0: return "Not Fit";
+                      default: return score;
+                    }
+                  }).join(", ")})</>
+                )}
               </span>
             </div>
           )}
@@ -711,6 +862,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
             onDelete={async (id) => onCandidateDelete(id)}
             onReachout={onCandidateReachout}
             onGetEmail={onGetEmail}
+            onFavorite={handleFavorite}
             searchQuery={searchQuery}
             showSelection={showExportBar && exportMode === "selected"}
             selectedCandidates={selectedCandidates}
