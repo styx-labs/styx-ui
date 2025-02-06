@@ -75,6 +75,8 @@ interface TalentEvaluationProps {
   onRefresh: () => void;
   onTraitFilterChange: (traits: string[]) => void;
   onCandidateFavorite?: (id: string) => Promise<boolean>;
+  onBulkDelete?: (ids: string[]) => Promise<void>;
+  onBulkFavorite?: (ids: string[]) => Promise<void>;
 }
 
 const LoadingTable = () => (
@@ -109,6 +111,8 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   onRefresh,
   onTraitFilterChange,
   onCandidateFavorite,
+  onBulkDelete,
+  onBulkFavorite,
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -154,8 +158,10 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
 
     // Filter by fit scores if any are selected
     if (selectedFitScores.length > 0) {
-      filtered = filtered.filter((candidate) => 
-        candidate.fit !== undefined && selectedFitScores.includes(candidate.fit)
+      filtered = filtered.filter(
+        (candidate) =>
+          candidate.fit !== undefined &&
+          selectedFitScores.includes(candidate.fit)
       );
     }
 
@@ -196,6 +202,14 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
     showFavorites,
     selectedFitScores,
   ]);
+
+  const handleExportBarToggle = (show: boolean) => {
+    setShowExportBar(show);
+    if (!show) {
+      setExportMode("all");
+      setSelectedCandidates([]);
+    }
+  };
 
   const handleExport = () => {
     if (exportFormat === "csv") {
@@ -248,29 +262,6 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }
-  };
-
-  // Reset selection state when export bar is toggled off
-  const handleExportBarToggle = (show: boolean) => {
-    setShowExportBar(show);
-    if (!show) {
-      setExportMode("all");
-      setSelectedCandidates([]);
-    }
-  };
-
-  const handleFavorite = async (candidateId: string) => {
-    if (!onCandidateFavorite) return;
-    try {
-      await onCandidateFavorite(candidateId);
-    } catch (error) {
-      console.error("Error toggling favorite status:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update favorite status",
-        variant: "destructive",
-      });
     }
   };
 
@@ -570,16 +561,29 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                 {filteredCandidates.length === 1 ? "" : "s"} found
                 {showFavorites && <> (favorited)</>}
                 {selectedFitScores.length > 0 && (
-                  <> (fit scores: {selectedFitScores.map(score => {
-                    switch (score) {
-                      case 4: return "Ideal";
-                      case 3: return "Good";
-                      case 2: return "Potential";
-                      case 1: return "Likely Not";
-                      case 0: return "Not Fit";
-                      default: return score;
-                    }
-                  }).join(", ")})</>
+                  <>
+                    {" "}
+                    (fit scores:{" "}
+                    {selectedFitScores
+                      .map((score) => {
+                        switch (score) {
+                          case 4:
+                            return "Ideal";
+                          case 3:
+                            return "Good";
+                          case 2:
+                            return "Potential";
+                          case 1:
+                            return "Likely Not";
+                          case 0:
+                            return "Not Fit";
+                          default:
+                            return score;
+                        }
+                      })
+                      .join(", ")}
+                    )
+                  </>
                 )}
               </span>
             </div>
@@ -859,14 +863,25 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
         ) : (
           <CandidateList
             candidates={filteredCandidates}
-            onDelete={async (id) => onCandidateDelete(id)}
-            onReachout={onCandidateReachout}
             onGetEmail={onGetEmail}
-            onFavorite={handleFavorite}
+            onReachout={onCandidateReachout}
+            onDelete={async (id) => {
+              onCandidateDelete(id);
+              return Promise.resolve();
+            }}
             searchQuery={searchQuery}
-            showSelection={showExportBar && exportMode === "selected"}
+            showSelection={true}
             selectedCandidates={selectedCandidates}
             onSelectionChange={setSelectedCandidates}
+            onFavorite={onCandidateFavorite}
+            onBulkDelete={onBulkDelete}
+            onBulkFavorite={onBulkFavorite}
+            onExportSelected={(ids) => {
+              setExportMode("selected");
+              setShowExportBar(true);
+              // Don't clear existing selections
+              handleExport();
+            }}
           />
         )}
       </Card>

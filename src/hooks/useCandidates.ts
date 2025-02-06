@@ -174,12 +174,12 @@ export function useCandidates(jobId: string | undefined) {
     try {
       await apiService.deleteCandidate(jobId, candidateId);
       setError(null);
-      loadCandidates();
     } catch (error) {
       console.error("Error deleting candidate:", error);
       setError(
         error instanceof Error ? error : new Error("Failed to delete candidate")
       );
+      throw error;
     }
   };
 
@@ -212,28 +212,49 @@ export function useCandidates(jobId: string | undefined) {
   const toggleCandidateFavorite = async (
     candidateId: string
   ): Promise<boolean> => {
-    if (!jobId || !user) throw new Error("No job ID or user");
+    if (!jobId) return false;
 
     try {
-      // Find the candidate and update optimistically
-      const updatedCandidates = candidates.map((candidate) =>
-        candidate.id === candidateId
-          ? { ...candidate, favorite: !candidate.favorite }
-          : candidate
-      );
-      // Update UI immediately
-      setCandidates(updatedCandidates);
-
-      // Make API call
       const response = await apiService.toggleCandidateFavorite(
         jobId,
         candidateId
       );
+      // Don't reload candidates, let the optimistic UI handle it
       return response;
     } catch (error) {
       console.error("Error toggling favorite status:", error);
-      // Revert the optimistic update on error by reloading the candidates
-      loadCandidates(false);
+      toast({
+        title: "Error",
+        description: "Failed to update favorite status",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
+  const bulkDeleteCandidates = async (
+    candidateIds: string[]
+  ): Promise<void> => {
+    if (!jobId) return;
+
+    try {
+      await apiService.bulkDeleteCandidates(jobId, candidateIds);
+    } catch (error) {
+      console.error("Error bulk deleting candidates:", error);
+      throw error;
+    }
+  };
+
+  const bulkFavoriteCandidates = async (
+    candidateIds: string[]
+  ): Promise<void> => {
+    if (!jobId) return;
+
+    try {
+      await apiService.bulkFavoriteCandidates(jobId, candidateIds);
+      // Don't reload candidates, let the optimistic UI handle it
+    } catch (error) {
+      console.error("Error bulk favoriting candidates:", error);
       throw error;
     }
   };
@@ -265,5 +286,7 @@ export function useCandidates(jobId: string | undefined) {
     isLoading: (isLoading && !isPolling) || authLoading,
     setTraitFilters,
     toggleCandidateFavorite,
+    bulkDeleteCandidates,
+    bulkFavoriteCandidates,
   };
 }

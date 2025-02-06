@@ -13,6 +13,7 @@ import { CandidateRow } from "./CandidateRow";
 import { CandidateSidebar } from "../sidebar/CandidateSidebar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { BulkActions } from "./BulkActions";
 
 interface CandidateListProps {
   candidates: Candidate[];
@@ -24,6 +25,9 @@ interface CandidateListProps {
   selectedCandidates?: string[];
   onSelectionChange?: (selectedIds: string[]) => void;
   onFavorite?: (id: string) => Promise<boolean>;
+  onBulkDelete?: (ids: string[]) => Promise<void>;
+  onBulkFavorite?: (ids: string[]) => Promise<void>;
+  onExportSelected?: (ids: string[]) => void;
 }
 
 const ProcessingCandidateRow: React.FC<{
@@ -77,20 +81,38 @@ export const CandidateList: React.FC<CandidateListProps> = ({
   selectedCandidates = [],
   onSelectionChange,
   onFavorite,
+  onBulkDelete,
+  onBulkFavorite,
+  onExportSelected,
 }) => {
   const { toast } = useToast();
-  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(
     null
   );
   const [loadingStates, setLoadingStates] = useState<{
     [key: string]: { email: boolean; message: boolean };
   }>({});
+  const [candidatesState, setCandidates] = useState<Candidate[]>(candidates);
+
+  // Sync local state with props when candidates change
+  useEffect(() => {
+    setCandidates(candidates);
+  }, [candidates]);
+
+  // Get the selected candidate from candidatesState
+  const selectedCandidate = useMemo(
+    () =>
+      selectedCandidateId
+        ? candidatesState.find((c) => c.id === selectedCandidateId) || null
+        : null,
+    [selectedCandidateId, candidatesState]
+  );
 
   const filteredCandidates = useMemo(() => {
-    if (!searchQuery.trim()) return candidates;
+    if (!searchQuery.trim()) return candidatesState;
 
     const query = searchQuery.toLowerCase();
-    return candidates.filter((candidate) => {
+    return candidatesState.filter((candidate) => {
       const name = candidate.name?.toLowerCase() || "";
       const occupation = candidate.profile?.occupation?.toLowerCase() || "";
       const company =
@@ -102,21 +124,21 @@ export const CandidateList: React.FC<CandidateListProps> = ({
         company.includes(query)
       );
     });
-  }, [candidates, searchQuery]);
+  }, [candidatesState, searchQuery]);
 
-  const currentIndex = selectedCandidate
-    ? filteredCandidates.findIndex((c) => c.id === selectedCandidate.id)
+  const currentIndex = selectedCandidateId
+    ? filteredCandidates.findIndex((c) => c.id === selectedCandidateId)
     : -1;
 
   const handlePrevious = () => {
     if (currentIndex > 0) {
-      setSelectedCandidate(filteredCandidates[currentIndex - 1]);
+      setSelectedCandidateId(filteredCandidates[currentIndex - 1].id!);
     }
   };
 
   const handleNext = () => {
     if (currentIndex < filteredCandidates.length - 1) {
-      setSelectedCandidate(filteredCandidates[currentIndex + 1]);
+      setSelectedCandidateId(filteredCandidates[currentIndex + 1].id!);
     }
   };
 
@@ -184,16 +206,27 @@ export const CandidateList: React.FC<CandidateListProps> = ({
     e.stopPropagation();
     if (!onDelete) return;
     try {
-      await onDelete(candidateId);
-      if (selectedCandidate?.id === candidateId) {
-        setSelectedCandidate(null);
+      // Optimistically update the UI
+      const updatedCandidates = candidatesState.filter(
+        (c) => c.id !== candidateId
+      );
+      setCandidates(updatedCandidates);
+
+      // Close sidebar if deleted candidate was selected
+      if (selectedCandidateId === candidateId) {
+        setSelectedCandidateId(null);
       }
+
+      // Make the API call
+      await onDelete(candidateId);
       toast({
         title: "Success",
         description: "Candidate deleted successfully",
       });
     } catch (error) {
       console.error(error);
+      // Revert the optimistic update on error
+      setCandidates(candidatesState);
       toast({
         title: "Error",
         description: "Failed to delete candidate",
@@ -230,11 +263,39 @@ export const CandidateList: React.FC<CandidateListProps> = ({
   const handleFavorite = async (candidateId: string) => {
     if (!onFavorite) return;
     try {
+      // Optimistically update the UI
+      const candidateIndex = candidatesState.findIndex(
+        (c) => c.id === candidateId
+      );
+      if (candidateIndex !== -1) {
+        const updatedCandidates = [...candidatesState];
+        const newFavoriteState = !updatedCandidates[candidateIndex].favorite;
+        updatedCandidates[candidateIndex] = {
+          ...updatedCandidates[candidateIndex],
+          favorite: newFavoriteState,
+        };
+        // Update the local state immediately
+        setCandidates(updatedCandidates);
+      }
+
+      // Make the API call
       await onFavorite(candidateId);
-      // The API response will update the candidate's favorite status
-      // and trigger a re-render through the parent's state management
     } catch (error) {
       console.error("Error toggling favorite status:", error);
+      // Revert the optimistic update on error
+      const candidateIndex = candidatesState.findIndex(
+        (c) => c.id === candidateId
+      );
+      if (candidateIndex !== -1) {
+        const updatedCandidates = [...candidatesState];
+        const revertedFavoriteState =
+          updatedCandidates[candidateIndex].favorite;
+        updatedCandidates[candidateIndex] = {
+          ...updatedCandidates[candidateIndex],
+          favorite: !revertedFavoriteState,
+        };
+        setCandidates(updatedCandidates);
+      }
       toast({
         title: "Error",
         description: "Failed to update favorite status",
@@ -243,14 +304,88 @@ export const CandidateList: React.FC<CandidateListProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (selectedCandidate) {
-      const updatedCandidate = candidates.find(c => c.id === selectedCandidate.id);
-      if (updatedCandidate && JSON.stringify(updatedCandidate) !== JSON.stringify(selectedCandidate)) {
-        setSelectedCandidate(updatedCandidate);
+  const handleBulkDelete = async (ids: string[]) => {
+    if (!onBulkDelete) return;
+    try {
+      // Optimistically update the UI
+      const updatedCandidates = candidatesState.filter(
+        (c) => !ids.includes(c.id!)
+      );
+      setCandidates(updatedCandidates);
+
+      // Close sidebar if deleted candidate was selected
+      if (selectedCandidateId && ids.includes(selectedCandidateId)) {
+        setSelectedCandidateId(null);
       }
+
+      // Clear selection
+      onSelectionChange?.([]);
+
+      // Make the API call
+      await onBulkDelete(ids);
+      toast({
+        title: "Success",
+        description: `${ids.length} candidate${
+          ids.length !== 1 ? "s" : ""
+        } deleted successfully`,
+      });
+    } catch (error) {
+      console.error("Error bulk deleting candidates:", error);
+      // Revert the optimistic update on error
+      setCandidates(candidatesState);
+      toast({
+        title: "Error",
+        description: "Failed to delete candidates",
+        variant: "destructive",
+      });
     }
-  }, [candidates, selectedCandidate]);
+  };
+
+  const handleBulkFavorite = async (ids: string[]) => {
+    if (!onBulkFavorite) return;
+    try {
+      // Optimistically update the UI
+      const updatedCandidates = candidatesState.map((candidate) => {
+        if (ids.includes(candidate.id!)) {
+          return {
+            ...candidate,
+            favorite: true,
+          };
+        }
+        return candidate;
+      });
+      // Update the local state immediately
+      setCandidates(updatedCandidates);
+
+      // Make the API call
+      await onBulkFavorite(ids);
+      toast({
+        title: "Success",
+        description: `${ids.length} candidate${
+          ids.length !== 1 ? "s" : ""
+        } starred successfully`,
+      });
+    } catch (error) {
+      console.error("Error bulk favoriting candidates:", error);
+      // Revert the optimistic update on error
+      const updatedCandidates = candidatesState.map((candidate) => {
+        if (ids.includes(candidate.id!)) {
+          return {
+            ...candidate,
+            favorite: false,
+          };
+        }
+        return candidate;
+      });
+      setCandidates(updatedCandidates);
+
+      toast({
+        title: "Error",
+        description: "Failed to star candidates",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <>
@@ -293,7 +428,9 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                   handleReachout={handleReachout}
                   handleDelete={handleDelete}
                   handleFavorite={handleFavorite}
-                  setSelectedCandidate={setSelectedCandidate}
+                  setSelectedCandidate={(candidate) =>
+                    setSelectedCandidateId(candidate.id!)
+                  }
                   showSelection={showSelection}
                   isSelected={
                     candidate.id
@@ -312,7 +449,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
 
       <CandidateSidebar
         candidate={selectedCandidate}
-        onClose={() => setSelectedCandidate(null)}
+        onClose={() => setSelectedCandidateId(null)}
         onPrevious={handlePrevious}
         onNext={handleNext}
         hasPrevious={currentIndex > 0}
@@ -327,6 +464,16 @@ export const CandidateList: React.FC<CandidateListProps> = ({
         onDelete={handleDelete}
         onFavorite={handleFavorite}
       />
+
+      {selectedCandidates.length > 0 && (
+        <BulkActions
+          selectedCandidates={selectedCandidates}
+          candidates={candidates}
+          onDelete={handleBulkDelete}
+          onFavorite={handleBulkFavorite}
+          onExport={onExportSelected}
+        />
+      )}
     </>
   );
 };

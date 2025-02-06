@@ -243,6 +243,22 @@ export const apiService = {
     );
     return response.data.favorite;
   },
+
+  bulkDeleteCandidates: async (jobId: string, candidateIds: string[]) => {
+    return api.delete<{ success: boolean }>(
+      `/jobs/${jobId}/candidates_bulk`,
+      {
+        data: { candidate_ids: candidateIds }
+      }
+    );
+  },
+
+  bulkFavoriteCandidates: async (jobId: string, candidateIds: string[]) => {
+    return api.post<{ success: boolean }>(
+      `/jobs/${jobId}/candidates_bulk/favorite`,
+      { candidate_ids: candidateIds }
+    );
+  },
 };
 
 export interface TemplateUpdateRequest {

@@ -45,6 +45,10 @@ function JobDetail() {
     error: candidatesError,
     isLoading: candidatesLoading,
     toggleCandidateFavorite,
+    bulkDeleteCandidates,
+    bulkFavoriteCandidates,
+    getCandidateReachout,
+    getEmail,
   } = useCandidates(jobId);
 
   const selectedJob = jobs.find((job) => job.id === jobId);
@@ -52,10 +56,7 @@ function JobDetail() {
   // Update meta tags when job changes
   useEffect(() => {
     if (selectedJob) {
-      // Update document title
       document.title = `${selectedJob.job_title} at ${selectedJob.company_name} - Styx`;
-
-      // Update meta description
       const metaDescription = document.querySelector(
         'meta[name="description"]'
       );
@@ -71,7 +72,6 @@ function JobDetail() {
       document.title = "Styx - AI Recruiting Assistant";
     }
 
-    // Cleanup on unmount
     return () => {
       document.title = "Styx - AI Recruiting Assistant";
       const metaDescription = document.querySelector(
@@ -87,7 +87,6 @@ function JobDetail() {
   }, [selectedJob]);
 
   if (error) {
-    // Handle unauthorized access
     if (error instanceof UnauthorizedError) {
       return (
         <div className="p-6 text-center">
@@ -126,7 +125,6 @@ function JobDetail() {
     );
   }
 
-  // Handle unauthorized access to candidates
   if (candidatesError instanceof UnauthorizedError) {
     return (
       <div className="p-6 text-center">
@@ -144,52 +142,6 @@ function JobDetail() {
     );
   }
 
-  const handleCandidateReachout = async (
-    candidateId: string,
-    format: string
-  ) => {
-    try {
-      const response = await apiService.getCandidateReachout(
-        jobId!,
-        candidateId,
-        format
-      );
-      return response.data.reachout;
-    } catch (error) {
-      console.error("Error getting reachout:", error);
-      return undefined;
-    }
-  };
-
-  const handleGetEmail = async (linkedinUrl: string) => {
-    try {
-      const response = await apiService.getEmail(linkedinUrl);
-      return response.data.email;
-    } catch (error) {
-      console.error("Error getting email:", error);
-      toast({
-        title: "Failed to get email",
-        variant: "destructive",
-      });
-      return undefined;
-    }
-  };
-
-  const handleCandidateFavorite = async (candidateId: string) => {
-    if (!toggleCandidateFavorite) return;
-    try {
-      return await toggleCandidateFavorite(candidateId);
-    } catch (error) {
-      console.error("Error toggling favorite status:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update favorite status",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
   return selectedJob ? (
     <TalentEvaluation
       job={selectedJob}
@@ -198,11 +150,13 @@ function JobDetail() {
       onCandidateCreate={createCandidate}
       onCandidateDelete={deleteCandidate}
       onCandidatesBatch={createCandidatesBatch}
-      onCandidateReachout={handleCandidateReachout}
-      onGetEmail={handleGetEmail}
+      onCandidateReachout={getCandidateReachout}
+      onGetEmail={getEmail}
       onRefresh={loadCandidates}
       onTraitFilterChange={setTraitFilters}
-      onCandidateFavorite={handleCandidateFavorite}
+      onCandidateFavorite={toggleCandidateFavorite}
+      onBulkDelete={bulkDeleteCandidates}
+      onBulkFavorite={bulkFavoriteCandidates}
     />
   ) : null;
 }
