@@ -10,8 +10,6 @@ import {
   UserPlus,
   Loader2,
   Download,
-  Check,
-  X,
 } from "lucide-react";
 import { Candidate, Job } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
@@ -46,14 +44,6 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "react-router-dom";
-import { CareerTagFilter } from "./components/CareerTagFilter";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface TalentEvaluationProps {
   job: Job;

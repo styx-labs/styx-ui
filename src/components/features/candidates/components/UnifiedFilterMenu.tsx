@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Filter, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -115,45 +115,12 @@ export function UnifiedFilterMenu({
   const getTraitStyle = (trait: string): string => {
     const traitInfo = job.key_traits.find((t: KeyTrait) => t.trait === trait);
     return traitInfo?.required
-      ? "bg-purple-100 text-purple-700 border-purple-200"
-      : "bg-gray-100 text-gray-700 border-gray-200";
+      ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+      : "bg-gray-100 text-gray-700 hover:bg-gray-200";
   };
 
   const getTagStyle = (tag: string): string => {
-    switch (tag) {
-      // Career Progression Tags
-      case "High Average Tenure":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      case "Low Average Tenure":
-        return "bg-amber-50 text-amber-700 border-amber-200";
-      case "Single Promotion":
-        return "bg-indigo-50 text-indigo-700 border-indigo-200";
-      case "Multiple Promotions":
-        return "bg-green-50 text-green-700 border-green-200";
-      case "Diverse Company Experience":
-        return "bg-violet-50 text-violet-700 border-violet-200";
-      case "Single Company Focus":
-        return "bg-teal-50 text-teal-700 border-teal-200";
-
-      // Company Type Tags
-      case "Worked at Big Tech":
-        return "bg-sky-50 text-sky-700 border-sky-200";
-      case "Worked at Unicorn":
-        return "bg-pink-50 text-pink-700 border-pink-200";
-      case "Worked at Quant Fund":
-        return "bg-purple-50 text-purple-700 border-purple-200";
-
-      // Company Stage Tags
-      case "Startup Experience":
-        return "bg-orange-50 text-orange-700 border-orange-200";
-      case "Growth Company Experience":
-        return "bg-cyan-50 text-cyan-700 border-cyan-200";
-      case "Public Company Experience":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200";
-
-      default:
-        return "bg-gray-50 text-gray-700 border-gray-200";
-    }
+    return "bg-blue-100 text-blue-700 hover:bg-blue-200";
   };
 
   return (
@@ -164,8 +131,10 @@ export function UnifiedFilterMenu({
             variant="outline"
             size="sm"
             className={cn(
-              "h-8 border-dashed",
-              hasFilters && "border-purple-600 bg-purple-50 text-purple-600"
+              "h-9 border-dashed transition-colors duration-200",
+              hasFilters
+                ? "border-purple-600 bg-purple-50 text-purple-600 hover:bg-purple-100"
+                : "hover:border-gray-400 hover:bg-gray-50"
             )}
           >
             <Filter className="mr-2 h-4 w-4" />
@@ -186,7 +155,7 @@ export function UnifiedFilterMenu({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[400px] p-0" align="start">
+        <PopoverContent className="w-[420px] p-0 shadow-lg" align="start">
           <div className="p-2 flex items-center justify-between">
             <p className="text-sm font-medium">Filters</p>
             {hasFilters && (
@@ -201,23 +170,55 @@ export function UnifiedFilterMenu({
           </div>
           <Separator />
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full bg-gray-200 p-1">
-              <TabsTrigger value="traits" className="flex-1 data-[state=active]:bg-white">
-                Traits {selectedTraits.length > 0 && `(${selectedTraits.length})`}
+            <TabsList className="w-full bg-gray-100 p-1 rounded-none">
+              <TabsTrigger
+                value="traits"
+                className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow"
+              >
+                Traits{" "}
+                {selectedTraits.length > 0 && (
+                  <Badge variant="secondary" className="ml-1">
+                    {selectedTraits.length}
+                  </Badge>
+                )}
               </TabsTrigger>
-              <TabsTrigger value="tags" className="flex-1 data-[state=active]:bg-white">
-                Tags {selectedCareerTags.length > 0 && `(${selectedCareerTags.length})`}
+              <TabsTrigger
+                value="tags"
+                className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow"
+              >
+                Tags{" "}
+                {selectedCareerTags.length > 0 && (
+                  <Badge variant="secondary" className="ml-1">
+                    {selectedCareerTags.length}
+                  </Badge>
+                )}
               </TabsTrigger>
-              <TabsTrigger value="favorites" className="flex-1 data-[state=active]:bg-white">
-                Favorites {showFavorites && "(1)"}
+              <TabsTrigger
+                value="favorites"
+                className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow"
+              >
+                Favorites{" "}
+                {showFavorites && (
+                  <Badge variant="secondary" className="ml-1">
+                    1
+                  </Badge>
+                )}
               </TabsTrigger>
-              <TabsTrigger value="fit" className="flex-1 data-[state=active]:bg-white">
-                Fit Score {selectedFitScores.length > 0 && `(${selectedFitScores.length})`}
+              <TabsTrigger
+                value="fit"
+                className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow"
+              >
+                Fit Score{" "}
+                {selectedFitScores.length > 0 && (
+                  <Badge variant="secondary" className="ml-1">
+                    {selectedFitScores.length}
+                  </Badge>
+                )}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="traits" className="m-0">
-              <ScrollArea className="h-[400px]">
+              <ScrollArea className="h-[400px] px-1 py-2">
                 <div className="p-4 space-y-4">
                   {Object.entries(traitGroups).map(([group, traits]) => (
                     <div key={group} className="space-y-2">
@@ -226,16 +227,18 @@ export function UnifiedFilterMenu({
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {traits.map((trait) => {
-                          const isSelected = selectedTraits.includes(trait.trait);
+                          const isSelected = selectedTraits.includes(
+                            trait.trait
+                          );
                           return (
                             <Badge
                               key={trait.trait}
                               variant="secondary"
                               className={cn(
-                                "cursor-pointer transition-colors",
+                                "cursor-pointer transition-colors duration-200 hover:opacity-80",
                                 isSelected
                                   ? getTraitStyle(trait.trait)
-                                  : "hover:bg-gray-100"
+                                  : "bg-gray-100 hover:bg-gray-200"
                               )}
                               onClick={() => handleTraitToggle(trait.trait)}
                             >
@@ -254,7 +257,7 @@ export function UnifiedFilterMenu({
             </TabsContent>
 
             <TabsContent value="tags" className="m-0">
-              <ScrollArea className="h-[400px]">
+              <ScrollArea className="h-[400px] px-1 py-2">
                 <div className="p-4 space-y-4">
                   {Object.entries(CAREER_TAG_GROUPS).map(([group, tags]) => (
                     <div key={group} className="space-y-2">
@@ -269,8 +272,10 @@ export function UnifiedFilterMenu({
                               key={tag}
                               variant="secondary"
                               className={cn(
-                                "cursor-pointer transition-colors",
-                                isSelected ? getTagStyle(tag) : "hover:bg-gray-100"
+                                "cursor-pointer transition-colors duration-200 hover:opacity-80",
+                                isSelected
+                                  ? getTagStyle(tag)
+                                  : "bg-gray-100 hover:bg-gray-200"
                               )}
                               onClick={() => handleCareerTagToggle(tag)}
                             >
@@ -286,43 +291,48 @@ export function UnifiedFilterMenu({
             </TabsContent>
 
             <TabsContent value="favorites" className="m-0">
-              <div className="p-4">
-                <Button
-                  variant={showFavorites ? "secondary" : "ghost"}
-                  size="sm"
-                  className={cn(
-                    "w-full h-9 gap-2",
-                    showFavorites &&
-                      "bg-yellow-50 text-yellow-700 hover:bg-yellow-100"
-                  )}
-                  onClick={() => onFavoriteChange(!showFavorites)}
-                >
-                  <Star
-                    className={cn("h-4 w-4", showFavorites && "fill-yellow-400")}
-                  />
-                  {showFavorites ? "Hide Favorites" : "Show Favorites"}
-                </Button>
-              </div>
+              <ScrollArea className="h-[400px] px-1 py-2">
+                <div className="p-4">
+                  <Badge
+                    variant="secondary"
+                    className={cn(
+                      "cursor-pointer transition-colors duration-200 hover:opacity-80 w-full justify-start h-9 px-3",
+                      showFavorites
+                        ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+                        : "bg-gray-100 hover:bg-gray-200"
+                    )}
+                    onClick={() => onFavoriteChange(!showFavorites)}
+                  >
+                    <Star
+                      className={cn(
+                        "h-4 w-4 mr-2",
+                        showFavorites && "fill-yellow-400"
+                      )}
+                    />
+                    {showFavorites ? "Hide Favorites" : "Show Favorites"}
+                  </Badge>
+                </div>
+              </ScrollArea>
             </TabsContent>
 
             <TabsContent value="fit" className="m-0">
-              <ScrollArea className="h-[400px]">
+              <ScrollArea className="h-[400px] px-1 py-2">
                 <div className="p-4 space-y-2">
                   {[4, 3, 2, 1, 0].map((score) => (
-                    <Button
+                    <Badge
                       key={score}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleFitScoreToggle(score)}
+                      variant="secondary"
                       className={cn(
-                        "w-full justify-start gap-2 h-9",
-                        selectedFitScores.includes(score) &&
-                          "bg-gray-100"
+                        "cursor-pointer transition-colors duration-200 hover:opacity-80 w-full justify-start h-9 px-3",
+                        selectedFitScores.includes(score)
+                          ? "bg-gray-200 text-gray-700"
+                          : "bg-gray-100 hover:bg-gray-200"
                       )}
+                      onClick={() => handleFitScoreToggle(score)}
                     >
                       <div
                         className={cn(
-                          "h-2 w-2 rounded-full",
+                          "h-2 w-2 rounded-full mr-2",
                           score === 4 && "bg-green-500",
                           score === 3 && "bg-blue-500",
                           score === 2 && "bg-yellow-500",
@@ -338,9 +348,9 @@ export function UnifiedFilterMenu({
                         {score === 0 && "Not Fit"}
                       </span>
                       {selectedFitScores.includes(score) && (
-                        <X className="h-4 w-4" />
+                        <X className="h-4 w-4 ml-2" />
                       )}
-                    </Button>
+                    </Badge>
                   ))}
                 </div>
               </ScrollArea>
@@ -352,7 +362,7 @@ export function UnifiedFilterMenu({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-9 w-9 rounded-full hover:bg-gray-100 transition-colors duration-200"
           onClick={handleClearFilters}
         >
           <X className="h-4 w-4" />
@@ -361,4 +371,4 @@ export function UnifiedFilterMenu({
       )}
     </div>
   );
-} 
+}
