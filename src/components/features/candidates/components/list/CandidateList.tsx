@@ -26,7 +26,7 @@ interface CandidateListProps {
   onSelectionChange?: (selectedIds: string[]) => void;
   onFavorite?: (id: string) => Promise<boolean>;
   onBulkDelete?: (ids: string[]) => Promise<void>;
-  onBulkFavorite?: (ids: string[]) => Promise<void>;
+  onBulkFavorite?: (ids: string[], favorite: boolean) => Promise<void>;
   onExportSelected?: (ids: string[]) => void;
 }
 
@@ -343,13 +343,29 @@ export const CandidateList: React.FC<CandidateListProps> = ({
 
   const handleBulkFavorite = async (ids: string[]) => {
     if (!onBulkFavorite) return;
+
+    // Check if all selected candidates are already favorited
+    const selectedCandidateObjects = candidatesState.filter(
+      (c) => c.id && ids.includes(c.id)
+    );
+    const allFavorited =
+      selectedCandidateObjects.length > 0 &&
+      selectedCandidateObjects.every((c) => c.favorite);
+
+    console.log('Bulk favorite action:', {
+      ids,
+      allFavorited,
+      targetState: !allFavorited,
+      selectedCandidates: selectedCandidateObjects
+    });
+
     try {
       // Optimistically update the UI
       const updatedCandidates = candidatesState.map((candidate) => {
         if (ids.includes(candidate.id!)) {
           return {
             ...candidate,
-            favorite: true,
+            favorite: !allFavorited, // Toggle to opposite of current state
           };
         }
         return candidate;
@@ -357,13 +373,13 @@ export const CandidateList: React.FC<CandidateListProps> = ({
       // Update the local state immediately
       setCandidates(updatedCandidates);
 
-      // Make the API call
-      await onBulkFavorite(ids);
+      // Make the API call with the new favorite state
+      await onBulkFavorite(ids, !allFavorited);
       toast({
         title: "Success",
-        description: `${ids.length} candidate${
-          ids.length !== 1 ? "s" : ""
-        } starred successfully`,
+        description: `${ids.length} candidate${ids.length !== 1 ? "s" : ""} ${
+          allFavorited ? "unstarred" : "starred"
+        } successfully`,
       });
     } catch (error) {
       console.error("Error bulk favoriting candidates:", error);
@@ -372,7 +388,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
         if (ids.includes(candidate.id!)) {
           return {
             ...candidate,
-            favorite: false,
+            favorite: candidate.favorite, // Revert to original state
           };
         }
         return candidate;
@@ -381,7 +397,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
 
       toast({
         title: "Error",
-        description: "Failed to star candidates",
+        description: `Failed to ${allFavorited ? "unstar" : "star"} candidates`,
         variant: "destructive",
       });
     }
@@ -468,7 +484,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
       {selectedCandidates.length > 0 && (
         <BulkActions
           selectedCandidates={selectedCandidates}
-          candidates={candidates}
+          candidates={candidatesState}
           onDelete={handleBulkDelete}
           onFavorite={handleBulkFavorite}
           onExport={onExportSelected}

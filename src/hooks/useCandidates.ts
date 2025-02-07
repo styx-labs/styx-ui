@@ -246,12 +246,24 @@ export function useCandidates(jobId: string | undefined) {
   };
 
   const bulkFavoriteCandidates = async (
-    candidateIds: string[]
+    candidateIds: string[],
+    shouldFavorite: boolean
   ): Promise<void> => {
     if (!jobId) return;
 
+    console.log('Hook: bulkFavoriteCandidates called:', {
+      jobId,
+      candidateIds,
+      shouldFavorite
+    });
+
     try {
-      await apiService.bulkFavoriteCandidates(jobId, candidateIds);
+      await apiService.bulkFavoriteCandidates(
+        jobId,
+        candidateIds,
+        shouldFavorite
+      );
+      console.log('Hook: bulkFavoriteCandidates completed successfully');
       // Don't reload candidates, let the optimistic UI handle it
     } catch (error) {
       console.error("Error bulk favoriting candidates:", error);

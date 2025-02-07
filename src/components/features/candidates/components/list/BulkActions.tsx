@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Star, Trash2, Download } from "lucide-react";
 import type { Candidate } from "@/types/index";
+import { cn } from "@/lib/utils";
 
 interface BulkActionsProps {
   selectedCandidates: string[];
@@ -35,6 +36,14 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
     onExport(selectedCandidates);
   };
 
+  // Check if all selected candidates are favorited using the current state
+  const selectedCandidateObjects = candidates.filter(
+    (c) => c.id && selectedCandidates.includes(c.id)
+  );
+  const allFavorited =
+    selectedCandidateObjects.length > 0 &&
+    selectedCandidateObjects.every((c) => c.favorite);
+
   return (
     <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg border p-4 z-50 flex items-center gap-4">
       <span className="text-sm font-medium text-muted-foreground">
@@ -48,8 +57,8 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
           onClick={handleBulkFavorite}
           className="gap-2"
         >
-          <Star className="h-4 w-4" />
-          Star Selected
+          <Star className={cn("h-4 w-4", allFavorited && "fill-yellow-400")} />
+          {allFavorited ? "Unstar Selected" : "Star Selected"}
         </Button>
         <Button
           variant="outline"
