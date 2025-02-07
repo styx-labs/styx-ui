@@ -136,35 +136,61 @@ export function useCandidates(jobId: string | undefined) {
     }
   };
 
-  const createCandidatesBatch = async (
-    urls: string[],
-    search_mode: boolean = true
-  ) => {
+  const createCandidatesBatch = async (urls: string[], searchMode = false) => {
     if (!jobId) return;
 
+    // Add a single loading indicator for all URLs
+    const loadingIndicator = {
+      id: "loading-indicator",
+      name: `${urls.length} candidate${urls.length !== 1 ? "s" : ""}`,
+      status: "processing" as const,
+      is_loading_indicator: true,
+    };
+
+    // Create processing placeholders for each URL
+    const processingCandidates = urls.map((url, index) => ({
+      id: `processing-${index}`,
+      name: url.split("/").pop() || "Processing...",
+      status: "processing" as const,
+      url,
+    }));
+
+    // Update state with both loading indicator and processing placeholders
+    setCandidates((prev) => {
+      // Remove any existing loading indicators
+      const withoutLoading = prev.filter((c) => !c.is_loading_indicator);
+      return [loadingIndicator, ...processingCandidates, ...withoutLoading];
+    });
+
     try {
-      await apiService.createCandidatesBatch(jobId, urls, search_mode);
-      toast({
-        title: "Success",
-        description: "Candidates added successfully",
-      });
+      const response = await apiService.createCandidatesBatch(
+        jobId,
+        urls,
+        searchMode
+      );
+
+      // Remove loading indicators and processing placeholders
+      setCandidates((prev) =>
+        prev.filter(
+          (c) =>
+            !c.is_loading_indicator && c.id?.startsWith("processing-") !== true
+        )
+      );
+
+      // Load the updated candidates list
       loadCandidates();
+
+      return response.data;
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 402) {
-        setError(new Error("Out of search credits"));
-        toast({
-          title: "Error",
-          description: "Out of search credits",
-        });
-      } else {
-        setError(
-          error instanceof Error ? error : new Error("Failed to add candidates")
-        );
-        toast({
-          title: "Error",
-          description: "Failed to add candidates",
-        });
-      }
+      console.error("Error creating candidates batch:", error);
+      // Remove loading indicators and processing placeholders
+      setCandidates((prev) =>
+        prev.filter(
+          (c) =>
+            !c.is_loading_indicator && c.id?.startsWith("processing-") !== true
+        )
+      );
+      throw error;
     }
   };
 
@@ -251,10 +277,10 @@ export function useCandidates(jobId: string | undefined) {
   ): Promise<void> => {
     if (!jobId) return;
 
-    console.log('Hook: bulkFavoriteCandidates called:', {
+    console.log("Hook: bulkFavoriteCandidates called:", {
       jobId,
       candidateIds,
-      shouldFavorite
+      shouldFavorite,
     });
 
     try {
@@ -263,7 +289,7 @@ export function useCandidates(jobId: string | undefined) {
         candidateIds,
         shouldFavorite
       );
-      console.log('Hook: bulkFavoriteCandidates completed successfully');
+      console.log("Hook: bulkFavoriteCandidates completed successfully");
       // Don't reload candidates, let the optimistic UI handle it
     } catch (error) {
       console.error("Error bulk favoriting candidates:", error);

@@ -80,23 +80,25 @@ interface TalentEvaluationProps {
 }
 
 const LoadingTable = () => (
-  <div className="animate-pulse p-4">
-    <div className="h-8 bg-muted rounded-md w-full mb-4" />
-    {[...Array(3)].map((_, i) => (
-      <div key={i} className="space-y-3 py-4">
-        <div className="h-5 bg-muted rounded-md w-full" />
-        <div className="space-y-3">
-          <div className="grid grid-cols-5 gap-4">
-            <div className="h-4 bg-muted rounded-md col-span-1" />
-            <div className="h-4 bg-muted rounded-md col-span-1" />
-            <div className="h-4 bg-muted rounded-md col-span-1" />
-            <div className="h-4 bg-muted rounded-md col-span-1" />
-            <div className="h-4 bg-muted rounded-md col-span-1" />
+  <Card className="border-purple-100">
+    <div className="animate-pulse p-4">
+      <div className="h-8 bg-muted rounded-md w-full mb-4" />
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="space-y-3 py-4">
+          <div className="h-5 bg-muted rounded-md w-full" />
+          <div className="space-y-3">
+            <div className="grid grid-cols-5 gap-4">
+              <div className="h-4 bg-muted rounded-md col-span-1" />
+              <div className="h-4 bg-muted rounded-md col-span-1" />
+              <div className="h-4 bg-muted rounded-md col-span-1" />
+              <div className="h-4 bg-muted rounded-md col-span-1" />
+              <div className="h-4 bg-muted rounded-md col-span-1" />
+            </div>
           </div>
         </div>
-      </div>
-    ))}
-  </div>
+      ))}
+    </div>
+  </Card>
 );
 
 export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
@@ -139,7 +141,8 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const [showFavorites, setShowFavorites] = useState(false);
   const [selectedFitScores, setSelectedFitScores] = useState<number[]>([]);
   const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
-  const [localCandidates, setLocalCandidates] = useState<Candidate[]>(candidates);
+  const [localCandidates, setLocalCandidates] =
+    useState<Candidate[]>(candidates);
 
   // Sync local state with props when candidates change
   useEffect(() => {
@@ -200,51 +203,64 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   };
 
   const filteredCandidates = useMemo(() => {
-    let filtered = localCandidates.filter(
-      (candidate) => candidate.status === statusFilter
+    let filtered = localCandidates.filter((candidate) =>
+      // Always show loading indicators in processing tab
+      candidate.is_loading_indicator
+        ? statusFilter === "processing"
+        : // For regular candidates, filter by status
+          candidate.status === statusFilter
     );
 
-    // Filter by favorites if enabled
-    if (showFavorites) {
-      filtered = filtered.filter((candidate) => candidate.favorite);
-    }
+    // Only apply additional filters to non-loading indicator candidates
+    filtered = filtered
+      .map((candidate) => {
+        if (candidate.is_loading_indicator) return candidate;
 
-    // Filter by fit scores if any are selected
-    if (selectedFitScores.length > 0) {
-      filtered = filtered.filter(
-        (candidate) =>
-          candidate.fit !== undefined &&
-          selectedFitScores.includes(candidate.fit)
-      );
-    }
+        // Filter by favorites if enabled
+        if (showFavorites && !candidate.favorite) return null;
 
-    // Filter by career tags if any are selected
-    if (selectedCareerTags.length > 0) {
-      filtered = filtered.filter((candidate) => {
-        const careerTags = candidate.profile?.career_metrics?.career_tags || [];
-        const experienceTags =
-          candidate.profile?.career_metrics?.experience_tags || [];
-        const allTags = [...careerTags, ...experienceTags];
-        return selectedCareerTags.every((tag) => allTags.includes(tag));
-      });
-    }
+        // Filter by fit scores if any are selected
+        if (selectedFitScores.length > 0) {
+          if (
+            candidate.fit === undefined ||
+            !selectedFitScores.includes(candidate.fit)
+          ) {
+            return null;
+          }
+        }
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((candidate) => {
-        const name = candidate.name?.toLowerCase() || "";
-        const occupation = candidate.profile?.occupation?.toLowerCase() || "";
-        const company =
-          candidate.profile?.experiences?.[0]?.company?.toLowerCase() || "";
+        // Filter by career tags if any are selected
+        if (selectedCareerTags.length > 0) {
+          const careerTags =
+            candidate.profile?.career_metrics?.career_tags || [];
+          const experienceTags =
+            candidate.profile?.career_metrics?.experience_tags || [];
+          const allTags = [...careerTags, ...experienceTags];
+          if (!selectedCareerTags.every((tag) => allTags.includes(tag))) {
+            return null;
+          }
+        }
 
-        return (
-          name.includes(query) ||
-          occupation.includes(query) ||
-          company.includes(query)
-        );
-      });
-    }
+        // Filter by search query
+        if (searchQuery.trim()) {
+          const query = searchQuery.toLowerCase();
+          const name = candidate.name?.toLowerCase() || "";
+          const occupation = candidate.profile?.occupation?.toLowerCase() || "";
+          const company =
+            candidate.profile?.experiences?.[0]?.company?.toLowerCase() || "";
+
+          if (
+            !name.includes(query) &&
+            !occupation.includes(query) &&
+            !company.includes(query)
+          ) {
+            return null;
+          }
+        }
+
+        return candidate;
+      })
+      .filter(Boolean) as Candidate[];
 
     return filtered;
   }, [
@@ -835,34 +851,32 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
       )}
 
       {/* Candidates Table */}
-      <Card className="border-purple-100">
-        {isLoading ? (
-          <LoadingTable />
-        ) : (
-          <CandidateList
-            candidates={filteredCandidates}
-            onGetEmail={onGetEmail}
-            onReachout={onCandidateReachout}
-            onDelete={async (id) => {
-              onCandidateDelete(id);
-              return Promise.resolve();
-            }}
-            searchQuery={searchQuery}
-            showSelection={true}
-            selectedCandidates={selectedCandidates}
-            onSelectionChange={setSelectedCandidates}
-            onFavorite={handleFavorite}
-            onBulkDelete={onBulkDelete}
-            onBulkFavorite={onBulkFavorite}
-            onExportSelected={(ids) => {
-              setExportMode("selected");
-              setShowExportBar(true);
-              // Don't clear existing selections
-              handleExport();
-            }}
-          />
-        )}
-      </Card>
+      {isLoading ? (
+        <LoadingTable />
+      ) : (
+        <CandidateList
+          candidates={filteredCandidates}
+          onGetEmail={onGetEmail}
+          onReachout={onCandidateReachout}
+          onDelete={async (id) => {
+            onCandidateDelete(id);
+            return Promise.resolve();
+          }}
+          searchQuery={searchQuery}
+          showSelection={true}
+          selectedCandidates={selectedCandidates}
+          onSelectionChange={setSelectedCandidates}
+          onFavorite={handleFavorite}
+          onBulkDelete={onBulkDelete}
+          onBulkFavorite={onBulkFavorite}
+          onExportSelected={(ids) => {
+            setExportMode("selected");
+            setShowExportBar(true);
+            // Don't clear existing selections
+            handleExport();
+          }}
+        />
+      )}
 
       {showEditTraits && (
         <EditKeyTraits

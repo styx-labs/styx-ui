@@ -90,6 +90,7 @@ export interface Candidate {
   optional_met?: number;
   fit?: number;
   favorite?: boolean;
+  is_loading_indicator?: boolean;
   evaluation?: {
     score: number;
     traits_met: number;

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import type { Candidate } from "@/types/index";
 import {
   Table,
@@ -14,7 +14,8 @@ import { CandidateSidebar } from "../sidebar/CandidateSidebar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { BulkActions } from "./BulkActions";
-
+import { Loader2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
 interface CandidateListProps {
   candidates: Candidate[];
   onGetEmail?: (url: string) => Promise<string | undefined>;
@@ -71,6 +72,31 @@ const ProcessingCandidateRow: React.FC<{
   </TableRow>
 );
 
+const LoadingIndicatorCard: React.FC<{
+  loadingCandidates: Candidate[];
+}> = ({ loadingCandidates }) => {
+  if (loadingCandidates.length === 0) return null;
+
+  const totalCandidatesLoading = loadingCandidates.reduce((sum, candidate) => {
+    const match = candidate.name?.match(/Loading (\d+) candidates/);
+    return sum + (match ? parseInt(match[1], 10) : 0);
+  }, 0);
+
+  return (
+    <div className="mb-6 rounded-lg bg-primary border border-primary/20 text-primary-foreground shadow-sm bg-purple-100">
+      <div className="px-6 py-4">
+        <div className="flex items-center gap-3 text-sm text-purple-700">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span>
+            Processing {totalCandidatesLoading} new candidate
+            {totalCandidatesLoading !== 1 ? "s" : ""}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const CandidateList: React.FC<CandidateListProps> = ({
   candidates,
   onGetEmail,
@@ -102,11 +128,31 @@ export const CandidateList: React.FC<CandidateListProps> = ({
     [selectedCandidateId, candidates]
   );
 
+  const { loadingIndicators, regularCandidates } = useMemo(() => {
+    return candidates.reduce(
+      (acc, candidate) => {
+        if (
+          candidate.status === "processing" &&
+          candidate.is_loading_indicator
+        ) {
+          acc.loadingIndicators.push(candidate);
+        } else {
+          acc.regularCandidates.push(candidate);
+        }
+        return acc;
+      },
+      {
+        loadingIndicators: [] as Candidate[],
+        regularCandidates: [] as Candidate[],
+      }
+    );
+  }, [candidates]);
+
   const filteredCandidates = useMemo(() => {
-    if (!searchQuery.trim()) return candidates;
+    if (!searchQuery.trim()) return regularCandidates;
 
     const query = searchQuery.toLowerCase();
-    return candidates.filter((candidate) => {
+    return regularCandidates.filter((candidate) => {
       const name = candidate.name?.toLowerCase() || "";
       const occupation = candidate.profile?.occupation?.toLowerCase() || "";
       const company =
@@ -118,7 +164,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
         company.includes(query)
       );
     });
-  }, [candidates, searchQuery]);
+  }, [regularCandidates, searchQuery]);
 
   const currentIndex = selectedCandidateId
     ? filteredCandidates.findIndex((c) => c.id === selectedCandidateId)
@@ -322,91 +368,95 @@ export const CandidateList: React.FC<CandidateListProps> = ({
 
   return (
     <>
-      <div className="rounded-md border p-4">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {showSelection && (
-                <TableHead className="w-[50px]">
-                  <Checkbox
-                    checked={
-                      selectedCandidates.length === selectableCandidatesCount
-                    }
-                    onCheckedChange={handleSelectAll}
-                    aria-label="Select all candidates"
+      <LoadingIndicatorCard loadingCandidates={loadingIndicators} />
+      <Card className="border-purple-100">
+        <div className="rounded-md border p-4">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {showSelection && (
+                  <TableHead className="w-[50px]">
+                    <Checkbox
+                      checked={
+                        selectedCandidates.length === selectableCandidatesCount
+                      }
+                      onCheckedChange={handleSelectAll}
+                      aria-label="Select all candidates"
+                    />
+                  </TableHead>
+                )}
+                <TableHead>Name</TableHead>
+                <TableHead className="w-[200px]">Current Position</TableHead>
+                <TableHead className="text-center">AI Evaluation</TableHead>
+                <TableHead className="text-center">Traits Met</TableHead>
+                <TableHead>Trait Breakdown</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredCandidates.map((candidate) =>
+                candidate.status === "processing" ? (
+                  <ProcessingCandidateRow
+                    key={candidate.id}
+                    candidate={candidate}
                   />
-                </TableHead>
+                ) : (
+                  <CandidateRow
+                    key={candidate.id}
+                    candidate={candidate}
+                    loadingStates={loadingStates}
+                    handleEmail={handleEmail}
+                    handleReachout={handleReachout}
+                    handleDelete={handleDelete}
+                    handleFavorite={handleFavorite}
+                    setSelectedCandidate={(candidate) =>
+                      setSelectedCandidateId(candidate.id!)
+                    }
+                    showSelection={showSelection}
+                    isSelected={
+                      candidate.id
+                        ? selectedCandidates.includes(candidate.id)
+                        : false
+                    }
+                    onSelectionChange={(checked: boolean) =>
+                      candidate.id &&
+                      handleSelectCandidate(candidate.id, checked)
+                    }
+                  />
+                )
               )}
-              <TableHead>Name</TableHead>
-              <TableHead className="w-[200px]">Current Position</TableHead>
-              <TableHead className="text-center">AI Evaluation</TableHead>
-              <TableHead className="text-center">Traits Met</TableHead>
-              <TableHead>Trait Breakdown</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredCandidates.map((candidate) =>
-              candidate.status === "processing" ? (
-                <ProcessingCandidateRow
-                  key={candidate.id}
-                  candidate={candidate}
-                />
-              ) : (
-                <CandidateRow
-                  key={candidate.id}
-                  candidate={candidate}
-                  loadingStates={loadingStates}
-                  handleEmail={handleEmail}
-                  handleReachout={handleReachout}
-                  handleDelete={handleDelete}
-                  handleFavorite={handleFavorite}
-                  setSelectedCandidate={(candidate) =>
-                    setSelectedCandidateId(candidate.id!)
-                  }
-                  showSelection={showSelection}
-                  isSelected={
-                    candidate.id
-                      ? selectedCandidates.includes(candidate.id)
-                      : false
-                  }
-                  onSelectionChange={(checked: boolean) =>
-                    candidate.id && handleSelectCandidate(candidate.id, checked)
-                  }
-                />
-              )
-            )}
-          </TableBody>
-        </Table>
-      </div>
+            </TableBody>
+          </Table>
+        </div>
 
-      <CandidateSidebar
-        candidate={selectedCandidate}
-        onClose={() => setSelectedCandidateId(null)}
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        hasPrevious={currentIndex > 0}
-        hasNext={currentIndex < filteredCandidates.length - 1}
-        loadingStates={loadingStates}
-        onGetEmail={async (url: string, id: string) => {
-          await handleEmail(url, id);
-        }}
-        onReachout={async (id: string, format: string) => {
-          await handleReachout(id, format);
-        }}
-        onDelete={handleDelete}
-        onFavorite={handleFavorite}
-      />
-
-      {selectedCandidates.length > 0 && (
-        <BulkActions
-          selectedCandidates={selectedCandidates}
-          candidates={candidates}
-          onDelete={handleBulkDelete}
-          onFavorite={handleBulkFavorite}
-          onExport={onExportSelected}
+        <CandidateSidebar
+          candidate={selectedCandidate}
+          onClose={() => setSelectedCandidateId(null)}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          hasPrevious={currentIndex > 0}
+          hasNext={currentIndex < filteredCandidates.length - 1}
+          loadingStates={loadingStates}
+          onGetEmail={async (url: string, id: string) => {
+            await handleEmail(url, id);
+          }}
+          onReachout={async (id: string, format: string) => {
+            await handleReachout(id, format);
+          }}
+          onDelete={handleDelete}
+          onFavorite={handleFavorite}
         />
-      )}
+
+        {selectedCandidates.length > 0 && (
+          <BulkActions
+            selectedCandidates={selectedCandidates}
+            candidates={candidates}
+            onDelete={handleBulkDelete}
+            onFavorite={handleBulkFavorite}
+            onExport={onExportSelected}
+          />
+        )}
+      </Card>
     </>
   );
 };
