@@ -17,7 +17,7 @@ import { Candidate, Job } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
 import Papa from "papaparse";
 import { EditKeyTraits } from "./components/EditKeyTraits";
-import { CandidateTraitFilter } from "./components/CandidateTraitFilter";
+import { UnifiedFilterMenu } from "./components/UnifiedFilterMenu";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -138,6 +138,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const [selectedCareerTags, setSelectedCareerTags] = useState<string[]>([]);
   const [showFavorites, setShowFavorites] = useState(false);
   const [selectedFitScores, setSelectedFitScores] = useState<number[]>([]);
+  const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
 
   // Handle openEditTraits query parameter
   useEffect(() => {
@@ -384,95 +385,20 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
       <Card className="border-purple-100">
         <div className="p-4">
           <div className="flex items-center gap-4">
-            <CandidateTraitFilter
+            <UnifiedFilterMenu
               job={job}
-              onFilterChange={onTraitFilterChange}
+              onTraitFilterChange={(traits) => {
+                setSelectedTraits(traits);
+                onTraitFilterChange(traits);
+              }}
+              onCareerTagChange={setSelectedCareerTags}
+              onFavoriteChange={setShowFavorites}
+              onFitScoreChange={setSelectedFitScores}
+              selectedTraits={selectedTraits}
+              selectedCareerTags={selectedCareerTags}
+              showFavorites={showFavorites}
+              selectedFitScores={selectedFitScores}
             />
-            <CareerTagFilter onFilterChange={setSelectedCareerTags} />
-            <Button
-              variant={showFavorites ? "secondary" : "ghost"}
-              size="sm"
-              className={cn(
-                "h-8 gap-2",
-                showFavorites &&
-                  "bg-yellow-50 text-yellow-700 hover:bg-yellow-100"
-              )}
-              onClick={() => setShowFavorites(!showFavorites)}
-            >
-              <Star
-                className={cn("h-4 w-4", showFavorites && "fill-yellow-400")}
-              />
-              Favorites
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant={selectedFitScores.length > 0 ? "secondary" : "ghost"}
-                  size="sm"
-                  className={cn(
-                    "h-8 gap-2",
-                    selectedFitScores.length > 0 &&
-                      "bg-blue-50 text-blue-700 hover:bg-blue-100"
-                  )}
-                >
-                  <GaugeCircle className="h-4 w-4" />
-                  {selectedFitScores.length > 0
-                    ? selectedFitScores.length === 1
-                      ? `Fit: ${selectedFitScores[0]}`
-                      : `${selectedFitScores.length} Fit Scores`
-                    : "Fit Scores"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuLabel>Filter by Fit Scores</DropdownMenuLabel>
-                {[4, 3, 2, 1, 0].map((score) => (
-                  <DropdownMenuItem
-                    key={score}
-                    onClick={() =>
-                      setSelectedFitScores(
-                        selectedFitScores.includes(score)
-                          ? selectedFitScores.filter((s) => s !== score)
-                          : [...selectedFitScores, score].sort((a, b) => b - a)
-                      )
-                    }
-                    className="gap-2"
-                  >
-                    <div
-                      className={cn(
-                        "h-2 w-2 rounded-full",
-                        score === 4 && "bg-green-500",
-                        score === 3 && "bg-blue-500",
-                        score === 2 && "bg-yellow-500",
-                        score === 1 && "bg-orange-500",
-                        score === 0 && "bg-red-500"
-                      )}
-                    />
-                    <span className="flex-1">
-                      {score === 4 && "Ideal Fit"}
-                      {score === 3 && "Good Fit"}
-                      {score === 2 && "Potential Fit"}
-                      {score === 1 && "Likely Not Fit"}
-                      {score === 0 && "Not Fit"}
-                    </span>
-                    {selectedFitScores.includes(score) && (
-                      <Check className="h-4 w-4" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-                {selectedFitScores.length > 0 && (
-                  <>
-                    <Separator className="my-2" />
-                    <DropdownMenuItem
-                      onClick={() => setSelectedFitScores([])}
-                      className="gap-2 text-muted-foreground"
-                    >
-                      <X className="h-4 w-4" />
-                      Clear Filters
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
