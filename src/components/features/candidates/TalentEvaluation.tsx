@@ -139,6 +139,12 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const [showFavorites, setShowFavorites] = useState(false);
   const [selectedFitScores, setSelectedFitScores] = useState<number[]>([]);
   const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
+  const [localCandidates, setLocalCandidates] = useState<Candidate[]>(candidates);
+
+  // Sync local state with props when candidates change
+  useEffect(() => {
+    setLocalCandidates(candidates);
+  }, [candidates]);
 
   // Handle openEditTraits query parameter
   useEffect(() => {
@@ -147,8 +153,54 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
     }
   }, [searchParams]);
 
+  const handleFavorite = async (candidateId: string) => {
+    if (!onCandidateFavorite) return false;
+    try {
+      // Optimistically update the UI
+      const candidateIndex = localCandidates.findIndex(
+        (c) => c.id === candidateId
+      );
+      if (candidateIndex !== -1) {
+        const updatedCandidates = [...localCandidates];
+        const newFavoriteState = !updatedCandidates[candidateIndex].favorite;
+        updatedCandidates[candidateIndex] = {
+          ...updatedCandidates[candidateIndex],
+          favorite: newFavoriteState,
+        };
+        // Update the local state immediately
+        setLocalCandidates(updatedCandidates);
+      }
+
+      // Make the API call
+      const result = await onCandidateFavorite(candidateId);
+      return result;
+    } catch (error) {
+      console.error("Error toggling favorite status:", error);
+      // Revert the optimistic update on error
+      const candidateIndex = localCandidates.findIndex(
+        (c) => c.id === candidateId
+      );
+      if (candidateIndex !== -1) {
+        const updatedCandidates = [...localCandidates];
+        const revertedFavoriteState =
+          updatedCandidates[candidateIndex].favorite;
+        updatedCandidates[candidateIndex] = {
+          ...updatedCandidates[candidateIndex],
+          favorite: !revertedFavoriteState,
+        };
+        setLocalCandidates(updatedCandidates);
+      }
+      toast({
+        title: "Error",
+        description: "Failed to update favorite status",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   const filteredCandidates = useMemo(() => {
-    let filtered = candidates.filter(
+    let filtered = localCandidates.filter(
       (candidate) => candidate.status === statusFilter
     );
 
@@ -196,7 +248,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
 
     return filtered;
   }, [
-    candidates,
+    localCandidates,
     statusFilter,
     selectedCareerTags,
     searchQuery,
@@ -799,7 +851,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
             showSelection={true}
             selectedCandidates={selectedCandidates}
             onSelectionChange={setSelectedCandidates}
-            onFavorite={onCandidateFavorite}
+            onFavorite={handleFavorite}
             onBulkDelete={onBulkDelete}
             onBulkFavorite={onBulkFavorite}
             onExportSelected={(ids) => {
