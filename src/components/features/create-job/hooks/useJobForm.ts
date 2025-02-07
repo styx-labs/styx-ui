@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/api";
-import type { TraitType } from "@/types/index";
+import type { TraitType, IdealProfile } from "@/types/index";
 import type { JobFormState, KeyTrait } from "../types";
 
 interface UseJobFormProps {
@@ -10,7 +10,7 @@ interface UseJobFormProps {
     keyTraits: KeyTrait[],
     jobTitle: string,
     companyName: string,
-    ideal_profile_urls: string[]
+    ideal_profiles: IdealProfile[]
   ) => void;
 }
 
@@ -34,9 +34,9 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
     updateState({ currentStep: 2 });
   };
 
-  const handleIdealProfilesSubmit = async (urls: string[]) => {
+  const handleIdealProfilesSubmit = async (profiles: IdealProfile[]) => {
     try {
-      const response = await apiService.getKeyTraits(state.description, urls);
+      const response = await apiService.getKeyTraits(state.description, profiles);
       const formattedTraits = Array.isArray(response.data.key_traits)
         ? response.data.key_traits.map(
             (
@@ -71,7 +71,7 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
         suggestedTraits: formattedTraits,
         jobTitle: response.data.job_title,
         companyName: response.data.company_name,
-        idealProfiles: urls,
+        idealProfiles: profiles,
         currentStep: 3,
       });
     } catch (error) {

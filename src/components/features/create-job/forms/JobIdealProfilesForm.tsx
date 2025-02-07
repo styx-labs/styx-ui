@@ -2,6 +2,14 @@ import { useState } from "react";
 import { X, LinkIcon, ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Card,
   CardHeader,
@@ -9,8 +17,14 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 
+interface IdealProfile {
+  url: string;
+  fit?: "yes" | "no" | "interesting";
+  reasoning?: string;
+}
+
 interface JobIdealProfilesFormProps {
-  onSubmit: (urls: string[]) => void;
+  onSubmit: (profiles: IdealProfile[]) => void;
   onBack: () => void;
 }
 
@@ -18,44 +32,56 @@ export const JobIdealProfilesForm: React.FC<JobIdealProfilesFormProps> = ({
   onSubmit,
   onBack,
 }) => {
-  const [urls, setUrls] = useState<string[]>([""]);
+  const [profiles, setProfiles] = useState<IdealProfile[]>([{ url: "" }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleUrlChange = (index: number, value: string) => {
-    const newUrls = [...urls];
-    newUrls[index] = value;
-    setUrls(newUrls);
+  const handleProfileChange = (
+    index: number,
+    field: keyof IdealProfile,
+    value: string
+  ) => {
+    const newProfiles = [...profiles];
+    newProfiles[index] = { ...newProfiles[index], [field]: value };
+    setProfiles(newProfiles);
   };
 
-  const addUrl = () => {
-    if (urls.length < 3) {
-      setUrls([...urls, ""]);
+  const addProfile = () => {
+    if (profiles.length < 10) {
+      setProfiles([...profiles, { url: "" }]);
     }
   };
 
-  const removeUrl = (index: number) => {
-    const newUrls = urls.filter((_, i) => i !== index);
-    setUrls(newUrls);
+  const removeProfile = (index: number) => {
+    const newProfiles = profiles.filter((_, i) => i !== index);
+    setProfiles(newProfiles);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const validUrls = urls.filter((url) => url.trim() !== "");
-    await onSubmit(validUrls);
+    const validProfiles = profiles.filter(
+      (profile) => profile.url.trim() !== ""
+    );
+    await onSubmit(validProfiles);
     setIsSubmitting(false);
   };
+
+  // Check if there are any valid profiles (non-empty URLs)
+  const hasValidProfiles = profiles.some(
+    (profile) => profile.url.trim() !== ""
+  );
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <h1 className="scroll-m-20 text-4xl font-bold tracking-tight">
-          Ideal Candidate Profiles
+          Reference Candidate Profiles (Optional)
         </h1>
         <p className="text-muted-foreground mt-2">
-          Add up to 3 LinkedIn profile URLs that represent your ideal
-          candidates. These will help guide the evaluation of sourced
-          candidates.
+          Optionally add LinkedIn profile URLs that represent different types of
+          candidates. You can add up to 10 profiles and indicate if they would
+          be a good fit. This helps calibrate our evaluation system, but you can
+          also skip this step.
         </p>
       </div>
 
@@ -67,40 +93,80 @@ export const JobIdealProfilesForm: React.FC<JobIdealProfilesFormProps> = ({
           </h2>
         </CardHeader>
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-6">
-            {urls.map((url, index) => (
-              <div key={index} className="flex gap-3 items-center group">
-                <div className="flex-1 relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    <LinkIcon className="h-4 w-4" />
+          <CardContent className="space-y-8">
+            {profiles.map((profile, index) => (
+              <div key={index} className="space-y-4 pt-4 first:pt-0">
+                {index > 0 && <div className="border-t -mt-4" />}
+                <div className="flex gap-3 items-start group">
+                  <div className="flex-1 space-y-4">
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        <LinkIcon className="h-4 w-4" />
+                      </div>
+                      <Input
+                        type="url"
+                        value={profile.url}
+                        onChange={(e) =>
+                          handleProfileChange(index, "url", e.target.value)
+                        }
+                        placeholder="LinkedIn Profile URL"
+                        className="pl-9"
+                      />
+                    </div>
+                    <div className="flex gap-4">
+                      <Select
+                        value={profile.fit}
+                        onValueChange={(value) =>
+                          handleProfileChange(index, "fit", value)
+                        }
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Fit" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="yes">Good Fit</SelectItem>
+                          <SelectItem value="interesting">
+                            Potential Fit
+                          </SelectItem>
+                          <SelectItem value="no">Not a Fit</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <div className="flex-1">
+                        <Textarea
+                          value={profile.reasoning || ""}
+                          onChange={(e) =>
+                            handleProfileChange(
+                              index,
+                              "reasoning",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Optionally explain why this candidate would or wouldn't be a good fit..."
+                          className="resize-none"
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <Input
-                    type="url"
-                    value={url}
-                    onChange={(e) => handleUrlChange(index, e.target.value)}
-                    placeholder="LinkedIn Profile URL"
-                    className="pl-9"
-                  />
+                  {profiles.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeProfile(index)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
-                {urls.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeUrl(index)}
-                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
               </div>
             ))}
 
-            {urls.length < 3 && (
+            {profiles.length < 10 && (
               <Button
                 type="button"
                 variant="outline"
-                onClick={addUrl}
+                onClick={addProfile}
                 className="w-full"
               >
                 <span className="h-5 w-5 rounded-full border-2 border-current inline-flex items-center justify-center mr-2">
@@ -132,7 +198,15 @@ export const JobIdealProfilesForm: React.FC<JobIdealProfilesFormProps> = ({
                 </>
               ) : (
                 <>
-                  Next: Key Traits <ArrowRight className="ml-2 h-4 w-4" />
+                  {hasValidProfiles ? (
+                    <>
+                      Next: Key Traits <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      Skip this step <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </>
               )}
             </Button>

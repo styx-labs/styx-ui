@@ -1,3 +1,9 @@
+export interface IdealProfile {
+  url: string;
+  fit?: "yes" | "no" | "interesting";
+  reasoning?: string;
+}
+
 export interface Job {
   id?: string;
   job_description: string;
@@ -8,7 +14,7 @@ export interface Job {
     value_type?: string;
     required: boolean;
   }[];
-  ideal_profiles: string[];
+  ideal_profiles: IdealProfile[];
   job_title: string;
   company_name: string;
   created_at?: string;

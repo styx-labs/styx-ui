@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Job, TraitType } from "../types";
+import { Job, TraitType, IdealProfile } from "../types";
 import { apiService } from "../api";
 import { useAuth } from "../context/AuthContext";
 
@@ -40,12 +40,12 @@ export function useJobs() {
 
   const getKeyTraits = async (
     description: string,
-    ideal_profile_urls: string[]
+    ideal_profiles: IdealProfile[]
   ) => {
     try {
       const response = await apiService.getKeyTraits(
         description,
-        ideal_profile_urls
+        ideal_profiles
       );
       return response.data.key_traits;
     } catch (error) {
@@ -61,7 +61,7 @@ export function useJobs() {
     keyTraits: KeyTrait[],
     jobTitle: string,
     companyName: string,
-    ideal_profile_urls: string[]
+    ideal_profiles: IdealProfile[]
   ) => {
     try {
       const jobResponse = await apiService.createJob({
@@ -69,7 +69,7 @@ export function useJobs() {
         key_traits: keyTraits,
         job_title: jobTitle,
         company_name: companyName,
-        ideal_profiles: ideal_profile_urls,
+        ideal_profiles: ideal_profiles,
       });
 
       if (jobResponse.data.job_id) {

@@ -1,4 +1,4 @@
-import { TraitType } from "@/types";
+import { TraitType, IdealProfile, KeyTrait } from "@/types/index";
 
 export interface KeyTrait {
   trait: string;
@@ -13,7 +13,7 @@ export interface JobFormState {
   jobTitle: string;
   companyName: string;
   suggestedTraits: KeyTrait[];
-  idealProfiles: string[];
+  idealProfiles: IdealProfile[];
   currentStep: number;
 }
 
