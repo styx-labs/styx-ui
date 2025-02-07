@@ -31,23 +31,25 @@ export function UserNav({ user, onLogout, renderAvatar }: UserNavProps) {
         <Button
           variant="ghost"
           className={cn(
-            "h-auto w-full gap-2 px-2 py-1.5 justify-center",
+            "h-auto w-full gap-2 px-2 py-1.5",
             isCollapsed && "justify-center px-0"
           )}
         >
-          {renderAvatar()}
+          <div className="flex-shrink-0">{renderAvatar()}</div>
           {!isCollapsed && (
-            <>
-              <div className="flex flex-1 flex-col items-start gap-1">
-                <p className="text-sm font-medium leading-none">
+            <div className="flex flex-1 min-w-0 items-start gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium leading-none truncate text-left">
                   {user?.displayName || user?.email?.split("@")[0]}
                 </p>
-                <p className="text-xs text-muted-foreground truncate w-full">
+                <p className="text-xs text-muted-foreground truncate">
                   {user?.email}
                 </p>
               </div>
-              <SearchCredits variant="compact" />
-            </>
+              <div className="flex-shrink-0">
+                <SearchCredits variant="compact" />
+              </div>
+            </div>
           )}
         </Button>
       </DropdownMenuTrigger>
@@ -61,7 +63,9 @@ export function UserNav({ user, onLogout, renderAvatar }: UserNavProps) {
             <p className="text-sm font-medium leading-none">
               {user?.displayName || user?.email?.split("@")[0]}
             </p>
-            <p className="text-xs text-muted-foreground">{user?.email}</p>
+            <p className="text-xs text-muted-foreground break-all">
+              {user?.email}
+            </p>
             <SearchCredits />
           </div>
         </DropdownMenuLabel>

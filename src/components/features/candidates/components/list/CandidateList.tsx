@@ -35,6 +35,9 @@ const ProcessingCandidateRow: React.FC<{
   candidate: Candidate;
 }> = ({ candidate }) => (
   <TableRow className="cursor-default">
+    <TableCell className="w-[50px]">
+      <Checkbox />
+    </TableCell>
     <TableCell className="font-medium">
       <div className="flex items-center gap-2">
         <span>{candidate.name}</span>
