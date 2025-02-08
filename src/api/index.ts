@@ -112,6 +112,15 @@ export interface TestTemplateResponse {
   candidate_context: CandidateContext;
 }
 
+interface RecalibrationFeedback {
+  fit: "good" | "bad";
+  reasoning?: string;
+}
+
+interface BulkRecalibrationFeedback {
+  [candidateId: string]: RecalibrationFeedback;
+}
+
 export const apiService = {
   // Jobs
   getJobs: () => api.get<{ jobs: Job[] }>("/jobs"),
@@ -273,6 +282,34 @@ export const apiService = {
     );
     console.log("Bulk favorite API response:", response.data);
     return response;
+  },
+
+  submitPipelineFeedback: (jobId: string, feedback: string) => {
+    return api.post<{ success: boolean }>(
+      `/jobs/${jobId}/pipeline-feedback`,
+      { feedback }
+    );
+  },
+
+  submitCandidateRecalibration: (
+    jobId: string,
+    candidateId: string,
+    feedback: RecalibrationFeedback
+  ) => {
+    return api.post<{ success: boolean }>(
+      `/jobs/${jobId}/candidates/${candidateId}/recalibrate`,
+      feedback
+    );
+  },
+
+  submitBulkRecalibration: (
+    jobId: string,
+    feedback: BulkRecalibrationFeedback
+  ) => {
+    return api.post<{ success: boolean }>(
+      `/jobs/${jobId}/candidates/bulk-recalibrate`,
+      { feedback }
+    );
   },
 };
 

@@ -11,7 +11,7 @@ import {
   Loader2,
   Download,
 } from "lucide-react";
-import { Candidate, Job } from "@/types/index";
+import type { Candidate, TraitType, IdealProfile } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
 import Papa from "papaparse";
 import { EditKeyTraits } from "./components/EditKeyTraits";
@@ -44,9 +44,37 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "react-router-dom";
+import { PipelineFeedbackButton } from "./components/PipelineFeedbackButton";
+
+interface TeamMember {
+  role: string;
+  name?: string;
+  description?: string;
+}
+
+interface JobDetails {
+  id?: string;
+  job_description: string;
+  key_traits: {
+    trait: string;
+    description: string;
+    trait_type: TraitType;
+    value_type?: string;
+    required: boolean;
+  }[];
+  ideal_profiles: IdealProfile[];
+  job_title: string;
+  company_name: string;
+  created_at?: string;
+  team_context?: {
+    hiring_manager?: TeamMember;
+    direct_report?: TeamMember;
+    team_members?: TeamMember[];
+  };
+}
 
 interface TalentEvaluationProps {
-  job: Job;
+  job: JobDetails;
   candidates: Candidate[];
   isLoading?: boolean;
   onCandidateCreate: (
@@ -348,15 +376,100 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                       showDescription ? "rotate-180" : ""
                     )}
                   />
-                  {showDescription ? "Hide Description" : "Show Description"}
+                  {showDescription ? "Hide Details" : "Show Details"}
                 </Button>
               </CollapsibleTrigger>
             </div>
             <CollapsibleContent>
-              <div className="mt-4 pt-4 border-t">
+              <div className="mt-4 pt-4 border-t space-y-6">
                 <div className="text-sm text-muted-foreground whitespace-pre-line">
                   {job.job_description}
                 </div>
+
+                {job.team_context && (
+                  <div className="space-y-6 pt-4 border-t">
+                    <h3 className="text-sm font-medium text-purple-900">
+                      Team Context
+                    </h3>
+
+                    {job.team_context.hiring_manager && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium">Hiring Manager</h4>
+                        <div className="pl-4 border-l-2 border-purple-100">
+                          {job.team_context.hiring_manager.name && (
+                            <p className="text-sm font-medium text-purple-700">
+                              {job.team_context.hiring_manager.name}
+                            </p>
+                          )}
+                          <p className="text-sm text-muted-foreground">
+                            {job.team_context.hiring_manager.role}
+                          </p>
+                          {job.team_context.hiring_manager.description && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                              {job.team_context.hiring_manager.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {job.team_context.direct_report && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium">
+                          Direct Report To
+                        </h4>
+                        <div className="pl-4 border-l-2 border-purple-100">
+                          {job.team_context.direct_report.name && (
+                            <p className="text-sm font-medium text-purple-700">
+                              {job.team_context.direct_report.name}
+                            </p>
+                          )}
+                          <p className="text-sm text-muted-foreground">
+                            {job.team_context.direct_report.role}
+                          </p>
+                          {job.team_context.direct_report.description && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                              {job.team_context.direct_report.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {job.team_context.team_members &&
+                      job.team_context.team_members.length > 0 && (
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium">
+                            Key Team Members
+                          </h4>
+                          <div className="space-y-4">
+                            {job.team_context.team_members.map(
+                              (member, index) => (
+                                <div
+                                  key={index}
+                                  className="pl-4 border-l-2 border-purple-100"
+                                >
+                                  {member.name && (
+                                    <p className="text-sm font-medium text-purple-700">
+                                      {member.name}
+                                    </p>
+                                  )}
+                                  <p className="text-sm text-muted-foreground">
+                                    {member.role}
+                                  </p>
+                                  {member.description && (
+                                    <p className="text-sm text-muted-foreground mt-2">
+                                      {member.description}
+                                    </p>
+                                  )}
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+                  </div>
+                )}
               </div>
             </CollapsibleContent>
           </div>
@@ -381,6 +494,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <PipelineFeedbackButton jobId={job.id!} />
               <Button
                 variant="outline"
                 size="sm"
