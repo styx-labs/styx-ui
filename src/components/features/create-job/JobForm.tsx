@@ -4,6 +4,7 @@ import { JobDescriptionForm } from "./forms/JobDescriptionForm";
 import { ProgressBar } from "./components/ProgressBar";
 import { useJobForm } from "./hooks/useJobForm";
 import { KeyTrait, STEPS } from "./types";
+import type { IdealProfile } from "@/types/index";
 
 interface JobFormProps {
   onSubmit: (
@@ -11,7 +12,7 @@ interface JobFormProps {
     keyTraits: KeyTrait[],
     jobTitle: string,
     companyName: string,
-    ideal_profile_urls: string[]
+    ideal_profiles: IdealProfile[]
   ) => void;
 }
 

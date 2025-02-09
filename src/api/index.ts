@@ -285,10 +285,9 @@ export const apiService = {
   },
 
   submitPipelineFeedback: (jobId: string, feedback: string) => {
-    return api.post<{ success: boolean }>(
-      `/jobs/${jobId}/pipeline-feedback`,
-      { feedback }
-    );
+    return api.post<{ success: boolean }>(`/jobs/${jobId}/pipeline-feedback`, {
+      feedback,
+    });
   },
 
   submitCandidateRecalibration: (

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/api";
-import type { TraitType, IdealProfile } from "@/types/index";
+import { TraitType } from "@/types/index";
+import type { IdealProfile } from "@/types/index";
 import type { JobFormState, KeyTrait } from "../types";
 
 interface UseJobFormProps {
@@ -36,7 +37,10 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
 
   const handleIdealProfilesSubmit = async (profiles: IdealProfile[]) => {
     try {
-      const response = await apiService.getKeyTraits(state.description, profiles);
+      const response = await apiService.getKeyTraits(
+        state.description,
+        profiles
+      );
       const formattedTraits = Array.isArray(response.data.key_traits)
         ? response.data.key_traits.map(
             (
@@ -54,13 +58,13 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
                 return {
                   trait,
                   description: "",
-                  trait_type: "boolean",
+                  trait_type: TraitType.SCORE,
                   required: false,
                 };
               }
               return {
                 ...trait,
-                trait_type: "boolean",
+                trait_type: trait.trait_type || TraitType.SCORE,
                 required: trait.required ?? false,
               };
             }
@@ -88,7 +92,13 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
     title: string,
     company: string
   ): Promise<void> => {
-    return onSubmit(state.description, traits, title, company, state.idealProfiles);
+    return onSubmit(
+      state.description,
+      traits,
+      title,
+      company,
+      state.idealProfiles
+    );
   };
 
   const goToPreviousStep = () => {
@@ -98,7 +108,7 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
   return {
     state,
     actions: {
-      setDescription: (description: string) => updateState({ description }),
+      setDescription: (value: string) => updateState({ description: value }),
       handleDescriptionSubmit,
       handleIdealProfilesSubmit,
       handleTraitsConfirm,

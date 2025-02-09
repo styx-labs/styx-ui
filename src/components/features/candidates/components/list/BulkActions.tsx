@@ -92,16 +92,21 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
     setIsSubmitting(true);
     try {
       // Filter out empty feedback entries and ensure valid types
-      const validFeedback = Object.entries(feedbackState).reduce((acc, [id, feedback]) => {
-        // Only include entries that have a valid fit rating
-        if (feedback.fit === "good" || feedback.fit === "bad") {
-          acc[id] = {
-            fit: feedback.fit,
-            ...(feedback.reasoning?.trim() ? { reasoning: feedback.reasoning.trim() } : {}),
-          };
-        }
-        return acc;
-      }, {} as ValidFeedback);
+      const validFeedback = Object.entries(feedbackState).reduce(
+        (acc, [id, feedback]) => {
+          // Only include entries that have a valid fit rating
+          if (feedback.fit === "good" || feedback.fit === "bad") {
+            acc[id] = {
+              fit: feedback.fit,
+              ...(feedback.reasoning?.trim()
+                ? { reasoning: feedback.reasoning.trim() }
+                : {}),
+            };
+          }
+          return acc;
+        },
+        {} as ValidFeedback
+      );
 
       if (Object.keys(validFeedback).length === 0) {
         toast({
