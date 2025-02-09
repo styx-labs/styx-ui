@@ -9,7 +9,7 @@ import {
   ThumbsDown,
   Loader2,
 } from "lucide-react";
-import type { Candidate } from "@/types/index";
+import type { Candidate, BulkRecalibrationFeedback } from "@/types/index";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -20,42 +20,23 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { apiService } from "@/api";
-import { useToast } from "@/hooks/use-toast";
+import { useRecalibration } from "@/hooks/useRecalibration";
 
 interface BulkActionsProps {
   selectedCandidates: string[];
   candidates: Candidate[];
   jobId: string;
   onDelete?: (ids: string[]) => Promise<void>;
-  onFavorite?: (ids: string[]) => Promise<void>;
+  onFavorite?: (ids: string[], favorite: boolean) => Promise<void>;
   onExport?: (ids: string[]) => void;
-  onPipelineFeedback?: () => void;
 }
 
-type FitType = "good" | "bad" | "interesting";
-
-interface FeedbackState {
-  [candidateId: string]: {
+type PartialBulkRecalibrationFeedback = {
+  [key: string]: {
     fit?: "good" | "bad";
     reasoning?: string;
   };
-}
-
-interface ValidFeedback {
-  [candidateId: string]: {
-    fit: "good" | "bad";
-    reasoning?: string;
-  };
-}
+};
 
 export const BulkActions: React.FC<BulkActionsProps> = ({
   selectedCandidates,
@@ -64,12 +45,11 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
   onDelete,
   onFavorite,
   onExport,
-  onPipelineFeedback,
 }) => {
-  const [isDetailedFeedbackOpen, setIsDetailedFeedbackOpen] = useState(false);
-  const [feedbackState, setFeedbackState] = useState<FeedbackState>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  const [isRecalibrateOpen, setIsRecalibrateOpen] = useState(false);
+  const [feedbackState, setFeedbackState] =
+    useState<PartialBulkRecalibrationFeedback>({});
+  const { isSubmitting, submitBulkRecalibration } = useRecalibration({ jobId });
 
   if (selectedCandidates.length === 0) return null;
 
@@ -80,7 +60,13 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
 
   const handleBulkFavorite = async () => {
     if (!onFavorite) return;
-    await onFavorite(selectedCandidates);
+    const selectedCandidateObjects = candidates.filter(
+      (c) => c.id && selectedCandidates.includes(c.id)
+    );
+    const allFavorited =
+      selectedCandidateObjects.length > 0 &&
+      selectedCandidateObjects.every((c) => c.favorite);
+    await onFavorite(selectedCandidates, !allFavorited);
   };
 
   const handleExport = () => {
@@ -88,53 +74,57 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
     onExport(selectedCandidates);
   };
 
-  const handleDetailedFeedbackSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      // Filter out empty feedback entries and ensure valid types
-      const validFeedback = Object.entries(feedbackState).reduce(
-        (acc, [id, feedback]) => {
-          // Only include entries that have a valid fit rating
-          if (feedback.fit === "good" || feedback.fit === "bad") {
-            acc[id] = {
-              fit: feedback.fit,
-              ...(feedback.reasoning?.trim()
-                ? { reasoning: feedback.reasoning.trim() }
-                : {}),
-            };
-          }
-          return acc;
-        },
-        {} as ValidFeedback
-      );
+  const handleRecalibrationSubmit = async () => {
+    const validFeedback = Object.entries(feedbackState).reduce(
+      (acc, [id, feedback]) => {
+        if (feedback.fit) {
+          acc[id] = {
+            fit: feedback.fit,
+            reasoning: feedback.reasoning || "",
+          };
+        }
+        return acc;
+      },
+      {} as BulkRecalibrationFeedback
+    );
 
-      if (Object.keys(validFeedback).length === 0) {
-        toast({
-          title: "No feedback provided",
-          description: "Please provide at least one rating.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
-      }
+    if (Object.keys(validFeedback).length === 0) return;
 
-      await apiService.submitBulkRecalibration(jobId, validFeedback);
-      toast({
-        title: "Feedback submitted",
-        description: "Thank you for helping us improve our evaluation system.",
-      });
+    const success = await submitBulkRecalibration(validFeedback);
+    if (success) {
+      setIsRecalibrateOpen(false);
       setFeedbackState({});
-      setIsDetailedFeedbackOpen(false);
-    } catch (error) {
-      console.error("Error submitting feedback:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit feedback. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
     }
+  };
+
+  const setFit = (candidateId: string, fit: "good" | "bad") => {
+    setFeedbackState((prev) => {
+      const newState = { ...prev };
+      if (prev[candidateId]?.fit === fit) {
+        delete newState[candidateId];
+      } else {
+        newState[candidateId] = {
+          ...prev[candidateId],
+          fit,
+        };
+      }
+      return newState;
+    });
+  };
+
+  const setReasoning = (candidateId: string, reasoning: string) => {
+    setFeedbackState((prev) => {
+      const newState = { ...prev };
+      if (!prev[candidateId]) {
+        newState[candidateId] = { reasoning: reasoning.trim() };
+      } else {
+        newState[candidateId] = {
+          ...prev[candidateId],
+          reasoning: reasoning.trim(),
+        };
+      }
+      return newState;
+    });
   };
 
   const selectedCandidateObjects = candidates.filter(
@@ -144,68 +134,33 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
     selectedCandidateObjects.length > 0 &&
     selectedCandidateObjects.every((c) => c.favorite);
 
-  const setFit = (candidateId: string, fit: "good" | "bad") => {
-    setFeedbackState((prev) => {
-      const newState = { ...prev };
-      // Toggle the fit if it's already selected
-      if (prev[candidateId]?.fit === fit) {
-        delete newState[candidateId]?.fit;
-        // Remove the entry if there's no feedback at all
-        if (!newState[candidateId]?.reasoning) {
-          delete newState[candidateId];
-        }
-      } else {
-        newState[candidateId] = { ...prev[candidateId], fit };
-      }
-      return newState;
-    });
+  const getFeedbackCount = () => {
+    return Object.values(feedbackState).filter(
+      (feedback) =>
+        feedback.fit ||
+        (feedback.reasoning && feedback.reasoning.trim().length > 0)
+    ).length;
   };
-
-  const setReasoning = (candidateId: string, reasoning: string) => {
-    setFeedbackState((prev) => {
-      const newState = { ...prev };
-      if (reasoning.trim()) {
-        newState[candidateId] = { ...prev[candidateId], reasoning };
-      } else {
-        // Remove reasoning if empty
-        delete newState[candidateId]?.reasoning;
-        // Remove the entry if there's no feedback at all
-        if (!newState[candidateId]?.fit) {
-          delete newState[candidateId];
-        }
-      }
-      return newState;
-    });
-  };
-
-  // Remove the allCandidatesRated check since feedback is optional
-  const hasAnyFeedback = Object.values(feedbackState).some(
-    (feedback) => feedback.fit || feedback.reasoning?.trim()
-  );
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-background border rounded-lg shadow-lg p-4 flex items-center gap-4">
-      <span className="text-sm text-muted-foreground">
+    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg border p-4 flex items-center gap-4">
+      <span className="text-sm font-medium text-muted-foreground">
         {selectedCandidates.length} selected
       </span>
 
-      <Dialog
-        open={isDetailedFeedbackOpen}
-        onOpenChange={setIsDetailedFeedbackOpen}
-      >
+      <Dialog open={isRecalibrateOpen} onOpenChange={setIsRecalibrateOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Gauge className="h-4 w-4" />
+          <Button variant="outline" size="sm">
+            <Gauge className="h-4 w-4 mr-2" />
             Rate Selected ({selectedCandidates.length})
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-[600px] max-h-[80vh] flex flex-col">
-          <DialogHeader className="px-6 py-4">
+          <DialogHeader>
             <DialogTitle>Rate Selected Candidates</DialogTitle>
             <DialogDescription>
-              Provide optional feedback about any of the selected candidates to
-              help improve our evaluation system. You can rate candidates and/or
-              leave comments.
+              Provide feedback about the selected candidates to help improve our
+              evaluation system.
             </DialogDescription>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto px-6">
@@ -230,9 +185,11 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
                             : "outline"
                         }
                         size="sm"
+                        className="flex-1"
                         onClick={() => setFit(candidate.id!, "good")}
                       >
-                        <ThumbsUp className="h-4 w-4" />
+                        <ThumbsUp className="h-4 w-4 mr-2" />
+                        Good Fit
                       </Button>
                       <Button
                         variant={
@@ -241,44 +198,44 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
                             : "outline"
                         }
                         size="sm"
+                        className="flex-1"
                         onClick={() => setFit(candidate.id!, "bad")}
                       >
-                        <ThumbsDown className="h-4 w-4" />
+                        <ThumbsDown className="h-4 w-4 mr-2" />
+                        Bad Fit
                       </Button>
                     </div>
                   </div>
                   <Textarea
-                    placeholder="Optional: Add any comments about this candidate..."
+                    placeholder="Why is this a good/bad fit? This helps us improve our evaluation."
                     value={feedbackState[candidate.id!]?.reasoning || ""}
                     onChange={(e) =>
                       setReasoning(candidate.id!, e.target.value)
                     }
-                    className="resize-none h-[100px]"
+                    className="resize-none"
                   />
                 </div>
               ))}
             </div>
           </div>
-          <div className="px-6 py-4 border-t mt-auto">
-            <div className="flex justify-between items-center">
-              <p className="text-sm text-muted-foreground">
-                {Object.keys(feedbackState).length} of{" "}
-                {selectedCandidates.length} candidates have feedback
-              </p>
-              <Button
-                disabled={!hasAnyFeedback || isSubmitting}
-                onClick={handleDetailedFeedbackSubmit}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  "Submit Feedback"
-                )}
-              </Button>
-            </div>
+          <div className="flex justify-between items-center border-t pt-4">
+            <p className="text-sm text-muted-foreground">
+              {getFeedbackCount()} of {selectedCandidates.length} candidates
+              have feedback
+            </p>
+            <Button
+              disabled={Object.keys(feedbackState).length === 0 || isSubmitting}
+              onClick={handleRecalibrationSubmit}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Feedback"
+              )}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

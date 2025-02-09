@@ -7,6 +7,7 @@ import { CandidateActions } from "../list/CandidateActions";
 
 interface CandidateHeaderProps {
   candidate: Candidate;
+  jobId: string;
   loadingStates: { [key: string]: { email: boolean; message: boolean } };
   onClose: () => void;
   onPrevious: () => void;
@@ -21,6 +22,7 @@ interface CandidateHeaderProps {
 
 export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
   candidate,
+  jobId,
   loadingStates,
   onClose,
   onPrevious,
@@ -57,6 +59,7 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
         <div className="flex items-center gap-2">
           <CandidateActions
             candidate={candidate}
+            jobId={jobId}
             loadingStates={loadingStates}
             handleEmail={onEmail}
             handleReachout={onReachout}

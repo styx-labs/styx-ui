@@ -31,10 +31,12 @@ import {
   ThumbsDown,
   Gauge,
 } from "lucide-react";
-import type { Candidate } from "@/types/index";
+import type { Candidate, RecalibrationFeedback } from "@/types/index";
+import { useRecalibration } from "@/hooks/useRecalibration";
 
 interface CandidateActionsProps {
   candidate: Candidate;
+  jobId: string;
   loadingStates: { [key: string]: { email: boolean; message: boolean } };
   handleEmail: (url: string, id: string) => Promise<void>;
   handleReachout: (id: string, format: string) => Promise<void>;
@@ -45,6 +47,7 @@ interface CandidateActionsProps {
 
 export const CandidateActions: React.FC<CandidateActionsProps> = ({
   candidate,
+  jobId,
   loadingStates,
   handleEmail,
   handleReachout,
@@ -53,20 +56,22 @@ export const CandidateActions: React.FC<CandidateActionsProps> = ({
   setSelectedCandidate,
 }) => {
   const [isRecalibrateOpen, setIsRecalibrateOpen] = useState(false);
-  const [feedback, setFeedback] = useState({ fit: "", reasoning: "" });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<Partial<RecalibrationFeedback>>({
+    reasoning: "",
+  });
 
-  const handleRecalibrate = async () => {
-    setIsSubmitting(true);
-    try {
-      // This would be replaced with an actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+  const { isSubmitting, submitRecalibration } = useRecalibration({ jobId });
+
+  const handleRecalibrationSubmit = async () => {
+    if (!candidate.id || !feedback.fit) return;
+
+    const success = await submitRecalibration(candidate.id, {
+      fit: feedback.fit,
+      reasoning: feedback.reasoning || "",
+    });
+    if (success) {
       setIsRecalibrateOpen(false);
-      setFeedback({ fit: "", reasoning: "" });
-    } catch (error) {
-      console.error("Error submitting feedback:", error);
-    } finally {
-      setIsSubmitting(false);
+      setFeedback({ fit: undefined, reasoning: "" });
     }
   };
 
@@ -259,7 +264,7 @@ export const CandidateActions: React.FC<CandidateActionsProps> = ({
                     </div>
                     <Textarea
                       placeholder="Why is this a good/bad fit? This helps us improve our evaluation."
-                      value={feedback.reasoning}
+                      value={feedback.reasoning || ""}
                       onChange={(e) =>
                         setFeedback((f) => ({
                           ...f,
@@ -271,10 +276,8 @@ export const CandidateActions: React.FC<CandidateActionsProps> = ({
                     <div className="flex justify-end">
                       <Button
                         size="sm"
-                        disabled={
-                          !feedback.fit || !feedback.reasoning || isSubmitting
-                        }
-                        onClick={handleRecalibrate}
+                        disabled={!feedback.fit || isSubmitting}
+                        onClick={handleRecalibrationSubmit}
                       >
                         {isSubmitting ? (
                           <>

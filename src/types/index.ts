@@ -139,3 +139,12 @@ export interface CandidateEvaluation {
   summary: string;
   overall_score: number;
 }
+
+export interface RecalibrationFeedback {
+  fit: "good" | "bad";
+  reasoning?: string;
+}
+
+export interface BulkRecalibrationFeedback {
+  [candidateId: string]: RecalibrationFeedback;
+}

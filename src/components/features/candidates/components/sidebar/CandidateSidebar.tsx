@@ -13,20 +13,22 @@ import { getFitScoreLabel } from "../../utils/traitHelpers";
 
 interface CandidateSidebarProps {
   candidate: Candidate | null;
+  jobId: string;
   onClose: () => void;
   onPrevious: () => void;
   onNext: () => void;
   hasPrevious: boolean;
   hasNext: boolean;
   loadingStates: { [key: string]: { email: boolean; message: boolean } };
-  onGetEmail?: (url: string, id: string) => Promise<void>;
-  onReachout?: (id: string, format: string) => Promise<void>;
-  onDelete?: (e: React.MouseEvent, id: string) => Promise<void>;
+  onGetEmail: (url: string, id: string) => Promise<void>;
+  onReachout: (id: string, format: string) => Promise<void>;
+  onDelete: (e: React.MouseEvent, id: string) => Promise<void>;
   onFavorite?: (id: string) => Promise<void>;
 }
 
 export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
   candidate,
+  jobId,
   onClose,
   onPrevious,
   onNext,
@@ -99,6 +101,7 @@ export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
         <div className="h-full flex flex-col">
           <CandidateHeader
             candidate={candidate}
+            jobId={jobId}
             loadingStates={loadingStates}
             onClose={onClose}
             onPrevious={onPrevious}

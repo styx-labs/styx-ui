@@ -319,20 +319,18 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
           "url",
           "occupation",
           "company",
-          "evaluation_score",
-          "traits_met",
-          "total_traits",
+          "fit",
+          "required_met",
+          "optional_met",
         ],
         ...candidates_to_export.map((candidate) => [
           candidate.name || "",
           candidate.url || "",
           candidate.profile?.occupation || "",
           candidate.profile?.experiences?.[0]?.company || "",
-          candidate.evaluation?.score
-            ? (candidate.evaluation.score * 100).toFixed(0) + "%"
-            : "",
-          candidate.evaluation?.traits_met || "0",
-          candidate.evaluation?.total_traits || "0",
+          candidate.fit || "0",
+          candidate.required_met || "0",
+          candidate.optional_met || "0",
         ]),
       ]
         .map((row) => row.join(","))
@@ -960,6 +958,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
       ) : (
         <CandidateList
           candidates={filteredCandidates}
+          jobId={job.id!}
           onGetEmail={onGetEmail}
           onReachout={onCandidateReachout}
           onDelete={async (id) => {

@@ -18,6 +18,7 @@ import { Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 interface CandidateListProps {
   candidates: Candidate[];
+  jobId: string;
   onGetEmail?: (url: string) => Promise<string | undefined>;
   onReachout?: (id: string, format: string) => Promise<string | undefined>;
   onDelete?: (id: string) => Promise<void>;
@@ -102,6 +103,7 @@ const LoadingIndicatorCard: React.FC<{
 
 export const CandidateList: React.FC<CandidateListProps> = ({
   candidates,
+  jobId,
   onGetEmail,
   onReachout,
   onDelete,
@@ -412,6 +414,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                     handleReachout={handleReachout}
                     handleDelete={handleDelete}
                     handleFavorite={handleFavorite}
+                    jobId={jobId}
                     setSelectedCandidate={(candidate) =>
                       setSelectedCandidateId(candidate.id!)
                     }
@@ -434,6 +437,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
 
         <CandidateSidebar
           candidate={selectedCandidate}
+          jobId={jobId}
           onClose={() => setSelectedCandidateId(null)}
           onPrevious={handlePrevious}
           onNext={handleNext}
@@ -450,10 +454,11 @@ export const CandidateList: React.FC<CandidateListProps> = ({
           onFavorite={handleFavorite}
         />
 
-        {selectedCandidates.length > 0 && (
+        {selectedCandidates.length > 0 && jobId && (
           <BulkActions
             selectedCandidates={selectedCandidates}
             candidates={candidates}
+            jobId={jobId}
             onDelete={handleBulkDelete}
             onFavorite={handleBulkFavorite}
             onExport={onExportSelected}
