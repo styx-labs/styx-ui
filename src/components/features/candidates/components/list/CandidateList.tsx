@@ -30,6 +30,7 @@ interface CandidateListProps {
   onBulkDelete?: (ids: string[]) => Promise<void>;
   onBulkFavorite?: (ids: string[], favorite: boolean) => Promise<void>;
   onExportSelected?: (ids: string[]) => void;
+  onRefresh?: () => void;
 }
 
 const ProcessingCandidateRow: React.FC<{
@@ -115,6 +116,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
   onBulkDelete,
   onBulkFavorite,
   onExportSelected,
+  onRefresh,
 }) => {
   const { toast } = useToast();
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(
@@ -428,6 +430,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                       candidate.id &&
                       handleSelectCandidate(candidate.id, checked)
                     }
+                    onRefresh={onRefresh}
                   />
                 )
               )}
@@ -462,6 +465,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
             onDelete={handleBulkDelete}
             onFavorite={handleBulkFavorite}
             onExport={onExportSelected}
+            onRefresh={onRefresh}
           />
         )}
       </Card>

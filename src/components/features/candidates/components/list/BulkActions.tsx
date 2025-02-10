@@ -29,6 +29,7 @@ interface BulkActionsProps {
   onDelete?: (ids: string[]) => Promise<void>;
   onFavorite?: (ids: string[], favorite: boolean) => Promise<void>;
   onExport?: (ids: string[]) => void;
+  onRefresh?: () => void;
 }
 
 type PartialBulkRecalibrationFeedback = {
@@ -45,6 +46,7 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
   onDelete,
   onFavorite,
   onExport,
+  onRefresh,
 }) => {
   const [isRecalibrateOpen, setIsRecalibrateOpen] = useState(false);
   const [feedbackState, setFeedbackState] =
@@ -94,6 +96,7 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
     if (success) {
       setIsRecalibrateOpen(false);
       setFeedbackState({});
+      onRefresh?.();
     }
   };
 

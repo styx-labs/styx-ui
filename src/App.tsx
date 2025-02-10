@@ -8,7 +8,7 @@ import { JobForm } from "./components/features/create-job/JobForm";
 import { useParams } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { Login } from "./components/auth/Login";
-import { setAuthUser, apiService } from "./api";
+import { setAuthUser } from "./api";
 import { UnauthorizedError } from "./api";
 import { useEffect, useState } from "react";
 import { HomeScreen } from "./components/layout/HomeScreen";
@@ -22,7 +22,6 @@ import { TalentEvaluation } from "./components/features/candidates/TalentEvaluat
 import { SettingsPage } from "./components/features/settings/SettingsPage";
 import { Toaster } from "./components/ui/toaster";
 import { WelcomePopup } from "./components/features/welcome/WelcomePopup";
-import { useToast } from "@/hooks/use-toast";
 
 // Extend Window interface
 interface ExtendedWindow extends Window {
@@ -33,7 +32,6 @@ declare const window: ExtendedWindow;
 function JobDetail() {
   const { jobId } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { jobs, isLoading: jobsLoading, error, retry } = useJobs();
   const {
     candidates,

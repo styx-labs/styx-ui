@@ -43,6 +43,7 @@ interface CandidateActionsProps {
   handleDelete: (e: React.MouseEvent, id: string) => Promise<void>;
   handleFavorite?: (id: string) => Promise<void>;
   setSelectedCandidate?: (candidate: Candidate) => void;
+  onRefresh?: () => void;
 }
 
 export const CandidateActions: React.FC<CandidateActionsProps> = ({
@@ -54,6 +55,7 @@ export const CandidateActions: React.FC<CandidateActionsProps> = ({
   handleDelete,
   handleFavorite,
   setSelectedCandidate,
+  onRefresh,
 }) => {
   const [isRecalibrateOpen, setIsRecalibrateOpen] = useState(false);
   const [feedback, setFeedback] = useState<Partial<RecalibrationFeedback>>({
@@ -72,6 +74,7 @@ export const CandidateActions: React.FC<CandidateActionsProps> = ({
     if (success) {
       setIsRecalibrateOpen(false);
       setFeedback({ fit: undefined, reasoning: "" });
+      onRefresh?.();
     }
   };
 

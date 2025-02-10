@@ -33,6 +33,7 @@ interface CandidateRowProps {
   showSelection?: boolean;
   isSelected?: boolean;
   onSelectionChange?: (checked: boolean) => void;
+  onRefresh?: () => void;
 }
 
 export const CandidateRow: React.FC<CandidateRowProps> = ({
@@ -47,6 +48,7 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
   showSelection,
   isSelected,
   onSelectionChange,
+  onRefresh,
 }) => {
   const renderTraitContent = (content: string) => {
     const parts = content.split(/(\[\d+\]\([^)]+\))/g);
@@ -230,6 +232,7 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
           handleDelete={handleDelete}
           handleFavorite={handleFavorite}
           setSelectedCandidate={setSelectedCandidate}
+          onRefresh={onRefresh}
         />
       </TableCell>
     </TableRow>

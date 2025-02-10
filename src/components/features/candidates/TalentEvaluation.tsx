@@ -981,6 +981,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
             // Don't clear existing selections
             handleExport();
           }}
+          onRefresh={onRefresh}
         />
       )}
 
