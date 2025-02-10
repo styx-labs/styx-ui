@@ -496,7 +496,10 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
             <div className="flex items-center gap-3">
               <EditCalibratedProfiles job={job} />
               <PipelineFeedbackButton jobId={job.id!} />
-              <EditKeyTraits job={job} onSuccess={() => window.location.reload()} />
+              <EditKeyTraits
+                job={job}
+                onSuccess={() => window.location.reload()}
+              />
             </div>
           </div>
           <div className="mt-4 pt-4 border-t space-y-4">
