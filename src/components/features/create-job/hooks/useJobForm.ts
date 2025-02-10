@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/api";
 import { TraitType } from "@/types/index";
-import type { IdealProfile } from "@/types/index";
+import type { CalibratedProfile } from "@/types/index";
 import type { JobFormState, KeyTrait } from "../types";
 
 interface UseJobFormProps {
@@ -11,7 +11,7 @@ interface UseJobFormProps {
     keyTraits: KeyTrait[],
     jobTitle: string,
     companyName: string,
-    ideal_profiles: IdealProfile[]
+    calibratedProfiles: CalibratedProfile[]
   ) => void;
 }
 
@@ -22,7 +22,7 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
     jobTitle: "",
     companyName: "",
     suggestedTraits: [],
-    idealProfiles: [],
+    calibratedProfiles: [],
     currentStep: 1,
   });
 
@@ -35,11 +35,13 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
     updateState({ currentStep: 2 });
   };
 
-  const handleIdealProfilesSubmit = async (profiles: IdealProfile[]) => {
+  const handleCalibrateProfilesSubmit = async (
+    calibratedProfiles: CalibratedProfile[]
+  ) => {
     try {
       const response = await apiService.getKeyTraits(
         state.description,
-        profiles
+        calibratedProfiles
       );
       const formattedTraits = Array.isArray(response.data.key_traits)
         ? response.data.key_traits.map(
@@ -75,7 +77,7 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
         suggestedTraits: formattedTraits,
         jobTitle: response.data.job_title,
         companyName: response.data.company_name,
-        idealProfiles: profiles,
+        calibratedProfiles: response.data.calibrated_profiles,
         currentStep: 3,
       });
     } catch (error) {
@@ -97,7 +99,7 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
       traits,
       title,
       company,
-      state.idealProfiles
+      state.calibratedProfiles
     );
   };
 
@@ -110,7 +112,7 @@ export const useJobForm = ({ onSubmit }: UseJobFormProps) => {
     actions: {
       setDescription: (value: string) => updateState({ description: value }),
       handleDescriptionSubmit,
-      handleIdealProfilesSubmit,
+      handleCalibrateProfilesSubmit,
       handleTraitsConfirm,
       goToPreviousStep,
     },

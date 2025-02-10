@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
-import { Job, Candidate, IdealProfile } from "../types/index";
+import { Job, Candidate, CalibratedProfile } from "../types/index";
 import { User, getIdToken } from "firebase/auth";
 
 interface ExtendedWindow extends Window {
@@ -131,13 +131,16 @@ export const apiService = {
   deleteJob: (jobId: string) =>
     api.delete<{ success: boolean }>(`/jobs/${jobId}`),
 
-  getKeyTraits: (description: string, ideal_profiles: IdealProfile[]) =>
+  getKeyTraits: (
+    description: string,
+    calibrated_profiles: CalibratedProfile[]
+  ) =>
     api.post<{
       key_traits: string[];
       job_title: string;
       company_name: string;
-      ideal_profiles: IdealProfile[];
-    }>("/get-key-traits", { description, ideal_profiles }),
+      calibrated_profiles: CalibratedProfile[];
+    }>("/get-key-traits", { description, calibrated_profiles }),
 
   // Candidates
   getCandidates: (jobId: string, filterTraits?: string[]) =>

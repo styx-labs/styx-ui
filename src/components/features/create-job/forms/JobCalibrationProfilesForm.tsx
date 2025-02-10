@@ -1,43 +1,39 @@
 import { useState } from "react";
-import { X, LinkIcon, ArrowLeft, ArrowRight } from "lucide-react";
+import {
+  X,
+  LinkIcon,
+  ArrowLeft,
+  ArrowRight,
+  ThumbsUp,
+  ThumbsDown,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Card,
   CardHeader,
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import { CalibratedProfile } from "@/types/index";
 
-interface IdealProfile {
-  url: string;
-  fit?: "yes" | "no" | "interesting";
-  reasoning?: string;
-}
-
-interface JobIdealProfilesFormProps {
-  onSubmit: (profiles: IdealProfile[]) => void;
+interface JobCalibrationProfilesFormProps {
+  onSubmit: (calibratedProfiles: CalibratedProfile[]) => void;
   onBack: () => void;
 }
 
-export const JobIdealProfilesForm: React.FC<JobIdealProfilesFormProps> = ({
-  onSubmit,
-  onBack,
-}) => {
-  const [profiles, setProfiles] = useState<IdealProfile[]>([{ url: "" }]);
+export const JobCalibrationProfilesForm: React.FC<
+  JobCalibrationProfilesFormProps
+> = ({ onSubmit, onBack }) => {
+  const [profiles, setProfiles] = useState<CalibratedProfile[]>([
+    { url: "", fit: "good" },
+  ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleProfileChange = (
     index: number,
-    field: keyof IdealProfile,
+    field: keyof CalibratedProfile,
     value: string
   ) => {
     const newProfiles = [...profiles];
@@ -47,7 +43,7 @@ export const JobIdealProfilesForm: React.FC<JobIdealProfilesFormProps> = ({
 
   const addProfile = () => {
     if (profiles.length < 10) {
-      setProfiles([...profiles, { url: "" }]);
+      setProfiles([...profiles, { url: "", fit: "good" }]);
     }
   };
 
@@ -75,13 +71,11 @@ export const JobIdealProfilesForm: React.FC<JobIdealProfilesFormProps> = ({
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <h1 className="scroll-m-20 text-4xl font-bold tracking-tight">
-          Reference Candidate Profiles (Optional)
+          Calibrate Candidate Profiles
         </h1>
         <p className="text-muted-foreground mt-2">
-          Optionally add LinkedIn profile URLs that represent different types of
-          candidates. You can add up to 10 profiles and indicate if they would
-          be a good fit. This helps calibrate our evaluation system, but you can
-          also skip this step.
+          Add profiles that represent different types of candidates to help
+          calibrate our evaluation system.
         </p>
       </div>
 
@@ -114,23 +108,36 @@ export const JobIdealProfilesForm: React.FC<JobIdealProfilesFormProps> = ({
                       />
                     </div>
                     <div className="flex gap-4">
-                      <Select
-                        value={profile.fit}
-                        onValueChange={(value) =>
-                          handleProfileChange(index, "fit", value)
-                        }
-                      >
-                        <SelectTrigger className="w-[200px]">
-                          <SelectValue placeholder="Fit" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="yes">Good Fit</SelectItem>
-                          <SelectItem value="interesting">
-                            Potential Fit
-                          </SelectItem>
-                          <SelectItem value="no">Not a Fit</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant={
+                            profile.fit === "good" ? "default" : "outline"
+                          }
+                          size="sm"
+                          className="flex-1"
+                          onClick={() =>
+                            handleProfileChange(index, "fit", "good")
+                          }
+                        >
+                          <ThumbsUp className="h-4 w-4 mr-2" />
+                          Good Fit
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={
+                            profile.fit === "bad" ? "default" : "outline"
+                          }
+                          size="sm"
+                          className="flex-1"
+                          onClick={() =>
+                            handleProfileChange(index, "fit", "bad")
+                          }
+                        >
+                          <ThumbsDown className="h-4 w-4 mr-2" />
+                          Not a Fit
+                        </Button>
+                      </div>
                       <div className="flex-1">
                         <Textarea
                           value={profile.reasoning || ""}
@@ -141,7 +148,7 @@ export const JobIdealProfilesForm: React.FC<JobIdealProfilesFormProps> = ({
                               e.target.value
                             )
                           }
-                          placeholder="Optionally explain why this candidate would or wouldn't be a good fit..."
+                          placeholder={`Explain why this candidate is a ${profile.fit} fit...`}
                           className="resize-none"
                         />
                       </div>

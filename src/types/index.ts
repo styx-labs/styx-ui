@@ -1,7 +1,8 @@
-export interface IdealProfile {
+export interface CalibratedProfile {
   url: string;
-  fit?: "yes" | "no" | "interesting";
+  fit?: "good" | "bad";
   reasoning?: string;
+  profile?: Profile;
 }
 
 export interface Job {
@@ -14,7 +15,7 @@ export interface Job {
     value_type?: string;
     required: boolean;
   }[];
-  ideal_profiles: IdealProfile[];
+  calibrated_profiles: CalibratedProfile[];
   job_title: string;
   company_name: string;
   created_at?: string;

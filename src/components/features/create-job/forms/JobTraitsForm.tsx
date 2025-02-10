@@ -5,8 +5,11 @@ import {
   Building2,
   ListChecks,
   ArrowRight,
+  ThumbsUp,
+  ThumbsDown,
+  Users,
 } from "lucide-react";
-import { TraitType } from "@/types/index";
+import { TraitType, CalibratedProfile } from "@/types/index";
 import { TraitCard } from "../components/TraitCard";
 import { JobDetailsForm } from "./JobDetailsForm";
 import { TraitTips } from "../components/TraitTips";
@@ -18,6 +21,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 interface KeyTrait {
   trait: string;
@@ -31,6 +35,7 @@ interface JobTraitsFormProps {
   suggestedTraits: KeyTrait[];
   jobTitle: string;
   companyName: string;
+  calibratedProfiles: CalibratedProfile[];
   onConfirm: (
     traits: KeyTrait[],
     jobTitle: string,
@@ -43,6 +48,7 @@ export const JobTraitsForm: React.FC<JobTraitsFormProps> = ({
   suggestedTraits,
   jobTitle: initialJobTitle,
   companyName: initialCompanyName,
+  calibratedProfiles,
   onConfirm,
   onBack,
 }) => {
@@ -121,6 +127,59 @@ export const JobTraitsForm: React.FC<JobTraitsFormProps> = ({
           />
         </CardContent>
       </Card>
+
+      {calibratedProfiles.length > 0 && (
+        <Card className="shadow-lg">
+          <CardHeader>
+            <h2 className="text-2xl font-semibold flex items-center">
+              <Users className="mr-2 h-6 w-6 text-purple-500" />
+              Calibration Profiles
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Reference profiles used to calibrate the evaluation system
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {calibratedProfiles.map((profile, index) => (
+              <div
+                key={index}
+                className="flex items-start justify-between p-4 rounded-lg border bg-card"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium">
+                      {profile.profile?.full_name}
+                    </h3>
+                    <Badge
+                      variant={
+                        profile.fit === "good" ? "default" : "destructive"
+                      }
+                      className="flex items-center gap-1"
+                    >
+                      {profile.fit === "good" ? (
+                        <ThumbsUp className="h-3 w-3" />
+                      ) : (
+                        <ThumbsDown className="h-3 w-3" />
+                      )}
+                      {profile.fit === "good" ? "Good Fit" : "Not a Fit"}
+                    </Badge>
+                  </div>
+                  {profile.profile?.occupation && (
+                    <p className="text-sm text-muted-foreground">
+                      {profile.profile.occupation}
+                    </p>
+                  )}
+                  {profile.reasoning && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {profile.reasoning}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="shadow-lg">
         <CardHeader>

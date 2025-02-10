@@ -1,4 +1,4 @@
-import { TraitType, IdealProfile } from "@/types/index";
+import { TraitType, CalibratedProfile } from "@/types/index";
 
 export interface KeyTrait {
   trait: string;
@@ -13,7 +13,7 @@ export interface JobFormState {
   jobTitle: string;
   companyName: string;
   suggestedTraits: KeyTrait[];
-  idealProfiles: IdealProfile[];
+  calibratedProfiles: CalibratedProfile[];
   currentStep: number;
 }
 
@@ -28,7 +28,7 @@ export interface JobFormActions {
 
 export const STEPS = [
   "Job Description",
-  "Ideal Profiles",
+  "Calibrate Profiles",
   "Key Traits",
 ] as const;
 export type Step = (typeof STEPS)[number];

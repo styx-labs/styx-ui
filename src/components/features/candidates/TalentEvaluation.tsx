@@ -11,7 +11,7 @@ import {
   Loader2,
   Download,
 } from "lucide-react";
-import type { Candidate, TraitType, IdealProfile } from "@/types/index";
+import type { Candidate, TraitType, CalibratedProfile } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
 import Papa from "papaparse";
 import { EditKeyTraits } from "./components/EditKeyTraits";
@@ -62,7 +62,7 @@ interface JobDetails {
     value_type?: string;
     required: boolean;
   }[];
-  ideal_profiles: IdealProfile[];
+  calibrated_profiles: CalibratedProfile[];
   job_title: string;
   company_name: string;
   created_at?: string;

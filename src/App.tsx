@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { HomeScreen } from "./components/layout/HomeScreen";
 import { User } from "firebase/auth";
 import { LoadingSpinner } from "./components/common/LoadingSpinner";
-import { Job } from "./types/index";
+import { CalibratedProfile, Job } from "./types/index";
 import { PaymentStatus } from "./components/features/payment/PaymentStatus";
 import PricingPage from "./components/features/payment/PricingPage";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -212,14 +212,14 @@ function App() {
     keyTraits: Job["key_traits"],
     jobTitle: string,
     companyName: string,
-    ideal_profile_urls: string[]
+    calibratedProfiles: CalibratedProfile[]
   ) => {
     const jobId = await createJob(
       description,
       keyTraits,
       jobTitle,
       companyName,
-      ideal_profile_urls
+      calibratedProfiles
     );
     if (jobId) {
       navigate(`/jobs/${jobId}`);
