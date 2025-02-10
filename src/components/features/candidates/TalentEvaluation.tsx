@@ -496,15 +496,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
             <div className="flex items-center gap-3">
               <EditCalibratedProfiles job={job} />
               <PipelineFeedbackButton jobId={job.id!} />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowEditTraits(true)}
-                className="gap-2"
-              >
-                <GaugeCircle className="h-4 w-4" />
-                Re-Calibrate Traits
-              </Button>
+              <EditKeyTraits job={job} onSuccess={() => window.location.reload()} />
             </div>
           </div>
           <div className="mt-4 pt-4 border-t space-y-4">
@@ -982,14 +974,6 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
             handleExport();
           }}
           onRefresh={onRefresh}
-        />
-      )}
-
-      {showEditTraits && (
-        <EditKeyTraits
-          job={job}
-          onClose={() => setShowEditTraits(false)}
-          onSuccess={() => window.location.reload()}
         />
       )}
     </div>
