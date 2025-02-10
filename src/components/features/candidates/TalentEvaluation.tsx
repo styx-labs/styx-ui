@@ -45,6 +45,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "react-router-dom";
 import { PipelineFeedbackButton } from "./components/PipelineFeedbackButton";
+import { EditCalibratedProfiles } from "./components/EditCalibratedProfiles";
+import { apiService } from "@/api";
 
 interface TeamMember {
   role: string;
@@ -492,6 +494,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <EditCalibratedProfiles job={job} />
               <PipelineFeedbackButton jobId={job.id!} />
               <Button
                 variant="outline"

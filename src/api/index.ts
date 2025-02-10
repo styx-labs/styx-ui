@@ -313,6 +313,18 @@ export const apiService = {
       { feedback }
     );
   },
+
+  updateCalibratedProfiles: (
+    jobId: string,
+    calibratedProfiles: CalibratedProfile[]
+  ) => {
+    return api.patch<{ success: boolean }>(
+      `/jobs/${jobId}/calibrated-profiles`,
+      {
+        calibrated_profiles: calibratedProfiles,
+      }
+    );
+  },
 };
 
 export interface TemplateUpdateRequest {
