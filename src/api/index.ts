@@ -51,7 +51,7 @@ export const setAuthUser = async (user: User | null) => {
     // Clear everything on logout
     delete api.defaults.headers.common["Authorization"];
     setExtensionCookie(null);
-    delete window.currentUser;
+    window.currentUser = null;
   }
 };
 
@@ -130,6 +130,9 @@ export const apiService = {
 
   deleteJob: (jobId: string) =>
     api.delete<{ success: boolean }>(`/jobs/${jobId}`),
+
+  updateJob: (jobId: string, job: Partial<Job>) =>
+    api.patch<{ success: boolean }>(`/jobs/${jobId}`, job),
 
   getKeyTraits: (
     description: string,

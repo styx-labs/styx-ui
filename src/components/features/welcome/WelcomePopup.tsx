@@ -3,7 +3,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
@@ -47,36 +46,51 @@ export function WelcomePopup() {
 
   return (
     <Dialog open={showPopup} onOpenChange={setShowPopup}>
-      <DialogContent 
+      <DialogContent
         className="w-[95vw] max-w-[900px] md:w-[85vw] lg:w-[80vw] xl:w-[70vw] max-h-[90vh] overflow-hidden z-50"
         onPointerDownOutside={(e) => {
           e.preventDefault();
         }}
       >
         <div className="py-4 space-y-4 overflow-y-auto max-h-[calc(90vh-200px)]">
-            <div className="flex justify-center">
-                <img src={styxLogo} alt="Styx Logo" className="h-12 object-contain" />
-            </div>
-            <DialogTitle className="text-2xl font-bold tracking-tight">Welcome to Styx! </DialogTitle>
-            <DialogDescription className="text-lg mt-2">
-                Start leveraging AI to source better candidates, faster
-            </DialogDescription>
+          <div className="flex justify-center">
+            <img
+              src={styxLogo}
+              alt="Styx Logo"
+              className="h-12 object-contain"
+            />
+          </div>
+          <DialogTitle className="text-2xl font-bold tracking-tight">
+            Welcome to Styx!{" "}
+          </DialogTitle>
+          <DialogDescription className="text-lg mt-2">
+            Start leveraging AI to source better candidates, faster
+          </DialogDescription>
           <div className="space-y-2">
-            <h3 className="font-semibold">Install our Chrome Extension for integration with LinkedIn:</h3>
+            <h3 className="font-semibold">
+              Install our Chrome Extension for integration with LinkedIn:
+            </h3>
             <Button
               variant="default"
               className="mt-2"
-              onClick={() => window.open("https://chromewebstore.google.com/detail/styx-linkedin-profile-eva/aoehfbedlmpcinddkobkgaddmifnenjl", "_blank")}
+              onClick={() =>
+                window.open(
+                  "https://chromewebstore.google.com/detail/styx-linkedin-profile-eva/aoehfbedlmpcinddkobkgaddmifnenjl",
+                  "_blank"
+                )
+              }
             >
               Get Chrome Extension
             </Button>
           </div>
           <div className="space-y-2">
-            <h3 className="font-semibold">Learn how to get the most out of Styx:</h3>
+            <h3 className="font-semibold">
+              Learn how to get the most out of Styx:
+            </h3>
             <div className="relative w-full aspect-video mt-2">
               <iframe
                 className="w-full h-full"
-                src="https://www.youtube.com/embed/HbRXibt4wKA"
+                src="https://www.youtube.com/embed/fMf_7MWSEqM?si=5hWBrAkN2ezUy9sr"
                 frameBorder="0"
                 allowFullScreen
                 title="Styx Demo Video"
@@ -89,7 +103,9 @@ export function WelcomePopup() {
             <Checkbox
               id="dont-show"
               checked={dontShowAgain}
-              onCheckedChange={(checked) => setDontShowAgain(checked as boolean)}
+              onCheckedChange={(checked) =>
+                setDontShowAgain(checked as boolean)
+              }
             />
             <label
               htmlFor="dont-show"
@@ -103,4 +119,4 @@ export function WelcomePopup() {
       </DialogContent>
     </Dialog>
   );
-} 
+}

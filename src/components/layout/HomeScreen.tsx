@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  Sparkles,
-  ChevronRight,
-  CreditCard,
-} from "lucide-react";
+import { Sparkles, ChevronRight, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const HomeScreen: React.FC = () => {
@@ -49,9 +45,7 @@ export const HomeScreen: React.FC = () => {
         {/* Demo Video */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Quick Demo
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900">Quick Demo</h2>
             <p className="mt-1 text-sm text-gray-500">
               Watch how to get the most out of Styx
             </p>
@@ -59,7 +53,7 @@ export const HomeScreen: React.FC = () => {
           <div className="relative w-full pb-[56.25%]">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/HbRXibt4wKA"
+              src="https://www.youtube.com/embed/fMf_7MWSEqM?si=5hWBrAkN2ezUy9sr"
               frameBorder="0"
               allowFullScreen
               title="Styx Demo Video"

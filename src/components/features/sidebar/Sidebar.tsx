@@ -28,24 +28,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// Add the keyframe animation
-const tooltipAnimation = `
-@keyframes sideToSide {
-  0% { transform: translateX(0px); }
-  50% { transform: translateX(20px); }
-  100% { transform: translateX(0px); }
-}
-
-.tooltip-animate {
-  animation: sideToSide 1s ease-in-out infinite;
-}
-` as const;
-
-// Add the style element
-const StyleSheet = () => (
-  <style>{tooltipAnimation}</style>
-);
-
 interface SidebarProps {
   jobs: Job[];
   isLoading: boolean;
@@ -76,8 +58,9 @@ export function AppSidebar({
 
   const { state, setOpen } = useSidebar();
   const isCollapsed = state === "collapsed";
-  
-  const showTooltip = !isLoading && jobs.length === 0 && location.pathname === "/";
+
+  const showTooltip =
+    !isLoading && jobs.length === 0 && location.pathname === "/";
 
   const filteredJobs = React.useMemo(
     () =>
@@ -91,7 +74,6 @@ export function AppSidebar({
 
   return (
     <Sidebar collapsible="icon">
-      <StyleSheet />
       <SidebarHeader className={cn("border-b", !isCollapsed && "p-4")}>
         <div
           className={cn(
@@ -137,8 +119,8 @@ export function AppSidebar({
                     {!isCollapsed && "Add Job"}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent 
-                  side="right" 
+                <TooltipContent
+                  side="right"
                   className={cn(
                     "bg-white/80 backdrop-blur-sm text-slate-900 px-4 py-3 text-lg font-medium border-2 border-slate-300 shadow-[0_0_15px_rgba(147,51,234,0.3)] z-10",
                     showTooltip && "tooltip-animate"
