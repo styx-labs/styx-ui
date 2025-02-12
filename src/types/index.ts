@@ -3,6 +3,7 @@ export interface CalibratedProfile {
   fit?: "good" | "bad";
   reasoning?: string;
   profile?: Profile;
+  type: "ideal" | "pipeline";
 }
 
 export interface Job {

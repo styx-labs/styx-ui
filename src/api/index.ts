@@ -321,12 +321,12 @@ export const apiService = {
     jobId: string,
     calibratedProfiles: CalibratedProfile[]
   ) => {
-    return api.patch<{ success: boolean }>(
-      `/jobs/${jobId}/calibrated-profiles`,
-      {
-        calibrated_profiles: calibratedProfiles,
-      }
-    );
+    return api.patch<{
+      success: boolean;
+      calibrated_profiles: CalibratedProfile[];
+    }>(`/jobs/${jobId}/calibrated-profiles`, {
+      calibrated_profiles: calibratedProfiles,
+    });
   },
 };
 

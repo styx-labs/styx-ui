@@ -27,7 +27,7 @@ export const JobCalibrationProfilesForm: React.FC<
   JobCalibrationProfilesFormProps
 > = ({ onSubmit, onBack }) => {
   const [profiles, setProfiles] = useState<CalibratedProfile[]>([
-    { url: "", fit: "good" },
+    { url: "", fit: "good", type: "ideal" },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,7 +43,7 @@ export const JobCalibrationProfilesForm: React.FC<
 
   const addProfile = () => {
     if (profiles.length < 10) {
-      setProfiles([...profiles, { url: "", fit: "good" }]);
+      setProfiles([...profiles, { url: "", fit: "good", type: "ideal" }]);
     }
   };
 

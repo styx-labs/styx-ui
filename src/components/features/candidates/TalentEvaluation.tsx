@@ -494,7 +494,13 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <EditCalibratedProfiles job={job} />
+              <EditCalibratedProfiles
+                job={job}
+                onUpdate={(updatedProfiles) => {
+                  // Update the job object with new calibrated profiles
+                  job.calibrated_profiles = updatedProfiles;
+                }}
+              />
               <PipelineFeedbackButton jobId={job.id!} />
               <EditKeyTraits
                 job={job}
