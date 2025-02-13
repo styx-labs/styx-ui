@@ -6,7 +6,6 @@ import {
   ChevronDown,
   ChevronUp,
   Star,
-  GaugeCircle,
   UserPlus,
   Loader2,
   Download,
@@ -46,13 +45,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "react-router-dom";
 import { PipelineFeedbackButton } from "./components/PipelineFeedbackButton";
 import { EditCalibratedProfiles } from "./components/EditCalibratedProfiles";
-import { apiService } from "@/api";
-
-interface TeamMember {
-  role: string;
-  name?: string;
-  description?: string;
-}
+import { exportCandidates } from "./utils/exportCandidates";
 
 interface JobDetails {
   id?: string;
@@ -68,11 +61,6 @@ interface JobDetails {
   job_title: string;
   company_name: string;
   created_at?: string;
-  team_context?: {
-    hiring_manager?: TeamMember;
-    direct_report?: TeamMember;
-    team_members?: TeamMember[];
-  };
 }
 
 interface TalentEvaluationProps {
@@ -301,55 +289,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   };
 
   const handleExport = () => {
-    if (exportFormat === "csv") {
-      let candidates_to_export = filteredCandidates;
-
-      if (exportMode === "limited") {
-        candidates_to_export = filteredCandidates.slice(
-          0,
-          parseInt(exportLimit)
-        );
-      } else if (exportMode === "selected") {
-        candidates_to_export = filteredCandidates.filter(
-          (c) => c.id && selectedCandidates.includes(c.id)
-        );
-      }
-
-      const csvContent = [
-        [
-          "name",
-          "url",
-          "occupation",
-          "company",
-          "fit",
-          "required_met",
-          "optional_met",
-        ],
-        ...candidates_to_export.map((candidate) => [
-          candidate.name || "",
-          candidate.url || "",
-          candidate.profile?.occupation || "",
-          candidate.profile?.experiences?.[0]?.company || "",
-          candidate.fit || "0",
-          candidate.required_met || "0",
-          candidate.optional_met || "0",
-        ]),
-      ]
-        .map((row) => row.join(","))
-        .join("\n");
-
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute(
-        "download",
-        `candidates_export_${new Date().toISOString().split("T")[0]}.csv`
-      );
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    exportCandidates(filteredCandidates, exportFormat as "csv" | "xlsx");
   };
 
   return (
@@ -701,6 +641,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="csv">Export to CSV</SelectItem>
+                <SelectItem value="xlsx">Export to XLSX</SelectItem>
               </SelectContent>
             </Select>
 
