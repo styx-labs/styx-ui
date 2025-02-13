@@ -967,6 +967,8 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
           onReachout={onCandidateReachout}
           onDelete={async (id) => {
             onCandidateDelete(id);
+            // Update local state after deletion
+            setLocalCandidates((prev) => prev.filter((c) => c.id !== id));
             return Promise.resolve();
           }}
           searchQuery={searchQuery}
