@@ -3,7 +3,11 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BriefcaseIcon, GraduationCap, ExternalLink } from "lucide-react";
 import type { Candidate, ProfileExperience } from "@/types/index";
-import { formatDate, calculateTenure } from "../../utils/dateFormatters";
+import {
+  formatDate,
+  formatEducationDate,
+  calculateTenure,
+} from "../../utils/dateFormatters";
 import { CareerMetrics } from "./CareerMetrics";
 
 interface CandidateProfileProps {
@@ -94,8 +98,8 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
       return `Worked during ${validStages[0]}`;
     }
 
-    const firstStage = validStages[0];
-    const lastStage = validStages[validStages.length - 1];
+    const firstStage = validStages[validStages.length - 1];
+    const lastStage = validStages[0];
 
     return firstStage === lastStage
       ? `Worked during ${firstStage}`
@@ -469,8 +473,8 @@ export const CandidateProfile: React.FC<CandidateProfileProps> = ({
                       </p>
                       {edu.starts_at && edu.ends_at && (
                         <p className="text-xs text-purple-600/75">
-                          {formatDate(edu.starts_at)} -{" "}
-                          {formatDate(edu.ends_at)}
+                          {formatEducationDate(edu.starts_at)} -{" "}
+                          {formatEducationDate(edu.ends_at)}
                         </p>
                       )}
                     </div>

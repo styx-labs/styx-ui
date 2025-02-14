@@ -66,6 +66,9 @@ export interface CareerMetrics {
   tech_stacks?: string[];
   career_tags?: string[];
   experience_tags?: string[];
+  latest_experience_level?: string;
+  latest_experience_track?: string;
+  latest_experience_income?: [number, number];
 }
 
 export interface Profile {
