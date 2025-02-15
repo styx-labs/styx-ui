@@ -225,6 +225,12 @@ export const apiService = {
     });
   },
 
+  editJobDescription: (jobId: string, job_description: string) => {
+    return api.patch<{ success: boolean }>(`/jobs/${jobId}/edit-job-description`, {
+      job_description,
+    });
+  },
+
   // Templates
   getTemplates: () => api.get<UserTemplates>("/settings/templates"),
 

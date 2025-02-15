@@ -15,6 +15,7 @@ import type { Candidate, TraitType, CalibratedProfile } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
 import Papa from "papaparse";
 import { EditKeyTraits } from "./components/EditKeyTraits";
+import { EditJobDescription } from "./components/EditJobDescription";
 import { UnifiedFilterMenu } from "./components/UnifiedFilterMenu";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -368,17 +369,23 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                   {job.company_name}
                 </h1>
               </div>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <ChevronDown
-                    className={cn(
-                      "h-4 w-4 transition-transform duration-200",
-                      showDescription ? "rotate-180" : ""
-                    )}
-                  />
-                  {showDescription ? "Hide Details" : "Show Details"}
-                </Button>
-              </CollapsibleTrigger>
+              <div className="flex items-center gap-2">
+                <EditJobDescription
+                  job={job}
+                  onSuccess={() => window.location.reload()}
+                />
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 transition-transform duration-200",
+                        showDescription ? "rotate-180" : ""
+                      )}
+                    />
+                    {showDescription ? "Hide Details" : "Show Details"}
+                  </Button>
+                </CollapsibleTrigger>
+              </div>
             </div>
             <CollapsibleContent>
               <div className="mt-4 pt-4 border-t space-y-6">
