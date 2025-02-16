@@ -145,17 +145,6 @@ export const CareerMetrics: React.FC<CareerMetricsProps> = ({ metrics }) => {
                   </p>
                 </div>
               )}
-              {metrics.latest_experience_income && (
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-1.5 text-sm text-purple-800">
-                    <DollarSign className="h-4 w-4" />
-                    <span>Estimated Income Range</span>
-                  </div>
-                  <p className="text-lg font-semibold text-purple-900">
-                    {formatSalaryRange(metrics.latest_experience_income)}
-                  </p>
-                </div>
-              )}
             </div>
           )}
 

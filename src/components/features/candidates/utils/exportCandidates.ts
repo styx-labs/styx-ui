@@ -15,6 +15,10 @@ export const exportCandidates = (
     "fit",
     "required_met",
     "optional_met",
+    ...(candidates[0]?.sections?.flatMap((section) => [
+      `section_${section.section}`,
+      `section_${section.section}_reasoning`,
+    ]) || []),
   ];
 
   const data = candidates.map((candidate) => [
@@ -26,6 +30,10 @@ export const exportCandidates = (
     getFitScoreLabel(candidate.fit).label || "Unknown",
     candidate.required_met || "0",
     candidate.optional_met || "0",
+    ...(candidate.sections?.flatMap((section) => [
+      section.value,
+      section.content,
+    ]) || []),
   ]);
 
   if (format === "csv") {
@@ -36,9 +44,10 @@ export const exportCandidates = (
       }
       return fieldStr;
     };
-
     const csvContent = [headers, ...data]
-      .map((row) => row.map(escapeCsvField).join(","))
+      .map((row) =>
+        row.map((field) => escapeCsvField(field as string | number)).join(",")
+      )
       .join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
