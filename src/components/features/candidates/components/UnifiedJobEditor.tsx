@@ -76,6 +76,24 @@ export const UnifiedJobEditor: React.FC<UnifiedJobEditorProps> = ({
     }
   }, [open, job]);
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setDescription(job.job_description);
+      setTraits(job.key_traits);
+      setProfiles(
+        job.calibrated_profiles?.length
+          ? [...job.calibrated_profiles]
+          : [{ url: "", reasoning: "", type: "ideal", fit: undefined }]
+      );
+      setIsDescriptionPromptOpen(false);
+      setIsPromptOpen(false);
+      setDescriptionPrompt("");
+      setPrompt("");
+      setUrlError("");
+    }
+    setOpen(open);
+  };
+
   const handleDescriptionSubmit = async () => {
     if (!description.trim()) {
       toast({
@@ -342,7 +360,6 @@ export const UnifiedJobEditor: React.FC<UnifiedJobEditorProps> = ({
             variant="ghost"
             size="icon"
             onClick={() => setProfiles(profiles.filter((_, i) => i !== index))}
-            disabled={profiles.length === 1}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -370,7 +387,7 @@ export const UnifiedJobEditor: React.FC<UnifiedJobEditorProps> = ({
   const newProfiles = profiles.filter((p) => !p.profile);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button 
           variant="secondary"
