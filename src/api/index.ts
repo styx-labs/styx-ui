@@ -296,12 +296,6 @@ export const apiService = {
     return response;
   },
 
-  submitPipelineFeedback: (jobId: string, feedback: string) => {
-    return api.post<{ success: boolean }>(`/jobs/${jobId}/pipeline-feedback`, {
-      feedback,
-    });
-  },
-
   submitCandidateRecalibration: (
     jobId: string,
     candidateId: string,
@@ -332,6 +326,18 @@ export const apiService = {
       calibrated_profiles: CalibratedProfile[];
     }>(`/jobs/${jobId}/calibrated-profiles`, {
       calibrated_profiles: calibratedProfiles,
+    });
+  },
+
+  editKeyTraitsWithAI: (jobId: string, prompt: string) => {
+    return api.post<{ key_traits: Job["key_traits"] }>(`/jobs/${jobId}/edit-key-traits-llm`, {
+      prompt,
+    });
+  },
+
+  editJobDescriptionWithAI: (jobId: string, prompt: string) => {
+    return api.post<{ job_description: string }>(`/jobs/${jobId}/edit-job-description-llm`, {
+      prompt,
     });
   },
 };

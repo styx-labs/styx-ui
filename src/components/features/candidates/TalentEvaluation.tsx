@@ -10,12 +10,12 @@ import {
   UserPlus,
   Loader2,
   Download,
+  Plus,
 } from "lucide-react";
 import type { Candidate, TraitType, CalibratedProfile } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
 import Papa from "papaparse";
-import { EditKeyTraits } from "./components/EditKeyTraits";
-import { EditJobDescription } from "./components/EditJobDescription";
+import { UnifiedJobEditor } from "./components/UnifiedJobEditor";
 import { UnifiedFilterMenu } from "./components/UnifiedFilterMenu";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -45,9 +45,14 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "react-router-dom";
-import { PipelineFeedbackButton } from "./components/PipelineFeedbackButton";
-import { EditCalibratedProfiles } from "./components/EditCalibratedProfiles";
 import { apiService } from "@/api";
+import { useJobs } from "@/hooks/useJobs";
+import { useNavigate } from "react-router-dom";
+import { useSearchCredits } from "@/hooks/useSearchCredits";
+import { NotEnoughCreditsError } from "./NotEnoughCreditsError";
+import { BulkActions } from "./components/list/BulkActions";
+import { CandidateSidebar } from "./components/sidebar/CandidateSidebar";
+import { CandidateForm } from "./CandidateForm";
 
 interface TeamMember {
   role: string;
@@ -164,6 +169,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
   const [localCandidates, setLocalCandidates] =
     useState<Candidate[]>(candidates);
+  const [showCandidateForm, setShowCandidateForm] = useState(false);
 
   // Sync local state with props when candidates change
   useEffect(() => {
@@ -370,9 +376,13 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                 </h1>
               </div>
               <div className="flex items-center gap-2">
-                <EditJobDescription
+                <UnifiedJobEditor
                   job={job}
                   onSuccess={() => window.location.reload()}
+                  onUpdate={(updatedProfiles) => {
+                    // Update the job object with new calibrated profiles
+                    job.calibrated_profiles = updatedProfiles;
+                  }}
                 />
                 <CollapsibleTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
@@ -499,20 +509,6 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                 <Separator orientation="vertical" className="h-4" />
                 <span>Optional</span>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <EditCalibratedProfiles
-                job={job}
-                onUpdate={(updatedProfiles) => {
-                  // Update the job object with new calibrated profiles
-                  job.calibrated_profiles = updatedProfiles;
-                }}
-              />
-              <PipelineFeedbackButton jobId={job.id!} />
-              <EditKeyTraits
-                job={job}
-                onSuccess={() => window.location.reload()}
-              />
             </div>
           </div>
           <div className="mt-4 pt-4 border-t space-y-4">
