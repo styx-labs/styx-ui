@@ -6,11 +6,9 @@ import {
   ChevronDown,
   ChevronUp,
   Star,
-  GaugeCircle,
   UserPlus,
   Loader2,
   Download,
-  Plus,
 } from "lucide-react";
 import type { Candidate, TraitType, CalibratedProfile } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
@@ -44,15 +42,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useSearchParams } from "react-router-dom";
-import { apiService } from "@/api";
-import { useJobs } from "@/hooks/useJobs";
-import { useNavigate } from "react-router-dom";
-import { useSearchCredits } from "@/hooks/useSearchCredits";
-import { NotEnoughCreditsError } from "./NotEnoughCreditsError";
-import { BulkActions } from "./components/list/BulkActions";
-import { CandidateSidebar } from "./components/sidebar/CandidateSidebar";
-import { CandidateForm } from "./CandidateForm";
 
 interface TeamMember {
   role: string;
@@ -143,11 +132,9 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   onBulkFavorite,
 }) => {
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
   const [isUploading, setIsUploading] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [searchMode, setSearchMode] = useState(true);
-  const [showEditTraits, setShowEditTraits] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"processing" | "complete">(
     "complete"
@@ -169,19 +156,11 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
   const [localCandidates, setLocalCandidates] =
     useState<Candidate[]>(candidates);
-  const [showCandidateForm, setShowCandidateForm] = useState(false);
 
   // Sync local state with props when candidates change
   useEffect(() => {
     setLocalCandidates(candidates);
   }, [candidates]);
-
-  // Handle openEditTraits query parameter
-  useEffect(() => {
-    if (searchParams.get("openEditTraits") === "true") {
-      setShowEditTraits(true);
-    }
-  }, [searchParams]);
 
   const handleFavorite = async (candidateId: string) => {
     if (!onCandidateFavorite) return false;
@@ -378,7 +357,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               <div className="flex items-center gap-2">
                 <UnifiedJobEditor
                   job={job}
-                  onSuccess={() => window.location.reload()}
+                  onSuccess={onRefresh}
                   onUpdate={(updatedProfiles) => {
                     // Update the job object with new calibrated profiles
                     job.calibrated_profiles = updatedProfiles;

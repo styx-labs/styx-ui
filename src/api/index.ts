@@ -125,6 +125,8 @@ export const apiService = {
   // Jobs
   getJobs: () => api.get<{ jobs: Job[] }>("/jobs"),
 
+  getJob: (jobId: string) => api.get<{ job: Job }>(`/jobs/${jobId}`),
+
   createJob: (job: Omit<Job, "id">) =>
     api.post<{ job_id: string }>("/jobs", job),
 

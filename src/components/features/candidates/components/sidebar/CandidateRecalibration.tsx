@@ -13,7 +13,7 @@ import { useRecalibration } from "@/hooks/useRecalibration";
 interface CandidateRecalibrationProps {
   candidate: Candidate;
   jobId: string;
-  onRefresh?: () => void;
+  onRefresh: () => void;
 }
 
 export const CandidateRecalibration: React.FC<CandidateRecalibrationProps> = ({
@@ -40,7 +40,7 @@ export const CandidateRecalibration: React.FC<CandidateRecalibrationProps> = ({
       setIsGoodFitOpen(false);
       setIsBadFitOpen(false);
       setFeedback({ fit: undefined, reasoning: "" });
-      onRefresh?.();
+      onRefresh();
     }
   };
 

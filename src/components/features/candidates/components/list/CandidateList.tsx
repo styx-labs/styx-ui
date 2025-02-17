@@ -30,7 +30,7 @@ interface CandidateListProps {
   onBulkDelete?: (ids: string[]) => Promise<void>;
   onBulkFavorite?: (ids: string[], favorite: boolean) => Promise<void>;
   onExportSelected?: (ids: string[]) => void;
-  onRefresh?: () => void;
+  onRefresh: () => void;
 }
 
 const ProcessingCandidateRow: React.FC<{
@@ -455,6 +455,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
           }}
           onDelete={handleDelete}
           onFavorite={handleFavorite}
+          onRefresh={onRefresh}
         />
 
         {selectedCandidates.length > 0 && jobId && (

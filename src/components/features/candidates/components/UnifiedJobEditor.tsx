@@ -208,6 +208,9 @@ export const UnifiedJobEditor: React.FC<UnifiedJobEditorProps> = ({
           title: "Success",
           description: "Calibrated profiles updated successfully",
         });
+        if (onSuccess) {
+          onSuccess();
+        }
         setOpen(false);
       }
     } catch (error) {

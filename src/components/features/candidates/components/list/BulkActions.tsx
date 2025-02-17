@@ -119,11 +119,11 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
     setFeedbackState((prev) => {
       const newState = { ...prev };
       if (!prev[candidateId]) {
-        newState[candidateId] = { reasoning: reasoning.trim() };
+        newState[candidateId] = { reasoning };
       } else {
         newState[candidateId] = {
           ...prev[candidateId],
-          reasoning: reasoning.trim(),
+          reasoning,
         };
       }
       return newState;

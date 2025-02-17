@@ -25,7 +25,7 @@ interface CandidateSidebarProps {
   onReachout: (id: string, format: string) => Promise<void>;
   onDelete: (e: React.MouseEvent, id: string) => Promise<void>;
   onFavorite?: (id: string) => Promise<void>;
-  onRefresh?: () => void;
+  onRefresh: () => void;
 }
 
 export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
