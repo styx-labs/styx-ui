@@ -26,7 +26,7 @@ const setExtensionCookie = (token: string | null) => {
     // Simplified cookie string for development testing
     document.cookie = isDev
       ? `styxExtensionToken=${token}; path=/;`
-      : `styxExtensionToken=${token}; path=/; domain=.styxlabs.co; max-age=3600; SameSite=None; Secure;`;
+      : `styxExtensionToken=${token}; path=/; domain=.styxlabs.co; max-age=86400; SameSite=None; Secure;`;
   } else {
     document.cookie = isDev
       ? `styxExtensionToken=; path=/; max-age=0;`

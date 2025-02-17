@@ -8,7 +8,6 @@ import {
   Code2,
   Tags,
   Briefcase,
-  DollarSign,
 } from "lucide-react";
 import type { CareerMetrics as CareerMetricsType } from "@/types/index";
 
