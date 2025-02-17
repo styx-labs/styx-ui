@@ -369,8 +369,12 @@ export const UnifiedJobEditor: React.FC<UnifiedJobEditorProps> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <Settings2 className="h-4 w-4" />
+        <Button 
+          variant="secondary"
+          size="sm" 
+          className="gap-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold"
+        >
+          <Settings2 className="h-4 w-4 stroke-[3]" />
           Recalibrate and Edit Job
         </Button>
       </DialogTrigger>
