@@ -663,7 +663,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                   <TooltipContent className="w-64">
                     When enabled, searches through candidate profiles and their
                     previous jobs for better matches, but takes longer to
-                    process
+                    process (uses 2 credits per candidate)
                   </TooltipContent>
                 </Tooltip>
               </div>

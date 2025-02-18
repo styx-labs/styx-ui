@@ -11,30 +11,45 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CheckIcon } from "lucide-react";
 
 const pricingTiers = [
   {
-    name: "Basic",
-    price: 9.99,
-    credits: 100,
-    costPerSearch: "$0.10",
-    description:
-      "Perfect for small teams or individual recruiters getting started with AI-powered recruiting.",
+    name: "Starter",
+    price: 0,
+    credits: 50,
+    description: "Best for individuals",
+    features: [
+      "Unlimited Users",
+      "Export",
+      "AI search and outreach",
+      "Chrome Extension",
+      "Limited to 3 jobs",
+    ],
   },
   {
     name: "Growth",
-    price: 44.99,
-    credits: 500,
-    costPerSearch: "$0.09",
+    price: 200,
+    credits: 1000,
     popular: true,
-    description:
-      "Ideal for growing teams who need advanced features and higher volume candidate processing.",
+    description: "Best for small teams and agencies",
+    features: [
+      "Everything from Starter",
+      "Rollover credits (2 months)",
+      "Unlimited Jobs",
+      "Dedicated Support",
+    ],
   },
   {
-    name: "Enterprise",
-    isEnterprise: true,
-    description:
-      "Custom solutions for large organizations with high-volume recruiting needs.",
+    name: "Pro",
+    price: 750,
+    credits: 5000,
+    description: "Best for large teams",
+    features: [
+      "Everything from Growth",
+      "Dedicated Slack Channel",
+      "ATS integrations",
+    ],
   },
 ];
 
@@ -83,57 +98,44 @@ export default function PricingPage() {
               <CardDescription>{tier.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              {!tier.isEnterprise ? (
+              <>
                 <div className="flex items-baseline mb-4">
                   <span className="text-4xl font-bold text-purple-600">
                     ${tier.price}
                   </span>
-                  <span className="text-muted-foreground ml-2">/package</span>
+                  <span className="text-muted-foreground ml-2">/month</span>
                 </div>
-              ) : (
-                <div className="text-2xl font-bold mb-4 text-purple-600">
-                  Custom Pricing
-                </div>
-              )}
+                {/* <div className="text-sm text-muted-foreground mb-2">
+                  Save 10% with annual billing
+                </div> */}
+              </>
               <div className="bg-muted p-4 rounded-lg mb-4">
-                {!tier.isEnterprise ? (
-                  <>
-                    <div className="text-lg font-semibold">
-                      {tier.credits} credits
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {tier.costPerSearch} per search
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-lg font-semibold">
-                      500-50,000 credits
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Volume-based pricing
-                    </div>
-                  </>
-                )}
+                <div className="text-lg font-semibold">
+                  {tier.credits} credits
+                </div>
               </div>
+              <ul className="space-y-2">
+                {tier.features.map((feature) => (
+                  <li key={feature} className="flex items-center">
+                    <CheckIcon className="w-4 h-4 mr-2 text-purple-600" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
             </CardContent>
             <CardFooter>
-              <Button
-                className={`w-full ${
-                  tier.popular
-                    ? "bg-purple-600 hover:bg-purple-700"
-                    : "hover:border-purple-500 hover:text-purple-600"
-                }`}
-                variant={tier.popular ? "default" : "outline"}
-                onClick={() =>
-                  tier.isEnterprise
-                    ? (window.location.href = "mailto:support@styxlabs.co")
-                    : handleSelectPlan(tier.name.toLowerCase())
-                }
-                disabled={!tier.isEnterprise && isLoading}
-              >
-                {!tier.isEnterprise ? (
-                  isLoading ? (
+              {tier.price > 0 ? (
+                <Button
+                  className={`w-full ${
+                    tier.popular
+                      ? "bg-purple-600 hover:bg-purple-700"
+                      : "hover:border-purple-500 hover:text-purple-600"
+                  }`}
+                  variant={tier.popular ? "default" : "outline"}
+                  onClick={() => handleSelectPlan(tier.name.toLowerCase())}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Processing...
@@ -143,14 +145,31 @@ export default function PricingPage() {
                       <CreditCard className="w-4 h-4 mr-2" />
                       Get Started
                     </>
-                  )
-                ) : (
-                  "Contact Sales"
-                )}
-              </Button>
+                  )}
+                </Button>
+              ) : (
+                <Button className="w-full" variant="outline" disabled>
+                  Free Tier
+                </Button>
+              )}
             </CardFooter>
           </Card>
         ))}
+      </div>
+
+      {/* Enterprise CTA */}
+      <div className="text-center mt-8 mb-12">
+        <h2 className="text-2xl font-bold mb-4">Looking for Enterprise?</h2>
+        <p className="text-muted-foreground mb-4">
+          Interested in enterprise features like dedicated support, higher
+          limits, and unlimited company + people data?
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => (window.location.href = "mailto:support@styxlabs.co")}
+        >
+          Contact Us
+        </Button>
       </div>
 
       {/* FAQ or Additional Info */}
@@ -196,11 +215,6 @@ export default function PricingPage() {
               </Card>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground mt-6">
-            Credits never expire and can be used across any job posting in your
-            account. Higher tier plans include additional features and premium
-            support options.
-          </p>
         </CardContent>
       </Card>
     </div>
