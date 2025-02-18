@@ -202,7 +202,7 @@ export const apiService = {
   },
 
   getSearchCredits: () => {
-    return api.post<{ search_credits: number }>("/get-search-credits");
+    return api.get<{ search_credits: number }>("/get-search-credits");
   },
 
   getShowPopup: () => {
