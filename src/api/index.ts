@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
-import { Job, Candidate } from "../types/index";
+import { Job, Candidate, CalibratedProfile } from "../types/index";
 import { User, getIdToken } from "firebase/auth";
 
 interface ExtendedWindow extends Window {
@@ -51,7 +51,7 @@ export const setAuthUser = async (user: User | null) => {
     // Clear everything on logout
     delete api.defaults.headers.common["Authorization"];
     setExtensionCookie(null);
-    delete window.currentUser;
+    window.currentUser = null;
   }
 };
 
@@ -112,9 +112,20 @@ export interface TestTemplateResponse {
   candidate_context: CandidateContext;
 }
 
+interface RecalibrationFeedback {
+  fit: "good" | "bad";
+  reasoning?: string;
+}
+
+interface BulkRecalibrationFeedback {
+  [candidateId: string]: RecalibrationFeedback;
+}
+
 export const apiService = {
   // Jobs
   getJobs: () => api.get<{ jobs: Job[] }>("/jobs"),
+
+  getJob: (jobId: string) => api.get<{ job: Job }>(`/jobs/${jobId}`),
 
   createJob: (job: Omit<Job, "id">) =>
     api.post<{ job_id: string }>("/jobs", job),
@@ -122,13 +133,19 @@ export const apiService = {
   deleteJob: (jobId: string) =>
     api.delete<{ success: boolean }>(`/jobs/${jobId}`),
 
-  getKeyTraits: (description: string, ideal_profile_urls: string[]) =>
+  updateJob: (jobId: string, job: Partial<Job>) =>
+    api.patch<{ success: boolean }>(`/jobs/${jobId}`, job),
+
+  getKeyTraits: (
+    description: string,
+    calibrated_profiles: CalibratedProfile[]
+  ) =>
     api.post<{
       key_traits: string[];
       job_title: string;
       company_name: string;
-      ideal_profiles: string[];
-    }>("/get-key-traits", { description, ideal_profile_urls }),
+      calibrated_profiles: CalibratedProfile[];
+    }>("/get-key-traits", { description, calibrated_profiles }),
 
   // Candidates
   getCandidates: (jobId: string, filterTraits?: string[]) =>
@@ -210,6 +227,12 @@ export const apiService = {
     });
   },
 
+  editJobDescription: (jobId: string, job_description: string) => {
+    return api.patch<{ success: boolean }>(`/jobs/${jobId}/edit-job-description`, {
+      job_description,
+    });
+  },
+
   // Templates
   getTemplates: () => api.get<UserTemplates>("/settings/templates"),
 
@@ -273,6 +296,51 @@ export const apiService = {
     );
     console.log("Bulk favorite API response:", response.data);
     return response;
+  },
+
+  submitCandidateRecalibration: (
+    jobId: string,
+    candidateId: string,
+    feedback: RecalibrationFeedback
+  ) => {
+    return api.post<{ success: boolean }>(
+      `/jobs/${jobId}/candidates/${candidateId}/recalibrate`,
+      feedback
+    );
+  },
+
+  submitBulkRecalibration: (
+    jobId: string,
+    feedback: BulkRecalibrationFeedback
+  ) => {
+    return api.post<{ success: boolean }>(
+      `/jobs/${jobId}/candidates/bulk-recalibrate`,
+      { feedback }
+    );
+  },
+
+  updateCalibratedProfiles: (
+    jobId: string,
+    calibratedProfiles: CalibratedProfile[]
+  ) => {
+    return api.patch<{
+      success: boolean;
+      calibrated_profiles: CalibratedProfile[];
+    }>(`/jobs/${jobId}/calibrated-profiles`, {
+      calibrated_profiles: calibratedProfiles,
+    });
+  },
+
+  editKeyTraitsWithAI: (jobId: string, prompt: string) => {
+    return api.post<{ key_traits: Job["key_traits"] }>(`/jobs/${jobId}/edit-key-traits-llm`, {
+      prompt,
+    });
+  },
+
+  editJobDescriptionWithAI: (jobId: string, prompt: string) => {
+    return api.post<{ job_description: string }>(`/jobs/${jobId}/edit-job-description-llm`, {
+      prompt,
+    });
   },
 };
 

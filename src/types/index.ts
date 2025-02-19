@@ -1,3 +1,11 @@
+export interface CalibratedProfile {
+  url: string;
+  fit?: "good" | "bad";
+  reasoning?: string;
+  profile?: Profile;
+  type: "ideal" | "pipeline";
+}
+
 export interface Job {
   id?: string;
   job_description: string;
@@ -8,7 +16,7 @@ export interface Job {
     value_type?: string;
     required: boolean;
   }[];
-  ideal_profiles: string[];
+  calibrated_profiles: CalibratedProfile[];
   job_title: string;
   company_name: string;
   created_at?: string;
@@ -132,4 +140,13 @@ export interface CandidateEvaluation {
   citations: Citation[];
   summary: string;
   overall_score: number;
+}
+
+export interface RecalibrationFeedback {
+  fit: "good" | "bad";
+  reasoning?: string;
+}
+
+export interface BulkRecalibrationFeedback {
+  [candidateId: string]: RecalibrationFeedback;
 }

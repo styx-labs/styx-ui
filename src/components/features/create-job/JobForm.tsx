@@ -1,9 +1,10 @@
 import { JobTraitsForm } from "./forms/JobTraitsForm";
-import { JobIdealProfilesForm } from "./forms/JobIdealProfilesForm";
+import { JobCalibrationProfilesForm } from "./forms/JobCalibrationProfilesForm";
 import { JobDescriptionForm } from "./forms/JobDescriptionForm";
 import { ProgressBar } from "./components/ProgressBar";
 import { useJobForm } from "./hooks/useJobForm";
 import { KeyTrait, STEPS } from "./types";
+import type { CalibratedProfile } from "@/types/index";
 
 interface JobFormProps {
   onSubmit: (
@@ -11,7 +12,7 @@ interface JobFormProps {
     keyTraits: KeyTrait[],
     jobTitle: string,
     companyName: string,
-    ideal_profile_urls: string[]
+    calibratedProfiles: CalibratedProfile[]
   ) => void;
 }
 
@@ -26,14 +27,15 @@ export const JobForm: React.FC<JobFormProps> = ({ onSubmit }) => {
             suggestedTraits={state.suggestedTraits}
             jobTitle={state.jobTitle}
             companyName={state.companyName}
+            calibratedProfiles={state.calibratedProfiles}
             onConfirm={actions.handleTraitsConfirm}
             onBack={actions.goToPreviousStep}
           />
         );
       case 2:
         return (
-          <JobIdealProfilesForm
-            onSubmit={actions.handleIdealProfilesSubmit}
+          <JobCalibrationProfilesForm
+            onSubmit={actions.handleCalibrateProfilesSubmit}
             onBack={actions.goToPreviousStep}
           />
         );

@@ -18,6 +18,7 @@ import { Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 interface CandidateListProps {
   candidates: Candidate[];
+  jobId: string;
   onGetEmail?: (url: string) => Promise<string | undefined>;
   onReachout?: (id: string, format: string) => Promise<string | undefined>;
   onDelete?: (id: string) => Promise<void>;
@@ -29,6 +30,7 @@ interface CandidateListProps {
   onBulkDelete?: (ids: string[]) => Promise<void>;
   onBulkFavorite?: (ids: string[], favorite: boolean) => Promise<void>;
   onExportSelected?: (ids: string[]) => void;
+  onRefresh: () => void;
 }
 
 const ProcessingCandidateRow: React.FC<{
@@ -102,6 +104,7 @@ const LoadingIndicatorCard: React.FC<{
 
 export const CandidateList: React.FC<CandidateListProps> = ({
   candidates,
+  jobId,
   onGetEmail,
   onReachout,
   onDelete,
@@ -113,6 +116,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
   onBulkDelete,
   onBulkFavorite,
   onExportSelected,
+  onRefresh,
 }) => {
   const { toast } = useToast();
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(
@@ -412,6 +416,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                     handleReachout={handleReachout}
                     handleDelete={handleDelete}
                     handleFavorite={handleFavorite}
+                    jobId={jobId}
                     setSelectedCandidate={(candidate) =>
                       setSelectedCandidateId(candidate.id!)
                     }
@@ -425,6 +430,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
                       candidate.id &&
                       handleSelectCandidate(candidate.id, checked)
                     }
+                    onRefresh={onRefresh}
                   />
                 )
               )}
@@ -434,6 +440,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
 
         <CandidateSidebar
           candidate={selectedCandidate}
+          jobId={jobId}
           onClose={() => setSelectedCandidateId(null)}
           onPrevious={handlePrevious}
           onNext={handleNext}
@@ -448,15 +455,18 @@ export const CandidateList: React.FC<CandidateListProps> = ({
           }}
           onDelete={handleDelete}
           onFavorite={handleFavorite}
+          onRefresh={onRefresh}
         />
 
-        {selectedCandidates.length > 0 && (
+        {selectedCandidates.length > 0 && jobId && (
           <BulkActions
             selectedCandidates={selectedCandidates}
             candidates={candidates}
+            jobId={jobId}
             onDelete={handleBulkDelete}
             onFavorite={handleBulkFavorite}
             onExport={onExportSelected}
+            onRefresh={onRefresh}
           />
         )}
       </Card>

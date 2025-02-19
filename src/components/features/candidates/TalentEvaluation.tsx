@@ -6,15 +6,14 @@ import {
   ChevronDown,
   ChevronUp,
   Star,
-  GaugeCircle,
   UserPlus,
   Loader2,
   Download,
 } from "lucide-react";
-import { Candidate, Job } from "@/types/index";
+import type { Candidate, TraitType, CalibratedProfile } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
 import Papa from "papaparse";
-import { EditKeyTraits } from "./components/EditKeyTraits";
+import { UnifiedJobEditor } from "./components/UnifiedJobEditor";
 import { UnifiedFilterMenu } from "./components/UnifiedFilterMenu";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -43,10 +42,36 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useSearchParams } from "react-router-dom";
+
+interface TeamMember {
+  role: string;
+  name?: string;
+  description?: string;
+}
+
+interface JobDetails {
+  id?: string;
+  job_description: string;
+  key_traits: {
+    trait: string;
+    description: string;
+    trait_type: TraitType;
+    value_type?: string;
+    required: boolean;
+  }[];
+  calibrated_profiles: CalibratedProfile[];
+  job_title: string;
+  company_name: string;
+  created_at?: string;
+  team_context?: {
+    hiring_manager?: TeamMember;
+    direct_report?: TeamMember;
+    team_members?: TeamMember[];
+  };
+}
 
 interface TalentEvaluationProps {
-  job: Job;
+  job: JobDetails;
   candidates: Candidate[];
   isLoading?: boolean;
   onCandidateCreate: (
@@ -107,11 +132,9 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   onBulkFavorite,
 }) => {
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
   const [isUploading, setIsUploading] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [searchMode, setSearchMode] = useState(true);
-  const [showEditTraits, setShowEditTraits] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"processing" | "complete">(
     "complete"
@@ -138,13 +161,6 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   useEffect(() => {
     setLocalCandidates(candidates);
   }, [candidates]);
-
-  // Handle openEditTraits query parameter
-  useEffect(() => {
-    if (searchParams.get("openEditTraits") === "true") {
-      setShowEditTraits(true);
-    }
-  }, [searchParams]);
 
   const handleFavorite = async (candidateId: string) => {
     if (!onCandidateFavorite) return false;
@@ -291,20 +307,18 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
           "url",
           "occupation",
           "company",
-          "evaluation_score",
-          "traits_met",
-          "total_traits",
+          "fit",
+          "required_met",
+          "optional_met",
         ],
         ...candidates_to_export.map((candidate) => [
           candidate.name || "",
           candidate.url || "",
           candidate.profile?.occupation || "",
           candidate.profile?.experiences?.[0]?.company || "",
-          candidate.evaluation?.score
-            ? (candidate.evaluation.score * 100).toFixed(0) + "%"
-            : "",
-          candidate.evaluation?.traits_met || "0",
-          candidate.evaluation?.total_traits || "0",
+          candidate.fit || "0",
+          candidate.required_met || "0",
+          candidate.optional_met || "0",
         ]),
       ]
         .map((row) => row.join(","))
@@ -340,23 +354,118 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                   {job.company_name}
                 </h1>
               </div>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <ChevronDown
-                    className={cn(
-                      "h-4 w-4 transition-transform duration-200",
-                      showDescription ? "rotate-180" : ""
-                    )}
-                  />
-                  {showDescription ? "Hide Description" : "Show Description"}
-                </Button>
-              </CollapsibleTrigger>
+              <div className="flex items-center gap-2">
+                <UnifiedJobEditor
+                  job={job}
+                  onSuccess={onRefresh}
+                  onUpdate={(updatedProfiles) => {
+                    // Update the job object with new calibrated profiles
+                    job.calibrated_profiles = updatedProfiles;
+                  }}
+                />
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 transition-transform duration-200",
+                        showDescription ? "rotate-180" : ""
+                      )}
+                    />
+                    {showDescription ? "Hide Details" : "Show Details"}
+                  </Button>
+                </CollapsibleTrigger>
+              </div>
             </div>
             <CollapsibleContent>
-              <div className="mt-4 pt-4 border-t">
+              <div className="mt-4 pt-4 border-t space-y-6">
                 <div className="text-sm text-muted-foreground whitespace-pre-line">
                   {job.job_description}
                 </div>
+
+                {job.team_context && (
+                  <div className="space-y-6 pt-4 border-t">
+                    <h3 className="text-sm font-medium text-purple-900">
+                      Team Context
+                    </h3>
+
+                    {job.team_context.hiring_manager && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium">Hiring Manager</h4>
+                        <div className="pl-4 border-l-2 border-purple-100">
+                          {job.team_context.hiring_manager.name && (
+                            <p className="text-sm font-medium text-purple-700">
+                              {job.team_context.hiring_manager.name}
+                            </p>
+                          )}
+                          <p className="text-sm text-muted-foreground">
+                            {job.team_context.hiring_manager.role}
+                          </p>
+                          {job.team_context.hiring_manager.description && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                              {job.team_context.hiring_manager.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {job.team_context.direct_report && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium">
+                          Direct Report To
+                        </h4>
+                        <div className="pl-4 border-l-2 border-purple-100">
+                          {job.team_context.direct_report.name && (
+                            <p className="text-sm font-medium text-purple-700">
+                              {job.team_context.direct_report.name}
+                            </p>
+                          )}
+                          <p className="text-sm text-muted-foreground">
+                            {job.team_context.direct_report.role}
+                          </p>
+                          {job.team_context.direct_report.description && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                              {job.team_context.direct_report.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {job.team_context.team_members &&
+                      job.team_context.team_members.length > 0 && (
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium">
+                            Key Team Members
+                          </h4>
+                          <div className="space-y-4">
+                            {job.team_context.team_members.map(
+                              (member, index) => (
+                                <div
+                                  key={index}
+                                  className="pl-4 border-l-2 border-purple-100"
+                                >
+                                  {member.name && (
+                                    <p className="text-sm font-medium text-purple-700">
+                                      {member.name}
+                                    </p>
+                                  )}
+                                  <p className="text-sm text-muted-foreground">
+                                    {member.role}
+                                  </p>
+                                  {member.description && (
+                                    <p className="text-sm text-muted-foreground mt-2">
+                                      {member.description}
+                                    </p>
+                                  )}
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+                  </div>
+                )}
               </div>
             </CollapsibleContent>
           </div>
@@ -379,17 +488,6 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                 <Separator orientation="vertical" className="h-4" />
                 <span>Optional</span>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowEditTraits(true)}
-                className="gap-2"
-              >
-                <GaugeCircle className="h-4 w-4" />
-                Re-Calibrate Traits
-              </Button>
             </div>
           </div>
           <div className="mt-4 pt-4 border-t space-y-4">
@@ -846,10 +944,13 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
       ) : (
         <CandidateList
           candidates={filteredCandidates}
+          jobId={job.id!}
           onGetEmail={onGetEmail}
           onReachout={onCandidateReachout}
           onDelete={async (id) => {
             onCandidateDelete(id);
+            // Update local state after deletion
+            setLocalCandidates((prev) => prev.filter((c) => c.id !== id));
             return Promise.resolve();
           }}
           searchQuery={searchQuery}
@@ -865,14 +966,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
             // Don't clear existing selections
             handleExport();
           }}
-        />
-      )}
-
-      {showEditTraits && (
-        <EditKeyTraits
-          job={job}
-          onClose={() => setShowEditTraits(false)}
-          onSuccess={() => window.location.reload()}
+          onRefresh={onRefresh}
         />
       )}
     </div>

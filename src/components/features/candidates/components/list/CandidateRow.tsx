@@ -21,6 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 interface CandidateRowProps {
   candidate: Candidate;
+  jobId: string;
   loadingStates: {
     [key: string]: { email: boolean; message: boolean };
   };
@@ -32,10 +33,12 @@ interface CandidateRowProps {
   showSelection?: boolean;
   isSelected?: boolean;
   onSelectionChange?: (checked: boolean) => void;
+  onRefresh?: () => void;
 }
 
 export const CandidateRow: React.FC<CandidateRowProps> = ({
   candidate,
+  jobId,
   loadingStates,
   handleEmail,
   handleReachout,
@@ -45,6 +48,7 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
   showSelection,
   isSelected,
   onSelectionChange,
+  onRefresh,
 }) => {
   const renderTraitContent = (content: string) => {
     const parts = content.split(/(\[\d+\]\([^)]+\))/g);
@@ -68,7 +72,7 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
       return <span key={i}>{part}</span>;
     });
   };
-  
+
   return (
     <TableRow
       className="cursor-pointer hover:bg-muted/50"
@@ -208,7 +212,9 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[300px] bg-white text-muted-foreground shadow-md">
                     <div className="space-y-1">
-                      <p className="text-sm">{renderTraitContent(section.content)}</p>
+                      <p className="text-sm">
+                        {renderTraitContent(section.content)}
+                      </p>
                     </div>
                   </TooltipContent>
                 </Tooltip>
@@ -219,12 +225,14 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
       <TableCell className="text-right">
         <CandidateActions
           candidate={candidate}
+          jobId={jobId}
           loadingStates={loadingStates}
           handleEmail={handleEmail}
           handleReachout={handleReachout}
           handleDelete={handleDelete}
           handleFavorite={handleFavorite}
           setSelectedCandidate={setSelectedCandidate}
+          onRefresh={onRefresh}
         />
       </TableCell>
     </TableRow>

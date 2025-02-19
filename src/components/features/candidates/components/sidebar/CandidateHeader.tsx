@@ -7,6 +7,7 @@ import { CandidateActions } from "../list/CandidateActions";
 
 interface CandidateHeaderProps {
   candidate: Candidate;
+  jobId: string;
   loadingStates: { [key: string]: { email: boolean; message: boolean } };
   onClose: () => void;
   onPrevious: () => void;
@@ -17,10 +18,12 @@ interface CandidateHeaderProps {
   onReachout: (id: string, format: string) => Promise<void>;
   onDelete: (e: React.MouseEvent, id: string) => Promise<void>;
   onFavorite?: (id: string) => Promise<void>;
+  onRefresh?: () => void;
 }
 
 export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
   candidate,
+  jobId,
   loadingStates,
   onClose,
   onPrevious,
@@ -31,6 +34,7 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
   onReachout,
   onDelete,
   onFavorite,
+  onRefresh,
 }) => {
   return (
     <div className="sticky top-0 z-10 p-6 border-b bg-background/80 backdrop-blur-sm">
@@ -57,11 +61,13 @@ export const CandidateHeader: React.FC<CandidateHeaderProps> = ({
         <div className="flex items-center gap-2">
           <CandidateActions
             candidate={candidate}
+            jobId={jobId}
             loadingStates={loadingStates}
             handleEmail={onEmail}
             handleReachout={onReachout}
             handleDelete={onDelete}
             handleFavorite={onFavorite}
+            onRefresh={onRefresh}
           />
 
           <Separator orientation="vertical" className="h-4 mx-2" />

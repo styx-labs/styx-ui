@@ -14,6 +14,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
+import {
   LinkedinIcon,
   Mail,
   MessageSquarePlus,
@@ -21,11 +27,15 @@ import {
   Trash2,
   ChevronRight,
   Star,
+  ThumbsUp,
+  ThumbsDown,
+  Gauge,
 } from "lucide-react";
 import type { Candidate } from "@/types/index";
 
 interface CandidateActionsProps {
   candidate: Candidate;
+  jobId: string;
   loadingStates: { [key: string]: { email: boolean; message: boolean } };
   handleEmail: (url: string, id: string) => Promise<void>;
   handleReachout: (id: string, format: string) => Promise<void>;
@@ -36,6 +46,7 @@ interface CandidateActionsProps {
 
 export const CandidateActions: React.FC<CandidateActionsProps> = ({
   candidate,
+  jobId,
   loadingStates,
   handleEmail,
   handleReachout,
