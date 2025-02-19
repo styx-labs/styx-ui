@@ -129,7 +129,7 @@ export const CareerMetrics: React.FC<CareerMetricsProps> = ({ metrics }) => {
             </div>
           )}
 
-          {/* Latest Experience Info */}
+          {/* Latest Experience Info
           {(metrics.latest_experience_level ||
             metrics.latest_experience_income) && (
             <div className="grid grid-cols-2 gap-4 pt-3 border-t border-purple-100">
@@ -145,7 +145,7 @@ export const CareerMetrics: React.FC<CareerMetricsProps> = ({ metrics }) => {
                 </div>
               )}
             </div>
-          )}
+          )} */}
 
           {/* Key Metrics */}
           <div className="grid grid-cols-3 gap-4">
