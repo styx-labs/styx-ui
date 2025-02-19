@@ -13,7 +13,7 @@ import {
 import type { Candidate, Job } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
 import Papa from "papaparse";
-import { EditKeyTraits } from "./components/EditKeyTraits";
+import { UnifiedJobEditor } from "./components/UnifiedJobEditor";
 import { UnifiedFilterMenu } from "./components/UnifiedFilterMenu";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -42,9 +42,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useSearchParams } from "react-router-dom";
-import { PipelineFeedbackButton } from "./components/PipelineFeedbackButton";
-import { EditCalibratedProfiles } from "./components/EditCalibratedProfiles";
 import { exportCandidates } from "./utils/exportCandidates";
 
 interface TalentEvaluationProps {
@@ -109,11 +106,9 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   onBulkFavorite,
 }) => {
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
   const [isUploading, setIsUploading] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [searchMode, setSearchMode] = useState(false);
-  const [showEditTraits, setShowEditTraits] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"processing" | "complete">(
     "complete"
@@ -140,13 +135,6 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   useEffect(() => {
     setLocalCandidates(candidates);
   }, [candidates]);
-
-  // Handle openEditTraits query parameter
-  useEffect(() => {
-    if (searchParams.get("openEditTraits") === "true") {
-      setShowEditTraits(true);
-    }
-  }, [searchParams]);
 
   const handleFavorite = async (candidateId: string) => {
     if (!onCandidateFavorite) return false;
@@ -292,17 +280,27 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                   {job.company_name}
                 </h1>
               </div>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <ChevronDown
-                    className={cn(
-                      "h-4 w-4 transition-transform duration-200",
-                      showDescription ? "rotate-180" : ""
-                    )}
-                  />
-                  {showDescription ? "Hide Details" : "Show Details"}
-                </Button>
-              </CollapsibleTrigger>
+              <div className="flex items-center gap-2">
+                <UnifiedJobEditor
+                  job={job}
+                  onSuccess={onRefresh}
+                  onUpdate={(updatedProfiles) => {
+                    // Update the job object with new calibrated profiles
+                    job.calibrated_profiles = updatedProfiles;
+                  }}
+                />
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 transition-transform duration-200",
+                        showDescription ? "rotate-180" : ""
+                      )}
+                    />
+                    {showDescription ? "Hide Details" : "Show Details"}
+                  </Button>
+                </CollapsibleTrigger>
+              </div>
             </div>
             <CollapsibleContent>
               <div className="mt-4 pt-4 border-t space-y-6">
@@ -331,20 +329,6 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                 <Separator orientation="vertical" className="h-4" />
                 <span>Optional</span>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <EditCalibratedProfiles
-                job={job}
-                onUpdate={(updatedProfiles) => {
-                  // Update the job object with new calibrated profiles
-                  job.calibrated_profiles = updatedProfiles;
-                }}
-              />
-              <PipelineFeedbackButton jobId={job.id!} />
-              <EditKeyTraits
-                job={job}
-                onSuccess={() => window.location.reload()}
-              />
             </div>
           </div>
           <div className="mt-4 pt-4 border-t space-y-4">

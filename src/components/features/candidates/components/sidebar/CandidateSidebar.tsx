@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { CandidateHeader } from "./CandidateHeader";
 import { CandidateTraits } from "./CandidateTraits";
 import { CandidateProfile } from "./CandidateProfile";
+import { CandidateRecalibration } from "./CandidateRecalibration";
 import { cn } from "@/lib/utils";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
@@ -24,7 +25,7 @@ interface CandidateSidebarProps {
   onReachout: (id: string, format: string) => Promise<void>;
   onDelete: (e: React.MouseEvent, id: string) => Promise<void>;
   onFavorite?: (id: string) => Promise<void>;
-  onRefresh?: () => void;
+  onRefresh: () => void;
 }
 
 export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
@@ -122,6 +123,12 @@ export const CandidateSidebar: React.FC<CandidateSidebarProps> = ({
             <CandidateTraits
               candidate={candidate}
               onSourceClick={scrollToSource}
+            />
+
+            <CandidateRecalibration
+              candidate={candidate}
+              jobId={jobId}
+              onRefresh={onRefresh}
             />
 
             {/* Summary Section */}

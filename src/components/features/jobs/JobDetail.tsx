@@ -27,6 +27,10 @@ export function JobDetail() {
 
   const selectedJob = jobs.find((job) => job.id === jobId);
 
+  const handleRefresh = async () => {
+    await Promise.all([retry(), loadCandidates()]);
+  };
+
   // Update meta tags when job changes
   useEffect(() => {
     if (selectedJob) {
@@ -129,7 +133,7 @@ export function JobDetail() {
       }}
       onCandidateReachout={getCandidateReachout}
       onGetEmail={getEmail}
-      onRefresh={loadCandidates}
+      onRefresh={handleRefresh}
       onTraitFilterChange={setTraitFilters}
       onCandidateFavorite={toggleCandidateFavorite}
       onBulkDelete={bulkDeleteCandidates}

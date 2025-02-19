@@ -122,6 +122,5 @@ export function useJobs() {
     createJob,
     deleteJob,
     retry: loadJobs,
-    refreshJobs: loadJobs,
   };
 }
