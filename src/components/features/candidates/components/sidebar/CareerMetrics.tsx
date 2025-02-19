@@ -72,13 +72,6 @@ export const CareerMetrics: React.FC<CareerMetricsProps> = ({ metrics }) => {
     }
   };
 
-  // Helper function to format salary range
-  const formatSalaryRange = (range?: [number, number]): string => {
-    if (!range) return "";
-    const [min, max] = range;
-    return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
-  };
-
   return (
     <div className="space-y-4">
       <h4 className="text-base font-medium text-purple-800/90 flex items-center gap-2">

@@ -35,7 +35,7 @@ const pricingTiers = [
     description: "Best for small teams and agencies",
     features: [
       "Everything from Starter",
-      "Rollover credits (2 months)",
+      "Rollover credits",
       "Unlimited Jobs",
       "Dedicated Support",
     ],
