@@ -3,6 +3,11 @@ export const formatDate = (dateStr: string) => {
   return date.toLocaleDateString("en-US", { year: "numeric", month: "short" });
 };
 
+export const formatEducationDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.getFullYear().toString();
+};
+
 export const calculateTenure = (startDate: string, endDate: string | null) => {
   const start = new Date(startDate);
   const end = endDate ? new Date(endDate) : new Date();

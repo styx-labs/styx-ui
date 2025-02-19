@@ -3,6 +3,8 @@ import { JobForm } from "./components/features/create-job/JobForm";
 import { JobDetail } from "./components/features/jobs/JobDetail";
 import { PaymentStatus } from "./components/features/payment/PaymentStatus";
 import PricingPage from "./components/features/payment/PricingPage";
+import PaymentSuccessPage from "./components/features/payment/PaymentSuccessPage";
+import PaymentErrorPage from "./components/features/payment/PaymentErrorPage";
 import { SettingsPage } from "./components/features/settings/SettingsPage";
 import { CalibratedProfile, Job } from "./types/index";
 
@@ -44,8 +46,12 @@ export function getRoutes({
       element: <JobDetail />,
     },
     {
-      path: "/payment-status",
-      element: <PaymentStatus status="success" />,
+      path: "/pricing/success",
+      element: <PaymentSuccessPage />,
+    },
+    {
+      path: "/pricing/error",
+      element: <PaymentErrorPage />,
     },
     {
       path: "/settings",

@@ -10,7 +10,7 @@ import {
   Loader2,
   Download,
 } from "lucide-react";
-import type { Candidate, TraitType, CalibratedProfile } from "@/types/index";
+import type { Candidate, Job } from "@/types/index";
 import { CandidateList } from "./components/list/CandidateList";
 import Papa from "papaparse";
 import { UnifiedJobEditor } from "./components/UnifiedJobEditor";
@@ -42,36 +42,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-
-interface TeamMember {
-  role: string;
-  name?: string;
-  description?: string;
-}
-
-interface JobDetails {
-  id?: string;
-  job_description: string;
-  key_traits: {
-    trait: string;
-    description: string;
-    trait_type: TraitType;
-    value_type?: string;
-    required: boolean;
-  }[];
-  calibrated_profiles: CalibratedProfile[];
-  job_title: string;
-  company_name: string;
-  created_at?: string;
-  team_context?: {
-    hiring_manager?: TeamMember;
-    direct_report?: TeamMember;
-    team_members?: TeamMember[];
-  };
-}
+import { exportCandidates } from "./utils/exportCandidates";
 
 interface TalentEvaluationProps {
-  job: JobDetails;
+  job: Job;
   candidates: Candidate[];
   isLoading?: boolean;
   onCandidateCreate: (
@@ -134,7 +108,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
-  const [searchMode, setSearchMode] = useState(true);
+  const [searchMode, setSearchMode] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"processing" | "complete">(
     "complete"
@@ -287,55 +261,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
   };
 
   const handleExport = () => {
-    if (exportFormat === "csv") {
-      let candidates_to_export = filteredCandidates;
-
-      if (exportMode === "limited") {
-        candidates_to_export = filteredCandidates.slice(
-          0,
-          parseInt(exportLimit)
-        );
-      } else if (exportMode === "selected") {
-        candidates_to_export = filteredCandidates.filter(
-          (c) => c.id && selectedCandidates.includes(c.id)
-        );
-      }
-
-      const csvContent = [
-        [
-          "name",
-          "url",
-          "occupation",
-          "company",
-          "fit",
-          "required_met",
-          "optional_met",
-        ],
-        ...candidates_to_export.map((candidate) => [
-          candidate.name || "",
-          candidate.url || "",
-          candidate.profile?.occupation || "",
-          candidate.profile?.experiences?.[0]?.company || "",
-          candidate.fit || "0",
-          candidate.required_met || "0",
-          candidate.optional_met || "0",
-        ]),
-      ]
-        .map((row) => row.join(","))
-        .join("\n");
-
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute(
-        "download",
-        `candidates_export_${new Date().toISOString().split("T")[0]}.csv`
-      );
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    exportCandidates(filteredCandidates, exportFormat as "csv" | "xlsx");
   };
 
   return (
@@ -381,91 +307,6 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                 <div className="text-sm text-muted-foreground whitespace-pre-line">
                   {job.job_description}
                 </div>
-
-                {job.team_context && (
-                  <div className="space-y-6 pt-4 border-t">
-                    <h3 className="text-sm font-medium text-purple-900">
-                      Team Context
-                    </h3>
-
-                    {job.team_context.hiring_manager && (
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">Hiring Manager</h4>
-                        <div className="pl-4 border-l-2 border-purple-100">
-                          {job.team_context.hiring_manager.name && (
-                            <p className="text-sm font-medium text-purple-700">
-                              {job.team_context.hiring_manager.name}
-                            </p>
-                          )}
-                          <p className="text-sm text-muted-foreground">
-                            {job.team_context.hiring_manager.role}
-                          </p>
-                          {job.team_context.hiring_manager.description && (
-                            <p className="text-sm text-muted-foreground mt-2">
-                              {job.team_context.hiring_manager.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {job.team_context.direct_report && (
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">
-                          Direct Report To
-                        </h4>
-                        <div className="pl-4 border-l-2 border-purple-100">
-                          {job.team_context.direct_report.name && (
-                            <p className="text-sm font-medium text-purple-700">
-                              {job.team_context.direct_report.name}
-                            </p>
-                          )}
-                          <p className="text-sm text-muted-foreground">
-                            {job.team_context.direct_report.role}
-                          </p>
-                          {job.team_context.direct_report.description && (
-                            <p className="text-sm text-muted-foreground mt-2">
-                              {job.team_context.direct_report.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {job.team_context.team_members &&
-                      job.team_context.team_members.length > 0 && (
-                        <div className="space-y-2">
-                          <h4 className="text-sm font-medium">
-                            Key Team Members
-                          </h4>
-                          <div className="space-y-4">
-                            {job.team_context.team_members.map(
-                              (member, index) => (
-                                <div
-                                  key={index}
-                                  className="pl-4 border-l-2 border-purple-100"
-                                >
-                                  {member.name && (
-                                    <p className="text-sm font-medium text-purple-700">
-                                      {member.name}
-                                    </p>
-                                  )}
-                                  <p className="text-sm text-muted-foreground">
-                                    {member.role}
-                                  </p>
-                                  {member.description && (
-                                    <p className="text-sm text-muted-foreground mt-2">
-                                      {member.description}
-                                    </p>
-                                  )}
-                                </div>
-                              )
-                            )}
-                          </div>
-                        </div>
-                      )}
-                  </div>
-                )}
               </div>
             </CollapsibleContent>
           </div>
@@ -683,6 +524,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="csv">Export to CSV</SelectItem>
+                <SelectItem value="xlsx">Export to XLSX</SelectItem>
               </SelectContent>
             </Select>
 
@@ -805,7 +647,7 @@ export const TalentEvaluation: React.FC<TalentEvaluationProps> = ({
                   <TooltipContent className="w-64">
                     When enabled, searches through candidate profiles and their
                     previous jobs for better matches, but takes longer to
-                    process
+                    process (uses 2 credits per candidate)
                   </TooltipContent>
                 </Tooltip>
               </div>

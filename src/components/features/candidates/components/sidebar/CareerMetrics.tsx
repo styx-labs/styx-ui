@@ -1,7 +1,14 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Building2, Timer, Code2, Tags } from "lucide-react";
+import {
+  TrendingUp,
+  Building2,
+  Timer,
+  Code2,
+  Tags,
+  Briefcase,
+} from "lucide-react";
 import type { CareerMetrics as CareerMetricsType } from "@/types/index";
 
 interface CareerMetricsProps {
@@ -93,6 +100,8 @@ export const CareerMetrics: React.FC<CareerMetricsProps> = ({ metrics }) => {
               </div>
             </div>
           )}
+
+          {/* Experience Tags */}
           {metrics.experience_tags && metrics.experience_tags.length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center gap-1.5 text-sm text-purple-800">
@@ -112,6 +121,24 @@ export const CareerMetrics: React.FC<CareerMetricsProps> = ({ metrics }) => {
               </div>
             </div>
           )}
+
+          {/* Latest Experience Info
+          {(metrics.latest_experience_level ||
+            metrics.latest_experience_income) && (
+            <div className="grid grid-cols-2 gap-4 pt-3 border-t border-purple-100">
+              {metrics.latest_experience_level && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-sm text-purple-800">
+                    <Briefcase className="h-4 w-4" />
+                    <span>Estimated Experience Level</span>
+                  </div>
+                  <p className="text-lg font-semibold text-purple-900">
+                    {metrics.latest_experience_level}
+                  </p>
+                </div>
+              )}
+            </div>
+          )} */}
 
           {/* Key Metrics */}
           <div className="grid grid-cols-3 gap-4">

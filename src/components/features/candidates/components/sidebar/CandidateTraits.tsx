@@ -8,14 +8,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  CheckCircle,
-  XCircle,
-  Star,
-  ChevronDown,
-  Check,
-  X,
-} from "lucide-react";
+import { Star, ChevronDown, Check, X } from "lucide-react";
 import {
   getRequiredTraitsMet,
   getOptionalTraitsMet,
@@ -32,6 +25,14 @@ export const CandidateTraits: React.FC<CandidateTraitsProps> = ({
   candidate,
   onSourceClick,
 }) => {
+  const [openSections, setOpenSections] = React.useState<number[]>([]);
+
+  const toggleSection = (index: number) => {
+    setOpenSections((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  };
+
   const renderTraitContent = (content: string) => {
     const parts = content.split(/(\[\d+\]\([^)]+\))/g);
     return parts.map((part, i) => {
@@ -91,7 +92,11 @@ export const CandidateTraits: React.FC<CandidateTraitsProps> = ({
       <Card className="border-purple-100/50">
         <div className="p-4 space-y-3">
           {candidate.sections?.map((section, index) => (
-            <Collapsible key={index}>
+            <Collapsible
+              key={index}
+              open={openSections.includes(index)}
+              onOpenChange={() => toggleSection(index)}
+            >
               <CollapsibleTrigger className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
                   <div
@@ -116,7 +121,12 @@ export const CandidateTraits: React.FC<CandidateTraitsProps> = ({
                     </span>
                   </div>
                 </div>
-                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 text-muted-foreground transition-transform duration-200",
+                    openSections.includes(index) ? "rotate-180" : ""
+                  )}
+                />
               </CollapsibleTrigger>
               <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                 <div className="px-4 py-3 mt-1.5 text-sm text-muted-foreground bg-muted/50 rounded-md border border-muted">
